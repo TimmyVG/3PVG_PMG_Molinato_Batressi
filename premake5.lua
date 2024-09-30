@@ -87,7 +87,9 @@ workspace "Motor"
 
 project "Motor"
     kind "StaticLib"
+    targetname "mew"
     targetdir "build/%{cfg.buildcfg}"
+    
     includedirs "include"
     conan_config_lib()
     pchheader "stdafx.hpp"
@@ -107,7 +109,8 @@ project"Window"
     language "C++"
     targetdir "build/%{prj.name}/%{cfg.buildcfg}"
     includedirs "include"
-    links "Mew"
+    libdirs { "build/%{cfg.buildcfg}" }
+    links {"mew"}
     conan_config_exec("Debug")
     conan_config_exec("Release")
     conan_config_exec("RelWithDebInfo")
