@@ -99,7 +99,7 @@ project "Motor"
         "src/build/conanfile.txt",
         "src/build/conan.lua",
         "src/stdafx.cpp", "src/stdafx.hpp",
-        "src/Window.cpp", "include/tija/Window.hpp",
+        "src/Window.cpp", "include/mew/Window.hpp",
         }
 
 project"Window"
@@ -107,7 +107,7 @@ project"Window"
     language "C++"
     targetdir "build/%{prj.name}/%{cfg.buildcfg}"
     includedirs "include"
-    links "Tija"
+    links "Mew"
     conan_config_exec("Debug")
     conan_config_exec("Release")
     conan_config_exec("RelWithDebInfo")
