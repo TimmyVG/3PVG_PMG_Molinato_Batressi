@@ -5,24 +5,44 @@
 namespace MEW {
 
 
-	Window::Window() {
-		
-	}
+	Window::Window(int width, int height, const char* title) {
+		width_ = width;
+		height_ = height;
+		title_ = title;
 
-	int Window::WindowInit(int width, int height, const char* title)
-	{
-		if (!glfwInit()) return -1;
 
-		window_ = glfwCreateWindow(width, height, title, NULL, NULL);
+		window_ = glfwCreateWindow(width_, height_, title_, NULL, NULL);
 
-		if (!window_) {
+		if (nullptr == window_) {
 			glfwTerminate();
-			return -1;
+			//algo
 		}
 
-		glfwMakeContextCurrent(window_);
+		//glfwMakeContextCurrent(window_);
 
-		return 0;
+		//algo
+	}
+
+
+
+
+	bool Window::isOpen()
+	{
+		return true;
+	}
+
+	void Window::swapBuffer()
+	{
+		glfwSwapBuffers(window_);
+	}
+
+	bool Window::closedPressed() {
+		return glfwWindowShouldClose(window_);
+	}
+
+	Window::~Window() {
+		glfwDestroyWindow(window_);
+
 	}
 
 }
