@@ -2,17 +2,26 @@
 #include "GLFW/glfw3.h"
 
 int WinMain() {
-	MEW::WindowSystem ws;
-	MEW::Window window{ 640, 400, "Hola Mundo"};
-	bool done = false;
+	auto maybe_ws = MEW::WindowSystem::make();
+	if (!maybe_ws)
+	{
+		return -1;
+	}
+	auto ws = maybe_ws.value();
+	std::string title = "Ventana";
+	auto maybe_w = MEW::Window::make(640, 460, title, ws);
+	if (!maybe_w) { 
+		return -1; 
+	}
+	auto w = maybe_w.value();
 
-	//!glfwWindowShouldClose(window.window_)
+	bool done = false;
 	while (!done) {
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		window.swapBuffer();
+		w.swapBuffer();
 
-		bool closePressed = window.closedPressed();
+		bool closePressed = w.closedPressed();
 		bool escPressed = false;
 		if (closePressed || escPressed) done = true;
 

@@ -1,6 +1,7 @@
 #ifndef __WINDOW_H__
 #define __WINDOW_H__ 1
-
+#include <optional>
+#include <string>
 #include "GLFW/glfw3.h"
 
 
@@ -8,31 +9,51 @@ namespace MEW {
 
 	class WindowSystem {
 	public:
-		WindowSystem() {
+		bool isDeletable_;
+		static std::optional<WindowSystem> make() {
+
 			if (!glfwInit()) {
-				//ALGO
+				return std::nullopt;
 			}
+			return WindowSystem{ };
 		};
-		~WindowSystem(){ glfwTerminate(); }
+		~WindowSystem(){ 
+			if (isDeletable_) {
+				glfwTerminate();
+			}
+			else {
+				isDeletable_ = true;
+			}
+		}
+		WindowSystem(WindowSystem&) {
+			isDeletable_ = false;
+		}
+	private:
+		//WindowSystem() { isDeletable_ = true; }
+		//WindowSystem(bool* isD) : isDeletable_{ isD } {};
 	};
 
 
 	class Window {
 	public:
-		Window(int width, int height, const char* title);
+		GLFWwindow* window_;
+		static std::optional<Window> make(int x, int y, std::string& name, WindowSystem&) {
+			auto w = glfwCreateWindow(x, y, name.c_str(), nullptr, nullptr);
+			if (nullptr == w) return std::nullopt;
+			return Window{ w };
+		}
+
 		bool isOpen();
 		void swapBuffer();
 		bool closedPressed();
+		Window(Window&& other); //CONSTRUCTOR DE MOVIMIENTO
+		Window(const Window&) {};
 		~Window();
 	private:
-		GLFWwindow* window_;
-		int width_;
-		int height_;
-		const char* title_;
-		Window(const Window&);
-		Window& operator=(const Window&);
-		Window(const Window&&); //CONSTRUCTOR DE MOVIMIENTO
-		Window& operator=(const Window&&); //ASIGNACION DE MOVIMIENTO
+
+		Window(GLFWwindow* w) : window_{ w } {}
+		Window& operator=(const Window&) = delete;
+		Window& operator=( Window&&) = delete; //ASIGNACION DE MOVIMIENTO
 	};
 
 }

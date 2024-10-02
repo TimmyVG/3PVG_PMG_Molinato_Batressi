@@ -5,27 +5,10 @@
 namespace MEW {
 
 
-	Window::Window(int width, int height, const char* title) {
-		width_ = width;
-		height_ = height;
-		title_ = title;
-
-
-		window_ = glfwCreateWindow(width_, height_, title_, NULL, NULL);
-
-		if (nullptr == window_) {
-			glfwTerminate();
-			//algo
-		}
-
-		//glfwMakeContextCurrent(window_);
-
-		//algo
-	}
-
-
-
-
+	Window::Window(Window&& other) {
+		window_ = other.window_;
+		other.window_ = nullptr;
+	};
 	bool Window::isOpen()
 	{
 		return true;
