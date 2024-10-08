@@ -54,7 +54,8 @@ namespace MEW {
 		}
 
 		bool isOpen();
-		void swapBuffer();
+		void endWindowFrame();
+		void clear(const float*);
 		bool closedPressed();
 		Window(Window&& other); //CONSTRUCTOR DE MOVIMIENTO
 		Window(Window& other) { isDeletable_ = true; this->window_ = other.window_; other.window_ = nullptr; other.isDeletable_ = true; };

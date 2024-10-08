@@ -14,9 +14,16 @@ namespace MEW {
 		return true;
 	}
 
-	void Window::swapBuffer()
+	void Window::clear(const float* color) 
+	{
+		glClearColor(color[0], color[1], color[2], color[3]);
+		glClear(GL_COLOR_BUFFER_BIT);
+	}
+
+	void Window::endWindowFrame()
 	{
 		glfwSwapBuffers(window_);
+		glfwPollEvents();
 	}
 
 	bool Window::closedPressed() {

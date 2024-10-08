@@ -16,15 +16,16 @@ int WinMain() {
 	MEW::Window w = maybe_w.value();
 
 	bool done = false;
+	const float backgroundcolor[4] = { 0.2f, 0.3f, 0.3f, 1.0f };
 	while (!done) {
-		glClear(GL_COLOR_BUFFER_BIT);
+		w.clear(backgroundcolor);
 
-		w.swapBuffer();
 
 		bool closePressed = w.closedPressed();
 		bool escPressed = false;
 		if (closePressed || escPressed) done = true;
-		glfwPollEvents();
+		w.endWindowFrame();
+		
 		//if (/*algo*/) done = true;
 	}
 
