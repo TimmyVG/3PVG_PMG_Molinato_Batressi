@@ -15,6 +15,7 @@ namespace MEW {
 			if (!glfwInit()) {
 				return std::nullopt;
 			}
+
 			return WindowSystem{ };
 		};
 		~WindowSystem(){ 
@@ -26,20 +27,29 @@ namespace MEW {
 			}
 		}
 		WindowSystem(WindowSystem&) {
-			isDeletable_ = false;
+			isDeletable_ = true;
+		}
+
+		WindowSystem(const WindowSystem&) = delete;
+		WindowSystem& operator=(const WindowSystem&) = delete;
+
+		WindowSystem(WindowSystem&& other) 
+			: isDeletable_(other.isDeletable_) {
+			other.isDeletable_ = false; // Transfer ownership
 		}
 	private:
-		//WindowSystem() { isDeletable_ = true; }
-		//WindowSystem(bool* isD) : isDeletable_{ isD } {};
+		WindowSystem() : isDeletable_(true) {}
 	};
 
 
 	class Window {
 	public:
 		GLFWwindow* window_;
+		bool isDeletable_;
 		static std::optional<Window> make(int x, int y, std::string& name, WindowSystem&) {
 			auto w = glfwCreateWindow(x, y, name.c_str(), nullptr, nullptr);
 			if (nullptr == w) return std::nullopt;
+			glfwMakeContextCurrent(w);
 			return Window{ w };
 		}
 
@@ -47,11 +57,13 @@ namespace MEW {
 		void swapBuffer();
 		bool closedPressed();
 		Window(Window&& other); //CONSTRUCTOR DE MOVIMIENTO
-		Window(const Window&) {};
+		Window(Window& other) { isDeletable_ = true; this->window_ = other.window_; other.window_ = nullptr; other.isDeletable_ = true; };
+
+		//Window(const Window&) {};
 		~Window();
 	private:
 
-		Window(GLFWwindow* w) : window_{ w } {}
+		Window(GLFWwindow* w) : window_{ w } ,isDeletable_(false) {  }
 		Window& operator=(const Window&) = delete;
 		Window& operator=( Window&&) = delete; //ASIGNACION DE MOVIMIENTO
 	};

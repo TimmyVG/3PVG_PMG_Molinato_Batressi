@@ -13,7 +13,7 @@ int WinMain() {
 	if (!maybe_w) { 
 		return -1; 
 	}
-	auto w = maybe_w.value();
+	MEW::Window w = maybe_w.value();
 
 	bool done = false;
 	while (!done) {
@@ -24,7 +24,6 @@ int WinMain() {
 		bool closePressed = w.closedPressed();
 		bool escPressed = false;
 		if (closePressed || escPressed) done = true;
-
 		glfwPollEvents();
 		//if (/*algo*/) done = true;
 	}

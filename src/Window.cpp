@@ -24,7 +24,13 @@ namespace MEW {
 	}
 
 	Window::~Window() {
-		glfwDestroyWindow(window_);
+
+		if (isDeletable_ && nullptr != window_) {
+			glfwDestroyWindow(window_);
+		}
+		else {
+			isDeletable_ = true;
+		}
 
 	}
 

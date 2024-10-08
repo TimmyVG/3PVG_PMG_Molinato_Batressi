@@ -100,8 +100,7 @@ project "Motor"
         "premake5.lua",
         "src/build/conanfile.txt",
         "src/build/conan.lua",
-        "src/stdafx.cpp", "src/stdafx.hpp",
-        "src/Window.cpp", "include/mew/Window.hpp",
+        "src/*.cpp", "include/mew/*.hpp",
         }
 
 project"Window"
@@ -116,3 +115,16 @@ project"Window"
     conan_config_exec("RelWithDebInfo")
     debugargs { _MAIN_SCRIPT_DIR .. "/examples/data" }
     files "examples/window.cpp"
+
+    project"Triangle"
+    kind "WindowedApp"
+    language "C++"
+    targetdir "build/%{prj.name}/%{cfg.buildcfg}"
+    includedirs "include"
+    libdirs { "build/%{cfg.buildcfg}" }
+    links {"mew"}
+    conan_config_exec("Debug")
+    conan_config_exec("Release")
+    conan_config_exec("RelWithDebInfo")
+    debugargs { _MAIN_SCRIPT_DIR .. "/examples/data" }
+    files "examples/triangle.cpp"
