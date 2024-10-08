@@ -1,31 +1,32 @@
 #include "mew/Shader.hpp"
 #include "GL/glew.h"
 #include <iostream>
+#include <fstream>
+#include <sstream>
 
 MEW::Shader::Shader(const char* vertexPath, const char* fragmentPath)
 {
 
-	const char* vertexShaderSource = "#version 330 core\n"
-		"layout (location = 0) in vec3 aPos;\n"
-		"out vec3 vertexColor;\n"
-		"uniform vec3 ourColor;\n"
-		"void main()\n"
-		"{\n"
-		"   gl_Position = vec4(aPos, 1.0);\n"
-		"   vertexColor = ourColor;\n"
-		"}\0";
-	const char* fragmentShaderSource = "#version 330 core\n"
-		"out vec4 FragColor;\n"
-		"in vec3 vertexColor;\n"
-		"void main()\n"
-		"{\n"
-		"   FragColor = vec4(vertexColor, 1.0f);\n"
-		"}\n\0";
+	std::string vertexCode;
+	std::string fragmentCode;
+	std::ifstream vShaderFile;
+	std::ifstream fShaderFile;
+	// open files
+	vShaderFile.open(vertexPath);
+	fShaderFile.open(fragmentPath);
+	std::stringstream vShaderStream, fShaderStream;
+	// read file's buffer contents into streams
+	vShaderStream << vShaderFile.rdbuf();
+	fShaderStream << fShaderFile.rdbuf();
+	// close file handlers
+	vShaderFile.close();
+	fShaderFile.close();
+	// convert stream into string
+	vertexCode = vShaderStream.str();
+	fragmentCode = fShaderStream.str();
 
-
-
-	const char* vShaderCode;
-	const char* fShaderCode;
+	const char* vShaderCode = vertexCode.c_str();
+	const char* fShaderCode = fragmentCode.c_str();
 	//leer los dos fcheros
 
 	glewInit();
@@ -36,11 +37,11 @@ MEW::Shader::Shader(const char* vertexPath, const char* fragmentPath)
 	if (error != GL_NO_ERROR) {
 		std::cout << "Error al crear el shader: " << error << std::endl;
 	}
-	glShaderSource(vertexShader_, 1, &vertexShaderSource, NULL);
+	glShaderSource(vertexShader_, 1, &vShaderCode, NULL);
 	glCompileShader(vertexShader_);
 
 	fragmentShader_ = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader_, 1, &fragmentShaderSource, NULL);
+	glShaderSource(fragmentShader_, 1, &fShaderCode, NULL);
 	glCompileShader(fragmentShader_);
 
 	shaderProgram_ = glCreateProgram();

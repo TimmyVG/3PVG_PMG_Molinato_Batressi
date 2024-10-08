@@ -17,7 +17,7 @@ int WinMain() {
 	}
 	MEW::Window w = maybe_w.value();
 
-	MEW::Shader shader("","");
+	MEW::Shader shader("../data/example.vs","../data/example.fs");
 	
 	std::vector<float> pointvertex = {
 	 0.5f,  0.5f, 0.0f,  // top right
