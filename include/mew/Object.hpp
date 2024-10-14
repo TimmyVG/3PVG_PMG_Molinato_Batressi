@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include "Shader.hpp"
+#include "glm/mat4x4.hpp"
 
 namespace MEW {
 	class Object {
@@ -12,10 +13,18 @@ namespace MEW {
 
 			void Draw();
 			void UseProgram();
+			void SetTranslation(glm::vec3 pos);
+			void SetRotation(glm::vec3 rot);
+			void SetScale(glm::vec3 scale);
 	protected:
 			std::vector<float> vertices_;
 			Shader shader_;
 			unsigned int vao_;
+			glm::mat4x4 mat_;
+			glm::vec3 scale_;
+			glm::vec3 rotation_;
+			glm::vec3 translation_;
+			
 
 		private:
 	};

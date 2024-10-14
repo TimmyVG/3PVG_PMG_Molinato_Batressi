@@ -128,3 +128,16 @@ project"Window"
     conan_config_exec("RelWithDebInfo")
     debugargs { _MAIN_SCRIPT_DIR .. "/examples/data" }
     files "examples/triangle.cpp"
+
+    project"TriangleMove"
+    kind "WindowedApp"
+    language "C++"
+    targetdir "build/%{prj.name}/%{cfg.buildcfg}"
+    includedirs "include"
+    libdirs { "build/%{cfg.buildcfg}" }
+    links {"mew"}
+    conan_config_exec("Debug")
+    conan_config_exec("Release")
+    conan_config_exec("RelWithDebInfo")
+    debugargs { _MAIN_SCRIPT_DIR .. "/examples/data" }
+    files "examples/trianglemove.cpp"

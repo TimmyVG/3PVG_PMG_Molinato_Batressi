@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <glm/gtc/type_ptr.hpp>
 
 MEW::Shader::Shader(const char* vertexPath, const char* fragmentPath)
 {
@@ -83,6 +84,12 @@ void MEW::Shader::setFloat(const char* name, float value) const
 void MEW::Shader::setFloat3(const char* name, const float *value) const
 {
 	glUniform3f(glGetUniformLocation(shaderProgram_, name), value[0], value[1], value[2]);
+}
+
+void MEW::Shader::setMat4(const char* name, glm::mat4x4 mat)
+{
+	glUniformMatrix4fv(glGetUniformLocation(shaderProgram_, name), 1,GL_FALSE, glm::value_ptr(mat));
+
 }
 
 
