@@ -54,16 +54,22 @@ namespace MEW {
 		}
 
 		bool isOpen();
+		bool isKeyPressed(char key);
+		bool isKeyPressed(int key);
 		void endWindowFrame();
-		void clear(const float*);
+		void newframe(const float*);
 		bool closedPressed();
+		double time();
+		double deltaTime();
 		Window(Window&& other); //CONSTRUCTOR DE MOVIMIENTO
 		Window(Window& other) { isDeletable_ = true; this->window_ = other.window_; other.window_ = nullptr; other.isDeletable_ = true; };
 
 		//Window(const Window&) {};
 		~Window();
 	private:
-
+		double currentFrame_;
+		double deltaTime_;
+		double lastFrame_;
 		Window(GLFWwindow* w) : window_{ w } ,isDeletable_(false) {  }
 		Window& operator=(const Window&) = delete;
 		Window& operator=( Window&&) = delete; //ASIGNACION DE MOVIMIENTO

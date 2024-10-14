@@ -37,12 +37,11 @@ int WinMain() {
 
 	bool done = false;
 	const float backgroundcolor[4] = { 0.2f, 0.3f, 0.3f, 1.0f };
-	int loco = 0;
-
+	double deltaTime;
 	while (!done) {
-		w.clear(backgroundcolor);
+		w.newframe(backgroundcolor);
+		deltaTime = w.deltaTime();
 
-		obj.SetTranslation(glm::vec3(cos(glfwGetTime()), 0.0f, 0.0f));
 		obj.UseProgram();
 		shader.setFloat3("ourColor", color);
 
@@ -51,18 +50,23 @@ int WinMain() {
 		obj2.UseProgram();
 		shader.setFloat3("ourColor", color2);
 
-		obj2.SetRotation(glm::vec3( 0.0f, 180, 0.0f));
-
+		if (w.isKeyPressed('W')) obj2.TranslateY(deltaTime * 1);
+		if (w.isKeyPressed('A')) obj2.TranslateX(deltaTime * -1);
+		if (w.isKeyPressed('S')) obj2.TranslateY(deltaTime * -1);
+		if (w.isKeyPressed('D')) obj2.TranslateX(deltaTime * 1);
+		if (w.isKeyPressed('Q')) obj2.RotateY(90 * deltaTime);
+		if (w.isKeyPressed('E')) obj2.RotateY(-90 * deltaTime);
+		if (w.isKeyPressed('Z')) obj2.Scale(glm::vec3(1 * deltaTime));
+		if (w.isKeyPressed('X')) obj2.Scale(glm::vec3(-1 * deltaTime));
 
 		obj2.Draw();
 
-		
-
 		bool closePressed = w.closedPressed();
-		bool escPressed = false;
+		bool escPressed = w.isKeyPressed(GLFW_KEY_ESCAPE);
 		if (closePressed || escPressed) done = true;
 		w.endWindowFrame();
 	}
+
 
 	return 0;
 }

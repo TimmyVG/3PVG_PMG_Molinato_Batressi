@@ -14,8 +14,20 @@ namespace MEW {
 			void Draw();
 			void UseProgram();
 			void SetTranslation(glm::vec3 pos);
+			void Translate(glm::vec3 pos);
+			void TranslateX(float pos);
+			void TranslateY(float pos);
+			void TranslateZ(float pos);
 			void SetRotation(glm::vec3 rot);
+			void Rotate(glm::vec3 rot);
+			void RotateX(float rot);
+			void RotateY(float rot);
+			void RotateZ(float rot);
 			void SetScale(glm::vec3 scale);
+			void Scale(glm::vec3 scale);
+			void ScaleX(float scale);
+			void ScaleY(float scale);
+			void ScaleZ(float scale);
 	protected:
 			std::vector<float> vertices_;
 			Shader shader_;
