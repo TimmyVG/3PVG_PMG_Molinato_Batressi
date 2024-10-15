@@ -54,8 +54,8 @@ int WinMain() {
 		if (w.isKeyPressed('A')) obj2.TranslateX(deltaTime * -1);
 		if (w.isKeyPressed('S')) obj2.TranslateY(deltaTime * -1);
 		if (w.isKeyPressed('D')) obj2.TranslateX(deltaTime * 1);
-		if (w.isKeyPressed('Q')) obj2.RotateY(90 * deltaTime);
-		if (w.isKeyPressed('E')) obj2.RotateY(-90 * deltaTime);
+		if (w.isKeyPressed('Q')) obj2.RotateZ(90 * deltaTime);
+		if (w.isKeyPressed('E')) obj2.RotateZ(-90 * deltaTime);
 		if (w.isKeyPressed('Z')) obj2.Scale(glm::vec3(1 * deltaTime));
 		if (w.isKeyPressed('X')) obj2.Scale(glm::vec3(-1 * deltaTime));
 

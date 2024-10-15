@@ -43,17 +43,17 @@ void MEW::Object::Translate(glm::vec3 pos) {
 
 void MEW::Object::TranslateX(float pos)
 {
-	translation_ = glm::vec3(translation_.x + pos, translation_.y, translation_.z);
+	translation_.x += pos;
 }
 
 void MEW::Object::TranslateY(float pos)
 {
-	translation_ = glm::vec3(translation_.x, translation_.y + pos, translation_.z);
+	translation_.y += pos;
 }
 
 void MEW::Object::TranslateZ(float pos)
 {
-	translation_ = glm::vec3(translation_.x, translation_.y, translation_.z + pos);
+	translation_.z += pos;
 }
 
 void MEW::Object::SetRotation(glm::vec3 rot)
@@ -66,15 +66,15 @@ void MEW::Object::Rotate(glm::vec3 rot) {
 }
 
 void MEW::Object::RotateX(float rot) {
-	rotation_ = glm::vec3(rotation_.x + rot, rotation_.y, rotation_.z);
+	rotation_.x += rot;
 }
 
 void MEW::Object::RotateY(float rot) {
-	rotation_ = glm::vec3(rotation_.x, rotation_.y + rot, rotation_.z);
+	rotation_.y += rot;
 }
 
 void MEW::Object::RotateZ(float rot) {
-	rotation_ = glm::vec3(rotation_.x, rotation_.y, rotation_.z + rot);
+	rotation_.z += rot;
 }
 
 void MEW::Object::SetScale(glm::vec3 scale)
@@ -87,14 +87,14 @@ void MEW::Object::Scale(glm::vec3 scale) {
 }
 
 void MEW::Object::ScaleX(float scale) {
-	scale_ = glm::vec3(scale_.x + scale, scale_.y, scale_.z);
+	scale_.x += scale;
 }
 
 void MEW::Object::ScaleY(float scale) {
-	scale_ = glm::vec3(scale_.x, scale_.y + scale, scale_.z);
+	scale_.y += scale;
 }
 
 void MEW::Object::ScaleZ(float scale) {
-	scale_ = glm::vec3(scale_.x, scale_.y, scale_.z + scale);
+	scale_.z += scale;
 }
 

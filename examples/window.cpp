@@ -18,7 +18,7 @@ int WinMain() {
 	bool done = false;
 	const float backgroundcolor[4] = { 0.2f, 0.3f, 0.3f, 1.0f };
 	while (!done) {
-		w.clear(backgroundcolor);
+		w.newframe(backgroundcolor);
 
 
 		bool closePressed = w.closedPressed();
