@@ -2,6 +2,18 @@
 #include "mew/Window.hpp"
 #include "mew/Shader.hpp"
 #include "mew/Object.hpp"
+#include "mew/Input.hpp"
+enum Actions
+{
+	LEFT,
+	RIGHT,
+	UP,
+	DOWN,
+	ROTATELEFT,
+	ROTATERIGHT,
+	SIZEUP,
+	SIZEDOWN,
+};
 
 int WinMain() {
 	auto maybe_ws = MEW::WindowSystem::make();
@@ -18,7 +30,15 @@ int WinMain() {
 	MEW::Window w = maybe_w.value();
 
 	MEW::Shader shader("../data/example.vs","../data/example.fs");
-	
+	MEW::Input input(w.window_);
+	input.assign(MEW::Input::Keys::KEY_A, LEFT);
+	input.assign(MEW::Input::Keys::KEY_D, RIGHT);
+	input.assign(MEW::Input::Keys::KEY_W, UP);
+	input.assign(MEW::Input::Keys::KEY_S, DOWN);
+	input.assign(MEW::Input::Keys::KEY_Q, ROTATELEFT);
+	input.assign(MEW::Input::Keys::KEY_E, ROTATERIGHT);
+	input.assign(MEW::Input::Keys::KEY_Z, SIZEUP);
+	input.assign(MEW::Input::Keys::KEY_X, SIZEDOWN);
 	std::vector<float> pointvertex = {
 	 0.5f,  0.5f, 0.0f,  // top right
 	 0.5f, -0.5f, 0.0f,  // bottom right
@@ -39,6 +59,7 @@ int WinMain() {
 	const float backgroundcolor[4] = { 0.2f, 0.3f, 0.3f, 1.0f };
 	double deltaTime;
 	while (!done) {
+		input.newframe();
 		w.newframe(backgroundcolor);
 		deltaTime = w.deltaTime();
 
@@ -50,15 +71,19 @@ int WinMain() {
 		obj2.UseProgram();
 		shader.setFloat3("ourColor", color2);
 
-		if (w.isKeyPressed('W')) obj2.TranslateY(deltaTime * 1);
-		if (w.isKeyPressed('A')) obj2.TranslateX(deltaTime * -1);
-		if (w.isKeyPressed('S')) obj2.TranslateY(deltaTime * -1);
-		if (w.isKeyPressed('D')) obj2.TranslateX(deltaTime * 1);
-		if (w.isKeyPressed('Q')) obj2.RotateZ(90 * deltaTime);
-		if (w.isKeyPressed('E')) obj2.RotateZ(-90 * deltaTime);
-		if (w.isKeyPressed('Z')) obj2.Scale(glm::vec3(1 * deltaTime));
-		if (w.isKeyPressed('X')) obj2.Scale(glm::vec3(-1 * deltaTime));
-
+		if (input.isKeyPressed(UP)) obj2.TranslateY(deltaTime * 1);
+		if (input.isKeyPressed(LEFT)) obj2.TranslateX(deltaTime * -1);
+		if (input.isKeyPressed(DOWN)) obj2.TranslateY(deltaTime * -1);
+		if (input.isKeyPressed(RIGHT)) obj2.TranslateX(deltaTime * 1);
+		if (input.isKeyPressed(ROTATERIGHT)) obj2.RotateZ(90 * deltaTime);
+		if (input.isKeyPressed(ROTATELEFT)) obj2.RotateZ(-90 * deltaTime);
+		if (input.isKeyPressed(SIZEUP)) obj2.Scale(glm::vec3(1 * deltaTime));
+		if (input.isKeyPressed(SIZEDOWN)) obj2.Scale(glm::vec3(-1 * deltaTime));
+		/*
+		std::vector<double> tmp = input.getMousePos();
+		glm::vec3 mousepos(tmp[0], tmp[1], 0.0f);
+		obj.SetTranslation(mousepos);
+		*/
 		obj2.Draw();
 
 		bool closePressed = w.closedPressed();
