@@ -61,6 +61,8 @@ namespace MEW {
 		bool closedPressed();
 		double time();
 		double deltaTime();
+		int getWindowHeight();
+		int getWindowWidth();
 		Window(Window&& other); //CONSTRUCTOR DE MOVIMIENTO
 		Window(Window& other) { isDeletable_ = true; this->window_ = other.window_; other.window_ = nullptr; other.isDeletable_ = true; };
 
@@ -70,6 +72,8 @@ namespace MEW {
 		double currentFrame_;
 		double deltaTime_;
 		double lastFrame_;
+		int window_width;
+		int window_height;
 		Window(GLFWwindow* w) : window_{ w } ,isDeletable_(false) {  }
 		Window& operator=(const Window&) = delete;
 		Window& operator=( Window&&) = delete; //ASIGNACION DE MOVIMIENTO

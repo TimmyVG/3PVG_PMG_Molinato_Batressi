@@ -28,6 +28,18 @@ namespace MEW {
 		return deltaTime_;
 	}
 
+	int Window::getWindowHeight()
+	{
+		if (window_ != nullptr)glfwGetWindowSize(window_,&window_width,&window_height);
+		return window_height;
+	}
+
+	int Window::getWindowWidth()
+	{
+		if (window_ != nullptr)glfwGetWindowSize(window_, &window_width, &window_height);
+		return window_width;
+	}
+
 	void Window::endWindowFrame()
 	{
 		glfwSwapBuffers(window_);
