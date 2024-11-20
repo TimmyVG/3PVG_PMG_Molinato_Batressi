@@ -103,41 +103,54 @@ project "Motor"
         "src/*.cpp", "include/mew/*.hpp",
         }
 
-project"Window"
-    kind "WindowedApp"
-    language "C++"
-    targetdir "build/%{prj.name}/%{cfg.buildcfg}"
-    includedirs "include"
-    libdirs { "build/%{cfg.buildcfg}" }
-    links {"mew"}
-    conan_config_exec("Debug")
-    conan_config_exec("Release")
-    conan_config_exec("RelWithDebInfo")
-    debugargs { _MAIN_SCRIPT_DIR .. "/examples/data" }
-    files "examples/window.cpp"
+    project"Window"
+        kind "WindowedApp"
+        language "C++"
+        targetdir "build/%{prj.name}/%{cfg.buildcfg}"
+        includedirs "include"
+        libdirs { "build/%{cfg.buildcfg}" }
+        links {"mew"}
+        conan_config_exec("Debug")
+        conan_config_exec("Release")
+        conan_config_exec("RelWithDebInfo")
+        debugargs { _MAIN_SCRIPT_DIR .. "/examples/data" }
+        files "examples/window.cpp"
 
     project"Triangle"
-    kind "WindowedApp"
-    language "C++"
-    targetdir "build/%{prj.name}/%{cfg.buildcfg}"
-    includedirs "include"
-    libdirs { "build/%{cfg.buildcfg}" }
-    links {"mew"}
-    conan_config_exec("Debug")
-    conan_config_exec("Release")
-    conan_config_exec("RelWithDebInfo")
-    debugargs { _MAIN_SCRIPT_DIR .. "/examples/data" }
-    files "examples/triangle.cpp"
+        kind "WindowedApp"
+        language "C++"
+        targetdir "build/%{prj.name}/%{cfg.buildcfg}"
+        includedirs "include"
+        libdirs { "build/%{cfg.buildcfg}" }
+        links {"mew"}
+        conan_config_exec("Debug")
+        conan_config_exec("Release")
+        conan_config_exec("RelWithDebInfo")
+        debugargs { _MAIN_SCRIPT_DIR .. "/examples/data" }
+        files "examples/triangle.cpp"
 
     project"TriangleMove"
-    kind "WindowedApp"
-    language "C++"
-    targetdir "build/%{prj.name}/%{cfg.buildcfg}"
-    includedirs "include"
-    libdirs { "build/%{cfg.buildcfg}" }
-    links {"mew"}
-    conan_config_exec("Debug")
-    conan_config_exec("Release")
-    conan_config_exec("RelWithDebInfo")
-    debugargs { _MAIN_SCRIPT_DIR .. "/examples/data" }
-    files "examples/trianglemove.cpp"
+        kind "WindowedApp"
+        language "C++"
+        targetdir "build/%{prj.name}/%{cfg.buildcfg}"
+        includedirs "include"
+        libdirs { "build/%{cfg.buildcfg}" }
+        links {"mew"}
+        conan_config_exec("Debug")
+        conan_config_exec("Release")
+        conan_config_exec("RelWithDebInfo")
+        debugargs { _MAIN_SCRIPT_DIR .. "/examples/data" }
+        files "examples/trianglemove.cpp"
+
+    project"MeshTextureLoader"
+        kind "WindowedApp"
+        language "C++"
+        targetdir "build/%{prj.name}/%{cfg.buildcfg}"
+        includedirs "include"
+        libdirs { "build/%{cfg.buildcfg}" }
+        links {"mew"}
+        conan_config_exec("Debug")
+        conan_config_exec("Release")
+        conan_config_exec("RelWithDebInfo")
+        debugargs { _MAIN_SCRIPT_DIR .. "/examples/data" }
+        files "examples/meshtextureloader.cpp"

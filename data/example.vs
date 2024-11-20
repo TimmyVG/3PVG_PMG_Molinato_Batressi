@@ -1,11 +1,20 @@
 #version 330 core
 layout (location = 0) in vec3 aPos;
-out vec3 vertexColor;
-uniform vec3 ourColor;
-uniform mat4 transform;
+layout (location = 1) in vec3 aNormal;
+layout (location = 2) in vec2 aTexCoords;
+layout (location = 3) in vec2 uV;
 
-void main()
-{
-    gl_Position = transform * vec4(aPos, 1.0);
-    vertexColor = ourColor;
+out vec2 TexCoords;
+out vec3 FragPos;
+out vec3 Normal;
+out vec2 uv;
+
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
+uniform vec3 ourColor;
+
+void main() {
+    gl_Position = projection * view * model * vec4(aPos,1.0);
+    uv = aTexCoords;
 }

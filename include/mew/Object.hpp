@@ -5,11 +5,13 @@
 #include <vector>
 #include "Shader.hpp"
 #include "glm/mat4x4.hpp"
+#include "Mesh.hpp"
+#include "Model.hpp"
 
 namespace MEW {
 	class Object {
 		public:
-			Object(std::vector<float>& vertices, Shader* shader);
+			Object(std::string, Shader* shader);
 
 			void Draw();
 			void UseProgram();
@@ -29,9 +31,10 @@ namespace MEW {
 			void ScaleY(float scale);
 			void ScaleZ(float scale);
 	protected:
+			Model* model;
 			std::vector<float> vertices_;
-			Shader shader_;
-			unsigned int vao_;
+			unsigned int actMesh;
+			Shader* shader_;
 			glm::mat4x4 mat_;
 			glm::vec3 scale_;
 			glm::vec3 rotation_;
@@ -39,6 +42,7 @@ namespace MEW {
 			
 
 		private:
+			std::vector<Mesh> meshes_;
 	};
 }
 

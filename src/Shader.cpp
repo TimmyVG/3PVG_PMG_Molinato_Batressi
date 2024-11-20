@@ -55,11 +55,6 @@ MEW::Shader::Shader(const char* vertexPath, const char* fragmentPath)
 	glDeleteShader(fragmentShader_);
 }
 
-void MEW::Shader::Draw(unsigned int vao) {
-	glBindVertexArray(vao);
-	glDrawArrays(GL_TRIANGLES, 0, 3);
-	glBindVertexArray(0);
-}
 
 void MEW::Shader::UseProgram()
 {
@@ -99,19 +94,3 @@ MEW::Shader::~Shader()
 	glDeleteShader(fragmentShader_);
 }
 
-void MEW::Shader::CompileProgram(std::vector<float>& vertices, unsigned int* vao)
-{
-	glGenVertexArrays(1, vao);
-	glBindVertexArray(*vao);
-
-	unsigned int VBO;
-	glGenBuffers(1, &VBO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size()  * sizeof(float), &vertices[0], GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-
-	glBindVertexArray(0);
-}
