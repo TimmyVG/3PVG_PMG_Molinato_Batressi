@@ -129,6 +129,7 @@ namespace MEW {
         }
       }
       if (!skip) {
+        //TODO Si es incorrecto, acortar.
         Texture texture;
         std::string textureTypeWithExtension = str.C_Str();
         std::string filename = std::string(str.C_Str());
