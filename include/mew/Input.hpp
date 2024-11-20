@@ -4,10 +4,14 @@
 #include <map>
 #include <unordered_map>
 #include <vector>
+#include <glm/vec2.hpp>
 namespace MEW {
   class Input{
     public:
-      enum Keys {
+      enum Buttons {
+        MOUSE_1 = 0,
+        MOUSE_2,
+        MOUSE_3,
         KEY_SPACEBAR = 32,
         KEY_RIGHT = 262,
         KEY_LEFT,
@@ -52,22 +56,23 @@ namespace MEW {
       bool isKeyPressed(int action);
       bool isKeyReleased(int action);
 
-      void assign(Keys k, int action);
-      std::vector <double> getMousePos();
+      void assign(Buttons k, int action);
+      glm::vec2 getMousePos();
     private:
       void key_callback(int key, int scancode, int action, int mods);
       void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
-      std::vector<double> mousePos;
-      std::map<int, std::list<Keys>> action_map;
-      std::map<Keys, bool> current_frame_key_map;
-      std::map<Keys, bool> last_frame_key_map;
-      std::map<Keys, bool> changed_key_map;
+      void mouse_button_callback(int button, int action, int mods);
+      glm::vec2 mousePos;
+      std::map<int, std::list<Buttons>> action_map;
+      std::map<Buttons, bool> current_frame_key_map;
+      std::map<Buttons, bool> last_frame_key_map;
+      std::map<Buttons, bool> changed_key_map;
 
       GLFWwindow* window_;
       static std::unordered_map<GLFWwindow*, Input*> input_map;
       static void global_key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
       static void global_cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
-
+      static void global_mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
   };
 
 }

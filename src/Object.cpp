@@ -107,4 +107,19 @@ namespace MEW {
 		scale_.z += scale;
 	}
 
+	glm::vec3 Object::GetScale()
+	{
+		return glm::vec3(scale_);
+	}
+
+	glm::vec3 Object::GetRotation()
+	{
+		return glm::vec3(rotation_);
+	}
+
+	glm::vec3 Object::GetTranslation()
+	{
+		return glm::vec3(translation_);
+	}
+
 }

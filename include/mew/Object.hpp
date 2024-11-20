@@ -30,6 +30,9 @@ namespace MEW {
 			void ScaleX(float scale);
 			void ScaleY(float scale);
 			void ScaleZ(float scale);
+			glm::vec3 GetScale();
+			glm::vec3 GetRotation();
+			glm::vec3 GetTranslation();
 	protected:
 			Model* model;
 			std::vector<float> vertices_;
