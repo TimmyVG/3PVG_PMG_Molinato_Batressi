@@ -7,6 +7,9 @@
 #include <stb_image.h>
 
 namespace MEW {
+  Model::Model()
+  {
+  }
   Model::Model(const char* path)
   {
     loadModel(path);
@@ -16,7 +19,7 @@ namespace MEW {
     for (unsigned int i = 0; i < meshes.size(); i++)
       meshes[i].Draw(shader);
   }
-  void Model::loadModel(std::string path)
+  bool Model::loadModel(std::string path)
   {
     Assimp::Importer import;
     const aiScene * scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs |  aiProcess_GenNormals |               // Genera normales si faltan
@@ -25,11 +28,24 @@ namespace MEW {
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
       std::cout << "ERROR::ASSIMP::" << import.GetErrorString() << std::endl;
-      return;
+      return false;
     }
     directory = path.substr(0, path.find_last_of('/'));
 
     processNode(scene->mRootNode, scene);
+    return true;
+  }
+  void Model::loadMeshes()
+  {
+    for (unsigned int i = 0; i < meshes.size(); i++)
+    {
+      for (unsigned int j = 0; j < meshes[i].textures_.size(); j++)
+      {
+        meshes[i].textures_[j].id = TextureFromFile(meshes[i].textures_[j].path.c_str(), directory, false);
+      
+      }
+      meshes[i].setupMesh();
+    }
   }
   void Model::processNode(aiNode* node, const aiScene* scene)
   {
@@ -140,7 +156,8 @@ namespace MEW {
         if (!exist || !( isPng || isJPG)){
           textureTypeWithExtension = typeName + ".png";
         }
-        texture.id = TextureFromFile(textureTypeWithExtension.c_str(), directory, false);
+       // texture.id = TextureFromFile(textureTypeWithExtension.c_str(), directory, false);
+
         texture.type = typeName;
         texture.path = textureTypeWithExtension;
 

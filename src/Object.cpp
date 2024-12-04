@@ -16,6 +16,19 @@ namespace MEW {
 		translation_ = glm::vec3(0.0f);
 	}
 
+	Object::Object(Shader* shader)
+	{
+		shader_ = shader;
+		actMesh = 0;
+		//Load Meshes
+		model = new Model();
+
+		mat_ = glm::mat4(1.0f);
+		scale_ = glm::vec3(1.0f);
+		rotation_ = glm::vec3(0.0f);
+		translation_ = glm::vec3(0.0f);
+	}
+
 
 	void Object::Draw()
 	{

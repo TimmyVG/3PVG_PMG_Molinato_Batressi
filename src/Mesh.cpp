@@ -8,7 +8,6 @@ MEW::Mesh::Mesh(std::vector<MEW::Vertex> vertices, std::vector<unsigned int> ind
   indices_ = indices;
   textures_ = textures;
 
-  setupMesh();
 }
 
 void MEW::Mesh::Draw(Shader& shader)

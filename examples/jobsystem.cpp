@@ -26,7 +26,7 @@ int WinMain() {
 
 	MEW::Shader shader("../data/example.vs", "../data/example.fs");
 
-	MEW::Object obj2(std::string("../data/Silla.fbx"), &shader);
+	MEW::Object obj2(&shader);
 
 	const float color[3] = { 0.25f,0.3f,0.4f };
 	const float color2[3] = { 0.4f,0.3f,0.25f };
@@ -41,10 +41,11 @@ int WinMain() {
 	bool done = false;
 	const float backgroundcolor[4] = { 0.2f, 0.3f, 0.3f, 1.0f };
 	double deltaTime;
-
-	auto prueba = js.add([]() {
-		return changeSize();  // Modify obj2's size
+	std::string objdirectory = "../data/Silla.fbx";
+	auto prueba = js.add([&obj2,objdirectory]() {
+		 return obj2.model->loadModel(objdirectory);
 		});
+
 
 	bool chair_loaded = false;
 
@@ -54,8 +55,10 @@ int WinMain() {
 
 		obj2.UseProgram();
 		shader.setFloat3("ourColor", color2);
-		if (prueba.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
-			chair_loaded = true;
+
+		if (prueba.valid() && prueba.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
+			chair_loaded = prueba.get();
+			obj2.model->loadMeshes();
 		}
 		
 		if (chair_loaded)
