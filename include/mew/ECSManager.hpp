@@ -1,0 +1,90 @@
+#include <optional>
+#include <unordered_map>
+#include <memory>
+#ifndef __ECSManager_H__
+#define __ECSManager_H__ 1
+
+namespace MEW {
+
+
+struct ComponentListBase {
+  virtual ~ComponentListBase() = default;
+  virtual void grow(int optUntil = 0) = 0;
+};
+
+template<typename T>
+struct ComponentListDerived : ComponentListBase {
+  std::vector<std::optional<T>> component_list_;
+
+   void grow(int optUntil = 0) override {
+     do {
+       component_list_.resize(component_list_.size() + 1);
+     } while (optUntil != 0 && component_list_.size() < optUntil);
+
+  }
+  
+};
+
+class ECSManager {
+public:
+  ECSManager() {
+    last_entity = 0;
+  }
+  size_t create_entity() {
+    size_t entity_id = last_entity++;
+    for (auto& it: component_list_map) {
+      it.second.get()->grow();
+    }
+    return entity_id;
+  }
+
+  template<typename T>
+  void add_component_type() {
+    size_t key = typeid(T).hash_code();
+    component_list_map.emplace(key, std::make_unique<ComponentListDerived<T>>());
+    map_type::iterator it = component_list_map.find(key);
+    if (it != component_list_map.end()) it->second.get()->grow(last_entity);
+  }
+  
+  template<typename T>
+  std::optional<T>& get_component(size_t entity) {
+    static std::optional<T> nullopt_val;
+    size_t hash = typeid(T).hash_code();
+    std::optional<T> component;
+    map_type::iterator it = component_list_map.find(hash);
+    if (it == component_list_map.end()) return nullopt_val;
+
+    ComponentListDerived<T>* cld = static_cast<ComponentListDerived<T>*>(it->second.get());
+
+    return cld->component_list_[entity];
+  }
+ 
+  template<typename T> 
+  std::optional<T>& add_component(size_t entity) {
+    size_t hash = typeid(T).hash_code();
+    std::optional<T> component;
+    auto it = component_list_map.find(hash);
+    if (it != component_list_map.end()) {
+      ComponentListDerived<T>* cld = static_cast<ComponentListDerived<T>*>(it->second.get());
+      if (cld->component_list_.at(entity).has_value()) {
+        component = cld->component_list_.at(entity);
+      }
+      else {
+        cld->component_list_.at(entity) = T{};
+
+        component = cld->component_list_.at(entity);
+      }
+    }
+    return component;
+  }
+    
+private:
+  typedef std::unordered_map<size_t, std::unique_ptr<ComponentListBase>> map_type;
+  map_type component_list_map;
+
+  size_t last_entity;
+
+};
+
+}
+#endif //__ECSManager__
