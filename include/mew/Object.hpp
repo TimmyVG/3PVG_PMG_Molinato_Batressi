@@ -12,7 +12,7 @@ namespace MEW {
 	class Object {
 		public:
 			Object(std::string, Shader* shader);
-
+			Object(Shader* shader);
 			void Draw();
 			void UseProgram();
 			void SetTranslation(glm::vec3 pos);
@@ -33,8 +33,8 @@ namespace MEW {
 			glm::vec3 GetScale();
 			glm::vec3 GetRotation();
 			glm::vec3 GetTranslation();
-	protected:
 			Model* model;
+	protected:
 			std::vector<float> vertices_;
 			unsigned int actMesh;
 			Shader* shader_;

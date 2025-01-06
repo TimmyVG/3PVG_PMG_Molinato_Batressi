@@ -18,15 +18,19 @@
 class JobSystem {
 public:
   JobSystem();
-  ~JobSystem();
-
-  //TODO: Implement move constructor and assignment
   JobSystem(JobSystem&&);
   JobSystem& operator=(JobSystem&);
+  ~JobSystem();
 
-  template<typename T, typename... Args>
-  std::future<std::invoke_result_t<T, Args&&...>>
-    add(T&& f, Args... args);
+  template<typename T> typename std::future<std::invoke_result_t<T>>
+  add(T&& f) {
+    typedef typename std::invoke_result_t<T> result;
+    std::packaged_task<result()> task(std::move(f));
+    auto future = task.get_future();
+
+    add_implementation(std::move(task));
+    return future;
+  };
 
 private:
   void worker();

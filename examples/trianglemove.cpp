@@ -49,8 +49,7 @@ int WinMain() {
 
 	MEW::Shader shader("../data/example.vs", "../data/example.fs");
 
-
-	MEW::Object obj(std::string("../data/cube/cube.obj"), &shader);
+	MEW::Object obj(std::string("../data/miku/source/Miku.fbx"), &shader);
 
 	MEW::Object obj2(std::string("../data/Silla.fbx"), &shader);
 
@@ -78,7 +77,6 @@ int WinMain() {
 		obj.UseProgram();
 		shader.setFloat3("ourColor", color);
 
-		obj.Draw();
 
 		obj2.UseProgram();
 		shader.setFloat3("ourColor", color2);
@@ -87,18 +85,22 @@ int WinMain() {
 		if (input.isKeyPressed(LEFT)) obj2.TranslateX(deltaTime * -1);
 		if (input.isKeyPressed(DOWN)) obj2.TranslateY(deltaTime * -1);
 		if (input.isKeyPressed(RIGHT)) obj2.TranslateX(deltaTime * 1);
-		if (input.isKeyPressed(ROTATERIGHT)) obj2.RotateZ(90 * deltaTime);
-		if (input.isKeyPressed(ROTATELEFT)) obj2.RotateZ(-90 * deltaTime);
+		if (input.isKeyPressed(ROTATERIGHT)) obj2.RotateZ(1 * deltaTime);
+		if (input.isKeyPressed(ROTATELEFT)) obj2.RotateZ(-1 * deltaTime);
 		if (input.isKeyDown(ATTACK)) obj2.Scale(glm::vec3(1 * deltaTime));
 		if (input.isKeyPressed(ATTACK2)) obj2.Scale(glm::vec3(-1 * deltaTime));
 		
 		float normalizedX = (input.getMousePos().x / w.getWindowWidth()) * 2.0f - 1.0f;
 		float normalizedY = (input.getMousePos().y / w.getWindowHeight()) * 2.0f - 1.0f;
+		normalizedY = -normalizedY; 
 
-		normalizedY = -normalizedY;
+		glm::vec3 objectPosition = obj.GetTranslation();
 
-		obj.SetTranslation(glm::vec3(normalizedX, normalizedY, obj2.GetTranslation().z));
-		
+		obj.SetTranslation(glm::vec3(normalizedX , normalizedY, objectPosition.z));
+
+		// Draw the object
+		obj.Draw();
+
 		obj2.Draw();
 
 		bool closePressed = w.closedPressed();

@@ -41,10 +41,10 @@ namespace MEW {
     Mesh(std::vector<MEW::Vertex> vertices, std::vector<unsigned int> indices, std::vector<MEW::Texture> textures);
     void Draw(Shader& shader);
 
+    void setupMesh();
   private:
     //  render data
     unsigned int VBO, EBO;
-    void setupMesh();
   };
 
 }
