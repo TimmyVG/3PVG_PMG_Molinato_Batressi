@@ -3,6 +3,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace MEW {
+	Object::Object() {
+
+	}
 	Object::Object(std::string path, Shader* shader)
 	{
 		shader_ = shader;

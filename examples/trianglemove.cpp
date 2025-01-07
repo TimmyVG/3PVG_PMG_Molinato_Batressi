@@ -1,8 +1,8 @@
 #include "GLFW/glfw3.h"
 #include "mew/Window.hpp"
 #include "mew/Shader.hpp"
-#include "mew/Object.hpp"
 #include "mew/Input.hpp"
+#include "mew/geometry.hpp"
 enum Actions
 {
 	LEFT,
@@ -47,24 +47,23 @@ int WinMain() {
 	input.assign(MEW::Input::Buttons::MOUSE_1, ATTACK);
 	input.assign(MEW::Input::Buttons::MOUSE_2, ATTACK2);
 
-	MEW::Shader shader("../data/example.vs", "../data/example.fs");
+	MEW::Shader shader("../data/triangle.vs", "../data/triangle.fs");
+	
+	std::string mikudirectory = "../data/miku/source/Miku.fbx";
 
-	MEW::Object obj(std::string("../data/miku/source/Miku.fbx"), &shader);
+	std::vector<float> pointvertex = {
+	 0.5f,  0.5f, 0.0f,  // top right
+	 0.5f, -0.5f, 0.0f,  // bottom right
+	-0.5f,  0.5f, 0.0f,  // top left 
+	};
 
-	MEW::Object obj2(std::string("../data/Silla.fbx"), &shader);
+	MEW::Geometry obj2(pointvertex,&shader);
 
 	const float color[3] = { 0.25f,0.3f,0.4f };
 	const float color2[3] = { 0.4f,0.3f,0.25f };
 
-	obj2.TranslateZ(-10);
-	obj2.TranslateX(-3);
-	obj2.TranslateY(-3);
-
-	obj2.RotateX(-45.0f);
 
 	obj2.SetScale(glm::vec3(1.0f));
-	obj.TranslateZ(-10);
-	obj.RotateX(-45.0f);
 
 	bool done = false;
 	const float backgroundcolor[4] = { 0.2f, 0.3f, 0.3f, 1.0f };
@@ -73,10 +72,6 @@ int WinMain() {
 		input.newframe();
 		w.newframe(backgroundcolor);
 		deltaTime = w.deltaTime();
-
-		obj.UseProgram();
-		shader.setFloat3("ourColor", color);
-
 
 		obj2.UseProgram();
 		shader.setFloat3("ourColor", color2);
@@ -94,14 +89,8 @@ int WinMain() {
 		float normalizedY = (input.getMousePos().y / w.getWindowHeight()) * 2.0f - 1.0f;
 		normalizedY = -normalizedY; 
 
-		glm::vec3 objectPosition = obj.GetTranslation();
-
-		obj.SetTranslation(glm::vec3(normalizedX , normalizedY, objectPosition.z));
-
 		// Draw the object
-		obj.Draw();
-
-		obj2.Draw();
+		obj2.DrawGeometry();
 
 		bool closePressed = w.closedPressed();
 		bool escPressed = w.isKeyPressed(GLFW_KEY_ESCAPE);

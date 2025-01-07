@@ -1,7 +1,7 @@
 #include "GLFW/glfw3.h"
 #include "mew/Window.hpp"
 #include "mew/Shader.hpp"
-#include "mew/Object.hpp"
+#include "mew/geometry.hpp"
 
 int WinMain() {
 	auto maybe_ws = MEW::WindowSystem::make();
@@ -17,8 +17,8 @@ int WinMain() {
 	}
 	MEW::Window w = maybe_w.value();
 
-	MEW::Shader shader("../data/example.vs","../data/example.fs");
-	
+	MEW::Shader shader("../data/triangle.vs", "../data/triangle.fs");
+
 	std::vector<float> pointvertex = {
 	 0.5f,  0.5f, 0.0f,  // top right
 	 0.5f, -0.5f, 0.0f,  // bottom right
@@ -29,8 +29,8 @@ int WinMain() {
 	-0.5f, -0.5f, 0.0f,  // bottom left
 	-0.5f,  0.5f, 0.0f   // top left
 	};
-	MEW::Object obj(pointvertex,&shader);
-	MEW::Object obj2(pointvertex2,&shader);
+	MEW::Geometry obj(pointvertex,&shader);
+	MEW::Geometry obj2(pointvertex2,&shader);
 	const float color[3] = { 0.25f,0.3f,0.4f };
 	const float color2[3] = { 0.4f,0.3f,0.25f };
 
@@ -38,15 +38,16 @@ int WinMain() {
 	bool done = false;
 	const float backgroundcolor[4] = { 0.2f, 0.3f, 0.3f, 1.0f };
 	while (!done) {
-		w.clear(backgroundcolor);
+		w.newframe(backgroundcolor);
+
 		obj.UseProgram();
 		shader.setFloat3("ourColor", color);
-		obj.Draw();
+		obj.DrawGeometry();
 
 		obj2.UseProgram();
 		shader.setFloat3("ourColor", color2);
 
-		obj2.Draw();
+		obj2.DrawGeometry();
 
 
 

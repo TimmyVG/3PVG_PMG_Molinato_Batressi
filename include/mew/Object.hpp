@@ -11,6 +11,7 @@
 namespace MEW {
 	class Object {
 		public:
+			Object();
 			Object(std::string, Shader* shader);
 			Object(Shader* shader);
 			void Draw();
@@ -38,6 +39,8 @@ namespace MEW {
 			std::vector<float> vertices_;
 			unsigned int actMesh;
 			Shader* shader_;
+			unsigned int vao_;
+
 			glm::mat4x4 mat_;
 			glm::vec3 scale_;
 			glm::vec3 rotation_;
