@@ -6,10 +6,26 @@
 namespace MEW {
 
 
-	Window::Window(Window&& other) {
+	Window::Window(Window&& other) noexcept {
 		window_ = other.window_;
 		other.window_ = nullptr;
-	};
+		lastFrame_ = other.lastFrame_;
+		window_height = other.window_height;
+		window_width = other.window_width;
+		currentFrame_ = other.currentFrame_;
+		deltaTime_ = other.deltaTime_;
+
+	}
+	Window::Window(Window& other)
+	{
+		isDeletable_ = true;
+		this->window_ = other.window_; 
+		other.window_ = nullptr; 
+		other.isDeletable_ = true; 
+		currentFrame_ = other.currentFrame_; 
+		deltaTime_ = other.deltaTime_;
+	}
+	;
 	bool Window::isOpen()
 	{
 		return true;

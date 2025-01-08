@@ -30,9 +30,8 @@ int WinMain() {
 
 	ecs.add_component<PositionComponent>(entidadPosition);
 	
-	PositionComponent* pc = &ecs.0-<P-ositionComponent>(entidadPosition).value();
-	_
-		ecs.add_component_type<HolaComponent>();
+	PositionComponent* pc = &ecs.get_component<PositionComponent>(entidadPosition).value();
+	ecs.add_component_type<HolaComponent>();
 	ecs.add_component<HolaComponent>(entidadPosition);
 
 	HolaComponent* pc1 = nullptr;
@@ -57,10 +56,13 @@ int WinMain() {
 	MEW::Shader shader("../data/example.vs","../data/example.fs");
 	
 	
-	MEW::Object obj(std::string("../data/cube/cube.obj"), &shader);
+	MEW::Object obj(&shader);
 
-	MEW::Object obj2(std::string("../data/Silla.fbx"),&shader);
-
+	MEW::Object obj2(&shader);
+	obj2.model->loadModel("../data/Silla.fbx");
+	obj2.model->loadMeshes();
+	obj.model->loadModel("../data/miku/source/Miku.fbx");
+	obj.model->loadMeshes();
 	obj2.TranslateZ(-10);
 	obj2.TranslateX(-3);
 	obj2.TranslateY(-3);

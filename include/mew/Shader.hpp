@@ -12,7 +12,7 @@ namespace MEW {
 			unsigned int fragmentShader_;
 			unsigned int shaderProgram_;
 
-			Shader() {};
+			Shader();
 			Shader(const char* vertexPath, const char* fragmentPath);
 			void Draw(unsigned int vao);
 			void UseProgram();

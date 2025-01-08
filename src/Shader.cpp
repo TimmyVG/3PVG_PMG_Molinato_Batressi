@@ -5,9 +5,18 @@
 #include <sstream>
 #include <glm/gtc/type_ptr.hpp>
 
+MEW::Shader::Shader()
+{
+	fragmentShader_ = 0;
+	vertexShader_ = 0;
+	shaderProgram_ = 0;
+}
+
 MEW::Shader::Shader(const char* vertexPath, const char* fragmentPath)
 {
-
+	fragmentShader_ = 0;
+	vertexShader_ = 0;
+	shaderProgram_ = 0;
 	std::string vertexCode;
 	std::string fragmentCode;
 	std::ifstream vShaderFile;
@@ -66,7 +75,6 @@ void MEW::Shader::Draw(unsigned int vao)
 void MEW::Shader::UseProgram()
 {
 	glUseProgram(shaderProgram_);
-
 }
 
 void MEW::Shader::setBool(const char* name, bool value) const

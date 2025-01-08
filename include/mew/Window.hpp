@@ -63,8 +63,9 @@ namespace MEW {
 		double deltaTime();
 		int getWindowHeight();
 		int getWindowWidth();
-		Window(Window&& other); //CONSTRUCTOR DE MOVIMIENTO
-		Window(Window& other) { isDeletable_ = true; this->window_ = other.window_; other.window_ = nullptr; other.isDeletable_ = true; };
+		Window(Window&& other) noexcept; //CONSTRUCTOR DE MOVIMIENTO
+		Window(Window& other);
+
 
 		//Window(const Window&) {};
 		~Window();
