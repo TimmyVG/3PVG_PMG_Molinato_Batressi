@@ -4,13 +4,23 @@
 #include "mew/Object.hpp"
 #include "mew/Input.hpp"
 #include "mew/JobSystem.hpp"
+#include "mew/geometry.hpp"
 
 
+enum Actions
+{
+	LEFT,
+	RIGHT,
+	UP,
+	DOWN,
+	CHANGE,
+	CHANGE2,
+};
 
-int WinMain() {
+int main() {
 	JobSystem js;
+	
 	std::mutex output_mutex;
-
 	auto maybe_ws = MEW::WindowSystem::make();
 	if (!maybe_ws)
 	{
@@ -25,12 +35,28 @@ int WinMain() {
 	MEW::Window w = maybe_w.value();
 
 	MEW::Shader shader("../data/example.vs", "../data/example.fs");
-
+	MEW::Shader shaderTriangle("../data/triangle.vs", "../data/triangle.fs");
+	std::vector<float> pointvertex = {
+ 0.5f,  0.5f, 0.0f,  // top right
+ 0.5f, -0.5f, 0.0f,  // bottom right
+-0.5f,  0.5f, 0.0f,  // top left 
+	};
 	MEW::Object obj2(&shader);
-
-	const float color[3] = { 0.25f,0.3f,0.4f };
-	const float color2[3] = { 0.4f,0.3f,0.25f };
-
+	MEW::Object objaux(&shader);
+	MEW::Geometry triangle(pointvertex, &shaderTriangle);
+	const float color[3] = { 0.4f,0.3f,0.25f };
+	MEW::Input input(w.window_);
+	input.assign(MEW::Input::Buttons::MOUSE_1, CHANGE);
+	input.assign(MEW::Input::Buttons::MOUSE_2, CHANGE2);
+	//Triangle Movement
+	input.assign(MEW::Input::Buttons::KEY_A, LEFT);
+	input.assign(MEW::Input::Buttons::KEY_LEFT, LEFT);
+	input.assign(MEW::Input::Buttons::KEY_D, RIGHT);
+	input.assign(MEW::Input::Buttons::KEY_RIGHT, RIGHT);
+	input.assign(MEW::Input::Buttons::KEY_W, UP);
+	input.assign(MEW::Input::Buttons::KEY_UP, UP);
+	input.assign(MEW::Input::Buttons::KEY_S, DOWN);
+	input.assign(MEW::Input::Buttons::KEY_DOWN, DOWN);
 	obj2.TranslateZ(-10);
 	obj2.TranslateY(-3);
 
@@ -42,29 +68,65 @@ int WinMain() {
 	const float backgroundcolor[4] = { 0.2f, 0.3f, 0.3f, 1.0f };
 	double deltaTime;
 	std::string objdirectory = "../data/Silla.fbx";
-	auto prueba = js.add([&obj2,objdirectory]() {
-		 return obj2.model->loadModel(objdirectory);
+	std::string objdirectorymiku = "../data/miku/source/Miku.fbx";
+	std::string objdirectorycube = "../data/spiderman.fbx";
+	std::vector<std::string> directories;
+	directories.push_back(objdirectory);
+	directories.push_back(objdirectorymiku);
+	directories.push_back(objdirectorycube);
+	int objindex = 0;
+	auto pruebaFuture = js.add([&objaux,objindex,directories]() {
+		 return objaux.model->loadModel(directories[objindex]);
 		});
+	objindex++;
 
-
-	bool chair_loaded = false;
-
+	bool obj_loaded = false;
+	bool aux_loaded = true;
 	while (!done) {
+		input.newframe();
+
 		w.newframe(backgroundcolor);
 		deltaTime = w.deltaTime();
 
 		obj2.UseProgram();
-		shader.setFloat3("ourColor", color2);
 
-		if (prueba.valid() && prueba.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
-			chair_loaded = prueba.get();
+		if (pruebaFuture.valid() && pruebaFuture.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
+			obj_loaded = pruebaFuture.get();
+			obj2.model = objaux.model;
 			obj2.model->loadMeshes();
+			aux_loaded = false;
 		}
-		
-		if (chair_loaded)
+		if (input.isKeyPressed(UP)) triangle.TranslateY(deltaTime * 1.0f);
+		if (input.isKeyPressed(LEFT)) triangle.TranslateX(deltaTime * -1.0f);
+		if (input.isKeyPressed(DOWN)) triangle.TranslateY(deltaTime * -1.0f);
+		if (input.isKeyPressed(RIGHT)) triangle.TranslateX(deltaTime * 1.0f);
+		if (obj_loaded&&!aux_loaded)
 		{
 			obj2.Draw();
+			if (input.isKeyUp(CHANGE))
+			{
+				if (objindex!=2)
+				{
+					obj2.SetScale(glm::vec3(1.0f));
+				}
+				else
+				{
+					obj2.SetScale(glm::vec3(0.1f));
+				}
+				objaux.model->meshes.clear();
+				objaux.model->textures_loaded.clear();
+				pruebaFuture = js.add([&objaux, objindex, directories]() {
+					return objaux.model->loadModel(directories[objindex]);
+					});
+				aux_loaded = true;
+				objindex++;
+				if (objindex >= directories.size())
+				{
+					objindex = 0;
+				}
+			}
 		}
+		triangle.DrawGeometry();
 
 
 		bool closePressed = w.closedPressed();

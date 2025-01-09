@@ -7,9 +7,7 @@ MEW::Mesh::Mesh(std::vector<MEW::Vertex> vertices, std::vector<unsigned int> ind
   vertices_ = vertices;
   indices_ = indices;
   textures_ = textures;
-  EBO = 0;
-  VBO = 0;
-  VAO = 0;
+
 }
 
 void MEW::Mesh::Draw(Shader& shader)

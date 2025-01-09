@@ -156,7 +156,7 @@ project "Motor"
         files "examples/meshtextureloader.cpp"
 
     project"JobSystem"
-        kind "WindowedApp"
+        kind "ConsoleApp"
         language "C++"
         targetdir "build/%{prj.name}/%{cfg.buildcfg}"
         includedirs "include"

@@ -76,14 +76,14 @@ int WinMain() {
 		obj2.UseProgram();
 		shader.setFloat3("ourColor", color2);
 
-		if (input.isKeyPressed(UP)) obj2.TranslateY(deltaTime * 1);
-		if (input.isKeyPressed(LEFT)) obj2.TranslateX(deltaTime * -1);
-		if (input.isKeyPressed(DOWN)) obj2.TranslateY(deltaTime * -1);
-		if (input.isKeyPressed(RIGHT)) obj2.TranslateX(deltaTime * 1);
-		if (input.isKeyPressed(ROTATERIGHT)) obj2.RotateZ(1 * deltaTime);
-		if (input.isKeyPressed(ROTATELEFT)) obj2.RotateZ(-1 * deltaTime);
-		if (input.isKeyDown(ATTACK)) obj2.Scale(glm::vec3(1 * deltaTime));
-		if (input.isKeyPressed(ATTACK2)) obj2.Scale(glm::vec3(-1 * deltaTime));
+		if (input.isKeyPressed(UP)) obj2.TranslateY(deltaTime * 1.0f);
+		if (input.isKeyPressed(LEFT)) obj2.TranslateX(deltaTime * -1.0f);
+		if (input.isKeyPressed(DOWN)) obj2.TranslateY(deltaTime * -1.0f);
+		if (input.isKeyPressed(RIGHT)) obj2.TranslateX(deltaTime * 1.0f);
+		if (input.isKeyPressed(ROTATERIGHT)) obj2.RotateZ(1.0f * deltaTime);
+		if (input.isKeyPressed(ROTATELEFT)) obj2.RotateZ(-1.0f * deltaTime);
+		if (input.isKeyDown(ATTACK)) obj2.Scale(glm::vec3(1.0f * deltaTime));
+		if (input.isKeyPressed(ATTACK2)) obj2.Scale(glm::vec3(-1.0f * deltaTime));
 		
 		float normalizedX = (input.getMousePos().x / w.getWindowWidth()) * 2.0f - 1.0f;
 		float normalizedY = (input.getMousePos().y / w.getWindowHeight()) * 2.0f - 1.0f;

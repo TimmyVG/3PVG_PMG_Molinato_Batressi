@@ -1,22 +1,24 @@
 #include "mew/Scripting.hpp"
 namespace MEW {
-  void LuaScript::check(int error){
+  void ScriptingSystem::check(const ScriptingComponent& sc,int error){
     if (error != LUA_OK) {
-      std::string err = lua_tostring(s, lua_gettop(s));
-      lua_pop(s, lua_gettop(s));
+      std::string err = lua_tostring(sc.s, lua_gettop(sc.s));
+      lua_pop(sc.s, lua_gettop(sc.s));
       throw std::runtime_error("Lua error:" + err);
     }
   }
 
-  void LuaScript::run(const std::string& str){
-    check(luaL_loadstring(s, str.c_str()));
-    check(lua_pcall(s, 0, 0, 0));
-    lua_pop(s, lua_gettop(s));
+  void ScriptingSystem::run(const ScriptingComponent& sc){
+    for (int i = 0; i < sc.scripts.size(); i++) {
+      check(sc, luaL_loadstring(sc.s, sc.scripts[i].c_str()));
+      check(sc, lua_pcall(sc.s, 0, 0, 0));
+      lua_pop(sc.s, lua_gettop(sc.s));
+    }
   }
 
-  void LuaScript::add_global(const std::string& name, int(*function)(lua_State*)){
-    lua_pushcfunction(s, function);
-    lua_setglobal(s, name.c_str());
+  void ScriptingSystem::add_global(const ScriptingComponent& sc,const std::string& name, int(*function)(lua_State*)){
+    lua_pushcfunction(sc.s, function);
+    lua_setglobal(sc.s, name.c_str());
   }
 
   std::string file_to_string(const std::filesystem::path& path)

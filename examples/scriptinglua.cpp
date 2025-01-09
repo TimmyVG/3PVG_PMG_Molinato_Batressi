@@ -2,6 +2,7 @@
 #include "mew/Scripting.hpp"
 #include "GLFW/glfw3.h"
 #include "lua.hpp"
+#include "mew/ECSManager.hpp"
 
 int main() {
 	#pragma region Window Creation
@@ -22,11 +23,31 @@ int main() {
 	const float backgroundcolor[4] = { 0.2f, 0.3f, 0.3f, 1.0f };
 	#pragma endregion
 
-	MEW::LuaScript scripting;
+	int nEntity = 13;
+	MEW::ECSManager ecs;
+	std::vector<size_t> entities;
+	MEW::ScriptingSystem SS;
+	MEW::ScriptingComponent SC;
 	std::string script = MEW::file_to_string("../data/scripts/helloworld.lua");
+	std::string script2 = MEW::file_to_string("../data/scripts/holamundo.lua");
 
-	scripting.add_global("multiplication", MEW::multiplication);
-	scripting.run(script);
+	ecs.add_component_type<MEW::ScriptingComponent>();
+	for (int i = 0; i < nEntity; i++) {
+		size_t entity = ecs.create_entity();
+		SC.scripts.push_back(script);
+		SC.scripts.push_back(script2);
+		ecs.add_component<MEW::ScriptingComponent>(entity);
+		MEW::ScriptingComponent* ScriptComp = &ecs.get_component<MEW::ScriptingComponent>(entity).value();
+		*ScriptComp = std::move(SC);
+
+		SS.add_global(ecs.get_component<MEW::ScriptingComponent>(entity).value(), "multiplication", MEW::multiplication);
+		entities.push_back(entity);
+	}
+
+	for (int i = 0; i < nEntity; i++)
+	{
+		SS.run(ecs.get_component<MEW::ScriptingComponent>(entities.at(i)).value());
+	}
 	while (!done) {
 		w.newframe(backgroundcolor);
 
@@ -36,7 +57,6 @@ int main() {
 		if (closePressed || escPressed) done = true;
 		w.endWindowFrame();
 
-		//if (/*algo*/) done = true;
 	}
 
 	return 0;
