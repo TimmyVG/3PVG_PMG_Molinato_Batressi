@@ -5,6 +5,8 @@
 #include "mew/Input.hpp"
 #include "mew/JobSystem.hpp"
 #include "mew/geometry.hpp"
+#include "mew/ECSManager.hpp"
+#include "mew/Render.hpp"
 
 
 enum Actions
@@ -18,6 +20,16 @@ enum Actions
 };
 
 int main() {
+
+	MEW::ECSManager ecs;
+
+
+	//AddComponents to ecs
+
+	ecs.add_component_type<MEW::TransformComponent>();
+	ecs.add_component_type<MEW::RenderComponent>();
+	MEW::TransformSystem TS;
+	MEW::RenderSystem RS;
 	JobSystem js;
 	
 	std::mutex output_mutex;
@@ -41,8 +53,17 @@ int main() {
  0.5f, -0.5f, 0.0f,  // bottom right
 -0.5f,  0.5f, 0.0f,  // top left 
 	};
+
+
 	MEW::Object obj2(&shader);
 	MEW::Object objaux(&shader);
+
+	size_t entity = ecs.create_entity();
+	ecs.add_component<MEW::TransformComponent>(entity);
+	ecs.add_component<MEW::RenderComponent>(entity);
+	MEW::RenderComponent* rc = &ecs.get_component<MEW::RenderComponent>(entity).value();
+	MEW::TransformComponent* tc = &ecs.get_component<MEW::TransformComponent>(entity).value();
+
 	MEW::Geometry triangle(pointvertex, &shaderTriangle);
 	const float color[3] = { 0.4f,0.3f,0.25f };
 	MEW::Input input(w.window_);
@@ -57,12 +78,12 @@ int main() {
 	input.assign(MEW::Input::Buttons::KEY_UP, UP);
 	input.assign(MEW::Input::Buttons::KEY_S, DOWN);
 	input.assign(MEW::Input::Buttons::KEY_DOWN, DOWN);
-	obj2.TranslateZ(-10);
-	obj2.TranslateY(-3);
+	TS.TranslateZ(-10,tc);
+	TS.TranslateY(-3, tc);
 
-	obj2.RotateX(-45.0f);
+	TS.RotateX(-45.0f, tc);
 
-	obj2.SetScale(glm::vec3(1.0f));
+	TS.SetScale(glm::vec3(1.0f), tc);
 
 	bool done = false;
 	const float backgroundcolor[4] = { 0.2f, 0.3f, 0.3f, 1.0f };
@@ -94,6 +115,8 @@ int main() {
 			obj_loaded = pruebaFuture.get();
 			obj2.model = objaux.model;
 			obj2.model->loadMeshes();
+			MEW::RenderComponent *auxrc =  &ecs.get_component<MEW::RenderComponent>(entity).value();
+			*auxrc->object = std::move(obj2);
 			aux_loaded = false;
 		}
 		if (input.isKeyPressed(UP)) triangle.TranslateY(deltaTime * 1.0f);
@@ -102,16 +125,16 @@ int main() {
 		if (input.isKeyPressed(RIGHT)) triangle.TranslateX(deltaTime * 1.0f);
 		if (obj_loaded&&!aux_loaded)
 		{
-			obj2.Draw();
+			RS.Draw(&ecs.get_component<MEW::RenderComponent>(entity).value(), &ecs.get_component<MEW::TransformComponent>(entity).value());
 			if (input.isKeyUp(CHANGE))
 			{
 				if (objindex!=2)
 				{
-					obj2.SetScale(glm::vec3(1.0f));
+					TS.SetScale(glm::vec3(1.0f), &ecs.get_component<MEW::TransformComponent>(entity).value());
 				}
 				else
 				{
-					obj2.SetScale(glm::vec3(0.1f));
+					TS.SetScale(glm::vec3(0.1f), &ecs.get_component<MEW::TransformComponent>(entity).value());
 				}
 				objaux.model->meshes.clear();
 				objaux.model->textures_loaded.clear();
@@ -126,7 +149,7 @@ int main() {
 				}
 			}
 		}
-		triangle.DrawGeometry();
+		triangle.Draw();
 
 
 		bool closePressed = w.closedPressed();

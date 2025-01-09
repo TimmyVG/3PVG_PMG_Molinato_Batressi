@@ -90,7 +90,7 @@ int WinMain() {
 		normalizedY = -normalizedY; 
 
 		// Draw the object
-		obj2.DrawGeometry();
+		obj2.Draw();
 
 		bool closePressed = w.closedPressed();
 		bool escPressed = w.isKeyPressed(GLFW_KEY_ESCAPE);

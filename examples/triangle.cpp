@@ -42,12 +42,12 @@ int WinMain() {
 
 		obj.UseProgram();
 		shader.setFloat3("ourColor", color);
-		obj.DrawGeometry();
+		obj.Draw();
 
 		obj2.UseProgram();
 		shader.setFloat3("ourColor", color2);
 
-		obj2.DrawGeometry();
+		obj2.Draw();
 
 
 

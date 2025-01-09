@@ -36,7 +36,7 @@ int main() {
 		size_t entity = ecs.create_entity();
 		SC.scripts.push_back(script);
 		SC.scripts.push_back(script2);
-		ecs.add_component<MEW::ScriptingComponent>(entity);
+		ecs.add_componentMove<MEW::ScriptingComponent>(entity);
 		MEW::ScriptingComponent* ScriptComp = &ecs.get_component<MEW::ScriptingComponent>(entity).value();
 		*ScriptComp = std::move(SC);
 

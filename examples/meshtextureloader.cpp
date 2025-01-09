@@ -2,10 +2,34 @@
 #include "mew/Window.hpp"
 #include "mew/Shader.hpp"
 #include "mew/Object.hpp"
+#include "mew/ECSManager.hpp"
+#include "mew/Transform.hpp"
+#include "mew/Render.hpp"
 #include <iostream>
+#include <cstdlib>  // Para rand() y srand()
+#include <ctime> 
+
+
+int global = 0;
 
 
 int WinMain() {
+	srand(static_cast<unsigned>(time(0)));
+
+	MEW::ECSManager ecs;
+
+
+	//AddComponents to ecs
+
+	ecs.add_component_type<MEW::TransformComponent>();
+	ecs.add_component_type<MEW::RenderComponent>();
+
+
+	MEW::TransformSystem TS;
+	MEW::RenderSystem RS;
+
+
+
 	auto maybe_ws = MEW::WindowSystem::make();
 	if (!maybe_ws)
 	{
@@ -18,22 +42,29 @@ int WinMain() {
 		return -1;
 	}
 	MEW::Window w = maybe_w.value();
-	MEW::Shader shader("../data/example.vs","../data/example.fs");
+	MEW::Shader shader("../data/example.vs", "../data/example.fs");
+
+	MEW::Object objmiku(&shader);
+	objmiku.model->loadModel("../data/miku/source/Miku.fbx");
+	objmiku.model->loadMeshes();
+
+	MEW::Object objsilla(&shader);
+	objsilla.model->loadModel("../data/silla/WoodenChair_low.fbx");
+	objsilla.model->loadMeshes();
+
+	std::vector<size_t> entities;
+
+		size_t entity = ecs.create_entity();
+		entities.push_back(entity);
+		ecs.add_component<MEW::RenderComponent>(entity);
+		ecs.add_component<MEW::TransformComponent>(entity);
+		MEW::RenderComponent* rc = &ecs.get_component<MEW::RenderComponent>(entity).value();
+		*rc->object = objsilla;
+		TS.Translate(glm::vec3((rand() % 50) - 25.0f, (rand() % 30) - 15.0f, -50.0f), &ecs.get_component<MEW::TransformComponent>(entity).value());
 	
-	
-	MEW::Object obj(std::string("../data/cube/cube.obj"), &shader);
 
-	MEW::Object obj2(std::string("../data/Silla.fbx"),&shader);
 
-	obj2.TranslateZ(-10);
-	obj2.TranslateX(-3);
-	obj2.TranslateY(-3);
 
-	obj2.RotateX(-45.0f);
-
-	obj2.SetScale(glm::vec3(1.0f));
-	obj.TranslateZ(-10);
-	obj.RotateX(-45.0f);
 	const float color[3] = { 0.25f,0.3f,0.4f };
 	const float color2[3] = { 0.4f,0.3f,0.25f };
 
@@ -45,25 +76,20 @@ int WinMain() {
 		w.newframe(backgroundcolor);
 		deltaTime = w.deltaTime();
 
-		obj.UseProgram();
-		shader.setFloat3("ourColor", color);
+
+		if (w.isKeyPressed('W')) TS.TranslateY(deltaTime * 1, &ecs.get_component<MEW::TransformComponent>(entities.at(0)).value());
+		if (w.isKeyPressed('A')) TS.TranslateX(deltaTime * -1, &ecs.get_component<MEW::TransformComponent>(entities.at(0)).value());
+		if (w.isKeyPressed('S')) TS.TranslateY(deltaTime * -1, &ecs.get_component<MEW::TransformComponent>(entities.at(0)).value());
+		if (w.isKeyPressed('D')) TS.TranslateX(deltaTime * 1, &ecs.get_component<MEW::TransformComponent>(entities.at(0)).value());
+		if (w.isKeyPressed('Q')) TS.RotateX(1 * deltaTime, &ecs.get_component<MEW::TransformComponent>(entities.at(0)).value());
+		if (w.isKeyPressed('E')) TS.RotateX(-1 * deltaTime, &ecs.get_component<MEW::TransformComponent>(entities.at(0)).value());
+		if (w.isKeyPressed('Z')) TS.Scale(glm::vec3(1 * deltaTime), &ecs.get_component<MEW::TransformComponent>(entities.at(0)).value());
+		if (w.isKeyPressed('X')) TS.Scale(glm::vec3(-1 * deltaTime), &ecs.get_component<MEW::TransformComponent>(entities.at(0)).value());
 
 
-		obj.Draw();
-
-		obj2.UseProgram();
-		shader.setFloat3("ourColor", color2);
-
-		if (w.isKeyPressed('W')) obj2.TranslateY(deltaTime * 1);
-		if (w.isKeyPressed('A')) obj2.TranslateX(deltaTime * -1);
-		if (w.isKeyPressed('S')) obj2.TranslateY(deltaTime * -1);
-		if (w.isKeyPressed('D')) obj2.TranslateX(deltaTime * 1);
-		if (w.isKeyPressed('Q')) obj2.RotateX(1 * deltaTime);
-		if (w.isKeyPressed('E')) obj2.RotateX(-1 * deltaTime);
-		if (w.isKeyPressed('Z')) obj2.Scale(glm::vec3(1 * deltaTime));
-		if (w.isKeyPressed('X')) obj2.Scale(glm::vec3(-1 * deltaTime));
-
-		obj2.Draw();
+			RS.Draw(&ecs.get_component<MEW::RenderComponent>(entities.at(0)).value(),
+				&ecs.get_component<MEW::TransformComponent>(entities.at(0)).value());
+		
 		bool closePressed = w.closedPressed();
 		bool escPressed = w.isKeyPressed(GLFW_KEY_ESCAPE);
 		if (closePressed || escPressed) done = true;
