@@ -119,10 +119,10 @@ int main() {
 			*auxrc->object = std::move(obj2);
 			aux_loaded = false;
 		}
-		if (input.isKeyPressed(UP)) triangle.TranslateY(deltaTime * 1.0f);
-		if (input.isKeyPressed(LEFT)) triangle.TranslateX(deltaTime * -1.0f);
-		if (input.isKeyPressed(DOWN)) triangle.TranslateY(deltaTime * -1.0f);
-		if (input.isKeyPressed(RIGHT)) triangle.TranslateX(deltaTime * 1.0f);
+		if (input.isKeyPressed(UP)) triangle.TranslateY(static_cast<float>(deltaTime) * 1.0f);
+		if (input.isKeyPressed(LEFT)) triangle.TranslateX(static_cast<float>(deltaTime) * -1.0f);
+		if (input.isKeyPressed(DOWN)) triangle.TranslateY(static_cast<float>(deltaTime) * -1.0f);
+		if (input.isKeyPressed(RIGHT)) triangle.TranslateX(static_cast<float>(deltaTime) * 1.0f);
 		if (obj_loaded&&!aux_loaded)
 		{
 			RS.Draw(&ecs.get_component<MEW::RenderComponent>(entity).value(), &ecs.get_component<MEW::TransformComponent>(entity).value());

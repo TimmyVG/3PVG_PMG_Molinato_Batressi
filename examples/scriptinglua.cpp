@@ -17,6 +17,7 @@ int main() {
 	if (!maybe_w) {
 		return -1;
 	}
+
 	MEW::Window w = maybe_w.value();
 
 	bool done = false;

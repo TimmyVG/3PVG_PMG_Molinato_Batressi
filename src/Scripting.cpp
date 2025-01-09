@@ -30,8 +30,8 @@ namespace MEW {
   }
 
   int multiplication(lua_State* L){
-    int a = luaL_checkinteger(L, 1);
-    int b = luaL_checkinteger(L, 2);
+    int a = static_cast<int>(luaL_checkinteger(L, 1));
+    int b = static_cast<int>(luaL_checkinteger(L, 2));
     lua_pushinteger(L, a * b);  // Return the product of a and b to Lua
     return 1;  // One return value on the stack
   }

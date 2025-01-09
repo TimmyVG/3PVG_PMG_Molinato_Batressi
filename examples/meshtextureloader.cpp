@@ -77,14 +77,14 @@ int WinMain() {
 		deltaTime = w.deltaTime();
 
 
-		if (w.isKeyPressed('W')) TS.TranslateY(deltaTime * 1, &ecs.get_component<MEW::TransformComponent>(entities.at(0)).value());
-		if (w.isKeyPressed('A')) TS.TranslateX(deltaTime * -1, &ecs.get_component<MEW::TransformComponent>(entities.at(0)).value());
-		if (w.isKeyPressed('S')) TS.TranslateY(deltaTime * -1, &ecs.get_component<MEW::TransformComponent>(entities.at(0)).value());
-		if (w.isKeyPressed('D')) TS.TranslateX(deltaTime * 1, &ecs.get_component<MEW::TransformComponent>(entities.at(0)).value());
-		if (w.isKeyPressed('Q')) TS.RotateX(1 * deltaTime, &ecs.get_component<MEW::TransformComponent>(entities.at(0)).value());
-		if (w.isKeyPressed('E')) TS.RotateX(-1 * deltaTime, &ecs.get_component<MEW::TransformComponent>(entities.at(0)).value());
-		if (w.isKeyPressed('Z')) TS.Scale(glm::vec3(1 * deltaTime), &ecs.get_component<MEW::TransformComponent>(entities.at(0)).value());
-		if (w.isKeyPressed('X')) TS.Scale(glm::vec3(-1 * deltaTime), &ecs.get_component<MEW::TransformComponent>(entities.at(0)).value());
+		if (w.isKeyPressed('W')) TS.TranslateY(static_cast<float>(deltaTime) * 1, &ecs.get_component<MEW::TransformComponent>(entities.at(0)).value());
+		if (w.isKeyPressed('A')) TS.TranslateX(static_cast<float>(deltaTime) * -1, &ecs.get_component<MEW::TransformComponent>(entities.at(0)).value());
+		if (w.isKeyPressed('S')) TS.TranslateY(static_cast<float>(deltaTime) * -1, &ecs.get_component<MEW::TransformComponent>(entities.at(0)).value());
+		if (w.isKeyPressed('D')) TS.TranslateX(static_cast<float>(deltaTime) * 1, &ecs.get_component<MEW::TransformComponent>(entities.at(0)).value());
+		if (w.isKeyPressed('Q')) TS.RotateX(1 * static_cast<float>(deltaTime), &ecs.get_component<MEW::TransformComponent>(entities.at(0)).value());
+		if (w.isKeyPressed('E')) TS.RotateX(-1 * static_cast<float>(deltaTime), &ecs.get_component<MEW::TransformComponent>(entities.at(0)).value());
+		if (w.isKeyPressed('Z')) TS.Scale(glm::vec3(1 * static_cast<float>(deltaTime)), &ecs.get_component<MEW::TransformComponent>(entities.at(0)).value());
+		if (w.isKeyPressed('X')) TS.Scale(glm::vec3(-1 * static_cast<float>(deltaTime)), &ecs.get_component<MEW::TransformComponent>(entities.at(0)).value());
 
 
 			RS.Draw(&ecs.get_component<MEW::RenderComponent>(entities.at(0)).value(),

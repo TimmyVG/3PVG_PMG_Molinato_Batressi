@@ -43,7 +43,7 @@ public:
     size_t key = typeid(T).hash_code();
     component_list_map.emplace(key, std::make_unique<ComponentListDerived<T>>());
     map_type::iterator it = component_list_map.find(key);
-    if (it != component_list_map.end()) it->second.get()->grow(last_entity);
+    if (it != component_list_map.end()) it->second.get()->grow(static_cast<int>(last_entity));
   }
   
   template<typename T>
@@ -62,7 +62,7 @@ public:
   template<typename T> 
   std::optional<T>& add_component(size_t entity) {
     size_t hash = typeid(T).hash_code();
-    std::optional<T> component;
+    static std::optional<T> component;
     auto it = component_list_map.find(hash);
     if (it != component_list_map.end()) {
       ComponentListDerived<T>* cld = static_cast<ComponentListDerived<T>*>(it->second.get());
@@ -81,7 +81,7 @@ public:
   template<typename T>
   std::optional<T>& add_componentMove(size_t entity) {
     size_t hash = typeid(T).hash_code();
-    std::optional<T> component;
+    static std::optional<T> component;
     auto it = component_list_map.find(hash);
     if (it != component_list_map.end()) {
       ComponentListDerived<T>* cld = static_cast<ComponentListDerived<T>*>(it->second.get());

@@ -87,14 +87,14 @@ int WinMain() {
 		deltaTime = w.deltaTime();
 
 		
-		if (w.isKeyPressed('W')) TS.TranslateY(deltaTime * 1,&ecs.get_component<MEW::TransformComponent>(entities.at(99)).value());
-		if (w.isKeyPressed('A')) TS.TranslateX(deltaTime * -1, &ecs.get_component<MEW::TransformComponent>(entities.at(99)).value());
-		if (w.isKeyPressed('S')) TS.TranslateY(deltaTime * -1, &ecs.get_component<MEW::TransformComponent>(entities.at(99)).value());
-		if (w.isKeyPressed('D')) TS.TranslateX(deltaTime * 1, &ecs.get_component<MEW::TransformComponent>(entities.at(99)).value());
-		if (w.isKeyPressed('Q')) TS.RotateX(1 * deltaTime, &ecs.get_component<MEW::TransformComponent>(entities.at(99)).value());
-		if (w.isKeyPressed('E')) TS.RotateX(-1 * deltaTime, &ecs.get_component<MEW::TransformComponent>(entities.at(99)).value());
-		if (w.isKeyPressed('Z')) TS.Scale(glm::vec3(1 * deltaTime), &ecs.get_component<MEW::TransformComponent>(entities.at(99)).value());
-		if (w.isKeyPressed('X')) TS.Scale(glm::vec3(-1 * deltaTime), &ecs.get_component<MEW::TransformComponent>(entities.at(99)).value());
+		if (w.isKeyPressed('W')) TS.TranslateY(static_cast<float>(deltaTime) * 1,&ecs.get_component<MEW::TransformComponent>(entities.at(99)).value());
+		if (w.isKeyPressed('A')) TS.TranslateX(static_cast<float>(deltaTime) * -1, &ecs.get_component<MEW::TransformComponent>(entities.at(99)).value());
+		if (w.isKeyPressed('S')) TS.TranslateY(static_cast<float>(deltaTime) * -1, &ecs.get_component<MEW::TransformComponent>(entities.at(99)).value());
+		if (w.isKeyPressed('D')) TS.TranslateX(static_cast<float>(deltaTime) * 1, &ecs.get_component<MEW::TransformComponent>(entities.at(99)).value());
+		if (w.isKeyPressed('Q')) TS.RotateX(1 * static_cast<float>(deltaTime), &ecs.get_component<MEW::TransformComponent>(entities.at(99)).value());
+		if (w.isKeyPressed('E')) TS.RotateX(-1 * static_cast<float>(deltaTime), &ecs.get_component<MEW::TransformComponent>(entities.at(99)).value());
+		if (w.isKeyPressed('Z')) TS.Scale(glm::vec3(1 * static_cast<float>(deltaTime)), &ecs.get_component<MEW::TransformComponent>(entities.at(99)).value());
+		if (w.isKeyPressed('X')) TS.Scale(glm::vec3(-1 * static_cast<float>(deltaTime)), &ecs.get_component<MEW::TransformComponent>(entities.at(99)).value());
 		
 		for (int i = 0; i < 100; i++) {
 			if (i != 99)TS.Rotate(glm::vec3(0.001f, 0.003f, 0.008f), &ecs.get_component<MEW::TransformComponent>(entities.at(i)).value());

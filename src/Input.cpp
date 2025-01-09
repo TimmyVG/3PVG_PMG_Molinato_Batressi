@@ -59,8 +59,8 @@ namespace MEW {
 
 	void Input::cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
 	{
-		mousePos.x = xpos;
-		mousePos.y = ypos;
+		mousePos.x = static_cast<float>(xpos);
+		mousePos.y = static_cast<float>(ypos);
 	}
 
 	void Input::global_cursor_position_callback(GLFWwindow* window, double xpos, double ypos) 
