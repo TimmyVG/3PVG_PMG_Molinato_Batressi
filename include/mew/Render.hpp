@@ -22,7 +22,8 @@ namespace MEW {
 	class RenderSystem {
 	public:
 
-		void Draw(RenderComponent *rc, TransformComponent *tc);
+		void Draw(RenderComponent* rc, TransformComponent* tc);
+
 	};
 
 

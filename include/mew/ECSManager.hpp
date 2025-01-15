@@ -79,6 +79,21 @@ public:
   }
 
   template<typename T>
+  std::vector<std::optional<T>>& get_vectorComponent() {
+    static std::vector<T> vec;
+    size_t key = typeid(T).hash_code();
+    component_list_map.emplace(key, std::make_unique<ComponentListDerived<T>>());
+    map_type::iterator it = component_list_map.find(key);
+ //   for (int i = 0; i < last_entity; ++i) {
+ //     if (it->second.get() != std::nullopt_t)vec.push_back(it->second.get());
+ //   }
+    ComponentListDerived<T>* cld = static_cast<ComponentListDerived<T>*>(it->second.get());
+    return cld->component_list_;
+
+  }
+
+
+  template<typename T>
   std::optional<T>& add_componentMove(size_t entity) {
     size_t hash = typeid(T).hash_code();
     static std::optional<T> component;

@@ -20,10 +20,10 @@ namespace MEW {
 			Model* model;
 			size_t entity_;
 			Shader* shader_;
+			unsigned int vao_;
 	protected:
 			std::vector<float> vertices_;
 			unsigned int actMesh;
-			unsigned int vao_;
 
 			
 
