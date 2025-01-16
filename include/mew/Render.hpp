@@ -26,6 +26,14 @@ namespace MEW {
 
 	};
 
+	class RenderSystemUnlit {
+	public:
+		void operator()(const std::vector<std::optional<MEW::TransformComponent>>& vecTransform,
+			const std::vector<std::optional<MEW::RenderComponent>>& vecRender, MEW::RenderSystem& RS, MEW::Shader& shader);
+	};
+
+	
+
 
 }
 

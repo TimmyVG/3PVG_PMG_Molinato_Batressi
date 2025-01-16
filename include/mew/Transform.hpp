@@ -6,16 +6,26 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include "mew/Transform.hpp"
 
 
 namespace MEW {
+
+
 	struct TransformComponent {
 		glm::mat4x4 mat_;
 		glm::vec3 scale_;
 		glm::vec3 rotation_;
 		glm::vec3 translation_;
+		glm::mat4 model;
 		TransformComponent();
 	};
+
+	class TransformSystemMat {
+	public:
+		void operator()(const std::vector<std::optional<MEW::TransformComponent>>& vecTransform);
+	};
+
 
 	class TransformSystem {
 	public:

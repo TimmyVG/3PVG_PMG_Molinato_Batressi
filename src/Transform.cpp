@@ -1,8 +1,24 @@
 #include "mew/Transform.hpp"
 #include <glm/glm.hpp>
+#include <glm/ext/matrix_transform.hpp>
 
 
 namespace MEW {
+	void TransformSystemMat::operator()(const std::vector<std::optional<MEW::TransformComponent>>& vecTransform)
+	{
+		for (auto& ctransform : vecTransform) {
+			if (!ctransform.has_value()) continue;
+			auto transform = &ctransform.value();
+			transform->model = glm::mat4(1.0f);
+
+			transform->model = glm::translate(modelo, transform->translation_);
+			modelo = glm::rotate(modelo, transform->rotation_.x, glm::vec3(1.0f, 0.0f, 0.0f));
+			modelo = glm::rotate(modelo, transform->rotation_.y, glm::vec3(0.0f, 1.0f, 0.0f));
+			modelo = glm::rotate(modelo, transform.rotation_.z, glm::vec3(0.0f, 0.0f, 1.0f));
+			modelo = glm::scale(modelo, transform->scale_);
+		}
+	}
+
 	TransformComponent::TransformComponent()
 	{
 		mat_ = glm::mat4(1.0f);
