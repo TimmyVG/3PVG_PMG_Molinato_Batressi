@@ -9,16 +9,36 @@ namespace MEW {
   }
 
   void ScriptingSystem::run(const ScriptingComponent& sc){
-    for (int i = 0; i < sc.scripts.size(); i++) {
-      check(sc, luaL_loadstring(sc.s, sc.scripts[i].c_str()));
+    for (const auto& it : sc.scripts) {
+      check(sc, luaL_loadstring(sc.s, it.c_str()));
       check(sc, lua_pcall(sc.s, 0, 0, 0));
       lua_pop(sc.s, lua_gettop(sc.s));
     }
   }
 
-  void ScriptingSystem::add_global(const ScriptingComponent& sc,const std::string& name, int(*function)(lua_State*)){
-    lua_pushcfunction(sc.s, function);
-    lua_setglobal(sc.s, name.c_str());
+  void ScriptingSystem::add_global(const std::vector<std::optional<ScriptingComponent>>& sc,const std::string& name, int(*function)(lua_State*)){
+    auto it = sc.begin();
+    for (;it != sc.end();it++)
+    {
+      if (!it->has_value())continue;
+      auto& sc = it->value();
+      lua_pushcfunction(sc.s, function);
+      lua_setglobal(sc.s, name.c_str());
+    }
+  }
+
+  void ScriptingSystem::operator()(const std::vector<std::optional<ScriptingComponent>>& scl) {
+    auto it = scl.begin();
+    for (;it != scl.end();it++)
+    {
+      if (!it->has_value())continue;
+      auto& sc = it->value();
+      for (const auto& its : sc.scripts) {
+        check(sc, luaL_loadstring(sc.s, its.c_str()));
+        check(sc, lua_pcall(sc.s, 0, 0, 0));
+        lua_pop(sc.s, lua_gettop(sc.s));
+      }
+    }
   }
 
   std::string file_to_string(const std::filesystem::path& path)

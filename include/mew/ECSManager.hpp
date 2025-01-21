@@ -62,17 +62,17 @@ public:
   template<typename T> 
   std::optional<T>& add_component(size_t entity) {
     size_t hash = typeid(T).hash_code();
-    static std::optional<T> component;
+    std::optional<T> component;
     auto it = component_list_map.find(hash);
     if (it != component_list_map.end()) {
       ComponentListDerived<T>* cld = static_cast<ComponentListDerived<T>*>(it->second.get());
       if (cld->component_list_.at(entity).has_value()) {
-        component = cld->component_list_.at(entity);
+        return cld->component_list_.at(entity);
       }
       else {
         cld->component_list_.at(entity) = T{};
 
-        component = cld->component_list_.at(entity);
+        return cld->component_list_.at(entity);
       }
     }
     return component;

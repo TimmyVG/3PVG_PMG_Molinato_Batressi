@@ -13,14 +13,35 @@ namespace MEW {
     ScriptingComponent() : scripts(), state_(luaL_newstate(), &lua_close), s(state_.get()) {
       luaL_openlibs(s);
     };
-    
+
+    ScriptingComponent(ScriptingComponent&& other) noexcept
+      : scripts(std::move(other.scripts)),
+      state_(std::move(other.state_)),
+      s(state_.get()) {
+      other.s = nullptr;
+    }
+
+    ScriptingComponent& operator=(ScriptingComponent&& other) noexcept {
+      if (this != &other) {
+        scripts = std::move(other.scripts);
+        state_ = std::move(other.state_);
+        s = state_.get();
+        other.s = nullptr;
+      }
+      return *this;
+    }
+
+    ScriptingComponent(const ScriptingComponent&) = delete;
+    ScriptingComponent& operator=(const ScriptingComponent&) = delete;
   };
 
   class ScriptingSystem {
   public:
-    void run(const ScriptingComponent& sc);
+    void add_global(const std::vector<std::optional<ScriptingComponent>>& sc, const std::string& name, int(*f)(lua_State*));
+    void operator()(const std::vector<std::optional<ScriptingComponent>>& scl);
+  protected:
     void check(const ScriptingComponent& sc, int error);
-    void add_global(const ScriptingComponent& sc, const std::string& name, int(*f)(lua_State*));
+    void run(const ScriptingComponent& sc);
   };
 
   std::string file_to_string(const std::filesystem::path& path);
