@@ -99,10 +99,9 @@ int WinMain() {
 		if (w.isKeyPressed('Z')) TS.Scale(glm::vec3(1 * static_cast<float>(deltaTime)), &ecs.get_component<MEW::TransformComponent>(entities.at(99)).value());
 		if (w.isKeyPressed('X')) TS.Scale(glm::vec3(-1 * static_cast<float>(deltaTime)), &ecs.get_component<MEW::TransformComponent>(entities.at(99)).value());
 
+		MEW::TransformSystemMat()(ecs.get_vectorComponent<MEW::TransformComponent>());
 		const auto& vecT = ecs.get_vectorComponent<MEW::TransformComponent>();
 		const auto& vecR = ecs.get_vectorComponent<MEW::RenderComponent>();
-
-		MEW::TransformSystemMat()(vecT);
 		MEW::RenderSystemUnlit()(vecT,vecR,RS, shader);
 		bool closePressed = w.closedPressed();
 		bool escPressed = w.isKeyPressed(GLFW_KEY_ESCAPE);

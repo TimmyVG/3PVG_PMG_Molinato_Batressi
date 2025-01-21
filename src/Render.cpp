@@ -51,16 +51,6 @@ namespace MEW {
 			if (!itRender->has_value() || !itTransform->has_value()) continue;
 			auto& render = itRender->value();
 			auto& transform = itTransform->value();
-			//Sacar fuera, calcular la modelo en otra 
-			//glm::mat4 modelo = glm::mat4(1.0f);
-
-			//modelo = glm::translate(modelo, transform.translation_);
-			//modelo = glm::rotate(modelo, transform.rotation_.x, glm::vec3(1.0f, 0.0f, 0.0f));
-			//modelo = glm::rotate(modelo, transform.rotation_.y, glm::vec3(0.0f, 1.0f, 0.0f));
-			//modelo = glm::rotate(modelo, transform.rotation_.z, glm::vec3(0.0f, 0.0f, 1.0f));
-			//modelo = glm::scale(modelo, transform.scale_);
-
-
 
 			shader.setMat4("model", transform.model);
 
@@ -90,6 +80,12 @@ namespace MEW {
 				glBindVertexArray(0);
 			}
 		}
+
+	}
+	void RenderSystemLit::operator()(const std::vector<std::optional<MEW::TransformComponent>>& vecTransform,
+		const std::vector<std::optional<MEW::RenderComponent>>& vecRender,
+		MEW::Shader& shader)
+	{
 
 	}
 }

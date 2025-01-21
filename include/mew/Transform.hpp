@@ -23,7 +23,7 @@ namespace MEW {
 
 	class TransformSystemMat {
 	public:
-		void operator()(const std::vector<std::optional<MEW::TransformComponent>>& vecTransform);
+		void operator()(std::vector<std::optional<MEW::TransformComponent>>& vecTransform);
 	};
 
 

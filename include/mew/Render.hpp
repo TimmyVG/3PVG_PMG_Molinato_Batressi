@@ -32,6 +32,12 @@ namespace MEW {
 			const std::vector<std::optional<MEW::RenderComponent>>& vecRender, MEW::RenderSystem& RS, MEW::Shader& shader);
 	};
 
+	class RenderSystemLit {
+	public:
+		void operator()(const std::vector<std::optional<MEW::TransformComponent>>& vecTransform,
+			const std::vector<std::optional<MEW::RenderComponent>>& vecRender, MEW::Shader& shader);
+	};
+
 	
 
 
