@@ -7,6 +7,7 @@
 #include "glm/mat4x4.hpp"
 #include "Mesh.hpp"
 #include "Model.hpp"
+#include "mew/Light.hpp"
 #include "mew/Object.hpp"
 #include <memory>
 #include "mew/Shader.hpp"
@@ -34,8 +35,10 @@ namespace MEW {
 
 	class RenderSystemLit {
 	public:
-		void operator()(const std::vector<std::optional<MEW::TransformComponent>>& vecTransform,
-			const std::vector<std::optional<MEW::RenderComponent>>& vecRender, MEW::Shader& shader);
+		void operator()(const std::vector<std::optional<MEW::TransformComponent>>& vecTrans,
+			const std::vector<std::optional<MEW::RenderComponent>>& vecRender,
+			const std::vector<std::optional<MEW::LightComponent>>& vecLight,
+			Shader& shader);
 	};
 
 	
