@@ -24,31 +24,26 @@ int main() {
 	const float backgroundcolor[4] = { 0.2f, 0.3f, 0.3f, 1.0f };
 	#pragma endregion
 
-	int nEntity = 13;
+	int nEntity = 5;
 	MEW::ECSManager ecs;
 	std::vector<size_t> entities;
 	MEW::ScriptingSystem SS;
-	MEW::ScriptingComponent SC;
 	std::string script = MEW::file_to_string("../data/scripts/helloworld.lua");
 	std::string script2 = MEW::file_to_string("../data/scripts/holamundo.lua");
 
 	ecs.add_component_type<MEW::ScriptingComponent>();
 	for (int i = 0; i < nEntity; i++) {
 		size_t entity = ecs.create_entity();
-		SC.scripts.push_back(script);
-		SC.scripts.push_back(script2);
-		ecs.add_componentMove<MEW::ScriptingComponent>(entity);
-		MEW::ScriptingComponent* ScriptComp = &ecs.get_component<MEW::ScriptingComponent>(entity).value();
-		*ScriptComp = std::move(SC);
-
-		SS.add_global(ecs.get_component<MEW::ScriptingComponent>(entity).value(), "multiplication", MEW::multiplication);
 		entities.push_back(entity);
+		//MEW::ScriptingComponent tempComponent;
+		//tempComponent.scripts.push_back(script2);
+		ecs.add_component<MEW::ScriptingComponent>(entity);
+		//ecs.get_component<MEW::ScriptingComponent>(entity).value() = std::move(tempComponent);
+		ecs.get_component<MEW::ScriptingComponent>(entity).value().scripts.push_back(script);
 	}
-
-	for (int i = 0; i < nEntity; i++)
-	{
-		SS.run(ecs.get_component<MEW::ScriptingComponent>(entities.at(i)).value());
-	}
+  auto& vecS = ecs.get_vectorComponent<MEW::ScriptingComponent>();
+	SS.add_global(vecS, "multiplication", MEW::multiplication);
+	SS(vecS);
 	while (!done) {
 		w.newframe(backgroundcolor);
 

@@ -67,12 +67,12 @@ public:
     if (it != component_list_map.end()) {
       ComponentListDerived<T>* cld = static_cast<ComponentListDerived<T>*>(it->second.get());
       if (cld->component_list_.at(entity).has_value()) {
-        component = cld->component_list_.at(entity);
+        return cld->component_list_.at(entity);
       }
       else {
         cld->component_list_.at(entity) = T{};
 
-        component = cld->component_list_.at(entity);
+        return cld->component_list_.at(entity);
       }
     }
     return component;
