@@ -34,15 +34,16 @@ namespace MEW {
 		rc->object->model->Draw(*rc->object->shader_);
 	}
 	void RenderSystemUnlit::operator()(const std::vector<std::optional<MEW::TransformComponent>>& vecTransform,
-		const std::vector<std::optional<MEW::RenderComponent>>& vecRender, MEW::RenderSystem& RS, MEW::Shader& shader) {
+		const std::vector<std::optional<MEW::RenderComponent>>& vecRender, MEW::RenderSystem& RS, MEW::Shader& shader,
+		 std::optional<CameraComponent>* camComp) {
 
 		//for (const auto& transform : vecTransform) {
 		//for (std::vector<std::optional<MEW::TransformComponent>>::const_iterator itTransform = vecTransform.begin(); itTransform != vecTransform.end(); itTransform++) {
 		//for (auto itTransform = vecTransform.begin(); itTransform != vecTransform.end(); itTransform++) {
 		shader.UseProgram();
 
-		glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.5f));
-		glm::mat4 projection = glm::perspective(glm::radians(45.0f), 640.0f / 460.0f, 0.1f, 100.0f);
+		glm::mat4 view = camComp->value().viewMatrix;
+		glm::mat4 projection = camComp->value().projectionMatrix;
 		shader.setMat4("view", view);
 		shader.setMat4("projection", projection);
 		auto itRender = vecRender.begin();
