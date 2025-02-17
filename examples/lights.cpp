@@ -13,6 +13,10 @@
 int global = 0;
 
 
+
+
+
+
 int WinMain() {
 	srand(static_cast<unsigned>(time(0)));
 
@@ -23,7 +27,7 @@ int WinMain() {
 
 	ecs.add_component_type<MEW::TransformComponent>();
 	ecs.add_component_type<MEW::RenderComponent>();
-
+	ecs.add_component_type<MEW::LightComponent>();
 
 	MEW::TransformSystem TS;
 	MEW::RenderSystem RS;
@@ -42,8 +46,9 @@ int WinMain() {
 		return -1;
 	}
 	MEW::Window w = maybe_w.value();
-	MEW::Shader shader("../data/example.vs","../data/example.fs");
-	
+	MEW::Shader shader("../data/exampleLight.vs", "../data/exampleLight.fs");
+	MEW::Shader shaderDepth("../data/exampleDepth.vs", "../data/exampleDepth.fs");
+
 	MEW::Object objmiku(&shader);
 	objmiku.model->loadModel("../data/miku/source/Miku.fbx");
 	objmiku.model->loadMeshes();
@@ -53,27 +58,28 @@ int WinMain() {
 	objsilla.model->loadMeshes();
 
 	std::vector<size_t> entities;
-
+	size_t miku = ecs.create_entity();
+	ecs.add_component<MEW::RenderComponent>(miku);
+	ecs.add_component<MEW::TransformComponent>(miku);
+	*ecs.get_component<MEW::RenderComponent>(miku).value().object = objmiku;
 	for (int i = 0; i < 100; ++i) {
 		size_t entity = ecs.create_entity();
 		entities.push_back(entity);
 		ecs.add_component<MEW::RenderComponent>(entity);
 		ecs.add_component<MEW::TransformComponent>(entity);
-		if (i != 99) {
-			MEW::RenderComponent* rc = &ecs.get_component<MEW::RenderComponent>(entity).value();
-			*rc->object = objsilla;
-			TS.Translate(glm::vec3((rand() % 50) - 25.0f, (rand() % 30) - 15.0f, -50.0f), &ecs.get_component<MEW::TransformComponent>(entity).value());
 
-		}
-		else {
-			MEW::RenderComponent* rc = &ecs.get_component<MEW::RenderComponent>(entity).value();
-			*rc->object = objmiku;
-			TS.Translate(glm::vec3(0.00f, 0.00f, -10.0f), &ecs.get_component<MEW::TransformComponent>(entity).value());
+		*ecs.get_component<MEW::RenderComponent>(entity).value().object = objsilla;
 
-		}
+		TS.Translate(glm::vec3((rand() % 50) - 25.0f, (rand() % 30) - 15.0f, -50.0f), &ecs.get_component<MEW::TransformComponent>(entity).value());
 	}
-	
 
+
+
+	//Add lights
+	size_t light = ecs.create_entity();
+	ecs.add_component<MEW::LightComponent>(light);
+	size_t light2 = ecs.create_entity();
+	ecs.add_component<MEW::LightComponent>(light2);
 
 	const float color[3] = { 0.25f,0.3f,0.4f };
 	const float color2[3] = { 0.4f,0.3f,0.25f };
@@ -82,26 +88,38 @@ int WinMain() {
 	bool done = false;
 	const float backgroundcolor[4] = { 0.2f, 0.3f, 0.3f, 1.0f };
 	double deltaTime;
+	auto getTransform = [miku, &ecs]() {return &ecs.get_component<MEW::TransformComponent>(miku).value(); };
+	TS.Translate(glm::vec3(0.00f, 0.00f, -10.0f), getTransform());
+	auto getComponent = [&ecs]<typename T>(size_t entity) -> std::optional<T> {
+		return ecs.get_component<T>(entity).value();
+	};
 	while (!done) {
 		w.newframe(backgroundcolor);
 		deltaTime = w.deltaTime();
 
-		
-		if (w.isKeyPressed('W')) TS.TranslateY(static_cast<float>(deltaTime) * 1,&ecs.get_component<MEW::TransformComponent>(entities.at(99)).value());
-		if (w.isKeyPressed('A')) TS.TranslateX(static_cast<float>(deltaTime) * -1, &ecs.get_component<MEW::TransformComponent>(entities.at(99)).value());
-		if (w.isKeyPressed('S')) TS.TranslateY(static_cast<float>(deltaTime) * -1, &ecs.get_component<MEW::TransformComponent>(entities.at(99)).value());
-		if (w.isKeyPressed('D')) TS.TranslateX(static_cast<float>(deltaTime) * 1, &ecs.get_component<MEW::TransformComponent>(entities.at(99)).value());
-		if (w.isKeyPressed('Q')) TS.RotateX(1 * static_cast<float>(deltaTime), &ecs.get_component<MEW::TransformComponent>(entities.at(99)).value());
-		if (w.isKeyPressed('E')) TS.RotateX(-1 * static_cast<float>(deltaTime), &ecs.get_component<MEW::TransformComponent>(entities.at(99)).value());
-		if (w.isKeyPressed('Z')) TS.Scale(glm::vec3(1 * static_cast<float>(deltaTime)), &ecs.get_component<MEW::TransformComponent>(entities.at(99)).value());
-		if (w.isKeyPressed('X')) TS.Scale(glm::vec3(-1 * static_cast<float>(deltaTime)), &ecs.get_component<MEW::TransformComponent>(entities.at(99)).value());
-		
-		for (int i = 0; i < 100; i++) {
-			if (i != 99)TS.Rotate(glm::vec3(0.001f, 0.003f, 0.008f), &ecs.get_component<MEW::TransformComponent>(entities.at(i)).value());
-
-			RS.Draw(&ecs.get_component<MEW::RenderComponent>(entities.at(i)).value(),
-				&ecs.get_component<MEW::TransformComponent>(entities.at(i)).value());
+		for (auto object : entities) {
+			TS.Rotate(glm::vec3(0.03f, 0.05f, 0.00f) * 1.0f, &ecs.get_component<MEW::TransformComponent>(object).value());
 		}
+
+
+		if (w.isKeyPressed('W')) TS.TranslateY(static_cast<float>(deltaTime) * 1, getTransform());
+		if (w.isKeyPressed('A')) TS.TranslateX(static_cast<float>(deltaTime) * -1, getTransform());
+		if (w.isKeyPressed('S')) TS.TranslateY(static_cast<float>(deltaTime) * -1, getTransform());
+		if (w.isKeyPressed('D')) TS.TranslateX(static_cast<float>(deltaTime) * 1, getTransform());
+		if (w.isKeyPressed('Q')) TS.RotateX(1 * static_cast<float>(deltaTime), getTransform());
+		if (w.isKeyPressed('E')) TS.RotateX(-1 * static_cast<float>(deltaTime), getTransform());
+		if (w.isKeyPressed('Z')) TS.Scale(glm::vec3(1 * static_cast<float>(deltaTime)), getTransform());
+		if (w.isKeyPressed('X')) TS.Scale(glm::vec3(-1 * static_cast<float>(deltaTime)), getTransform());
+
+		MEW::TransformSystemMat()(ecs.get_vectorComponent<MEW::TransformComponent>());
+		const auto& vecT = ecs.get_vectorComponent<MEW::TransformComponent>();
+		const auto& vecR = ecs.get_vectorComponent<MEW::RenderComponent>();
+		auto& vecL = ecs.get_vectorComponent<MEW::LightComponent>();
+
+		MEW::LightSystem()(vecT,vecR,vecL, shaderDepth);
+		MEW::RenderSystemLit()(vecT, vecR, vecL, shader);
+		//MEW::RenderSystemUnlit()(vecT, vecR, RS, shader);
+
 		bool closePressed = w.closedPressed();
 		bool escPressed = w.isKeyPressed(GLFW_KEY_ESCAPE);
 		if (closePressed || escPressed) done = true;

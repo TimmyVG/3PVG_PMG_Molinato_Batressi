@@ -5,13 +5,18 @@
 #include <vector>
 #include <optional>
 
+
 namespace MEW {
 
   struct LightComponent {
     glm::vec3 color;
     glm::vec3 direction;
+    unsigned int depthMap;
+    unsigned int depthFBO;
     LightComponent();
   };
+
+
 
 }
 
