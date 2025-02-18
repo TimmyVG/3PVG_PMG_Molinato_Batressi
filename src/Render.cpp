@@ -32,27 +32,28 @@ namespace MEW {
 
 
 
-    rc->object->shader_->setMat4("model", modelo);
-    rc->object->shader_->setMat4("view", view);
-    rc->object->shader_->setMat4("projection", projection);
-    rc->object->model->Draw(*rc->object->shader_);
-  }
-  void RenderSystemUnlit::operator()(const std::vector<std::optional<MEW::TransformComponent>>& vecTransform,
-    const std::vector<std::optional<MEW::RenderComponent>>& vecRender, MEW::RenderSystem& RS, MEW::Shader& shader) {
+		rc->object->shader_->setMat4("model", modelo);
+		rc->object->shader_->setMat4("view", view);
+		rc->object->shader_->setMat4("projection", projection);
+		rc->object->model->Draw(*rc->object->shader_);
+	}
+	void RenderSystemUnlit::operator()(const std::vector<std::optional<MEW::TransformComponent>>& vecTransform,
+		const std::vector<std::optional<MEW::RenderComponent>>& vecRender, MEW::RenderSystem& RS, MEW::Shader& shader,
+		 std::optional<CameraComponent>* camComp) {
 
 
     shader.UseProgram();
 
-    glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.5f));
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), 640.0f / 460.0f, 0.1f, 100.0f);
-    shader.setMat4("view", view);
-    shader.setMat4("projection", projection);
-    auto itRender = vecRender.begin();
-    auto itTransform = vecTransform.begin();
-    for (; itTransform != vecTransform.end() && itRender != vecRender.end(); itTransform++, itRender++) {
-      if (!itRender->has_value() || !itTransform->has_value()) continue;
-      auto& render = itRender->value();
-      auto& transform = itTransform->value();
+		glm::mat4 view = camComp->value().viewMatrix;
+		glm::mat4 projection = camComp->value().projectionMatrix;
+		shader.setMat4("view", view);
+		shader.setMat4("projection", projection);
+		auto itRender = vecRender.begin();
+		auto itTransform = vecTransform.begin();
+		for (; itTransform != vecTransform.end() && itRender != vecRender.end(); itTransform++, itRender++) {
+			if (!itRender->has_value() || !itTransform->has_value()) continue;
+			auto& render = itRender->value();
+			auto& transform = itTransform->value();
 
       shader.setMat4("model", transform.model);
 

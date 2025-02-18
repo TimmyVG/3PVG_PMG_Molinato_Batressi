@@ -10,6 +10,7 @@
 #include "mew/Light.hpp"
 #include "mew/Object.hpp"
 #include <memory>
+#include "mew/Camera.hpp"
 #include "mew/Shader.hpp"
 
 
@@ -30,7 +31,8 @@ namespace MEW {
 	class RenderSystemUnlit {
 	public:
 		void operator()(const std::vector<std::optional<MEW::TransformComponent>>& vecTransform,
-			const std::vector<std::optional<MEW::RenderComponent>>& vecRender, MEW::RenderSystem& RS, MEW::Shader& shader);
+			const std::vector<std::optional<MEW::RenderComponent>>& vecRender, MEW::RenderSystem& RS, MEW::Shader& shader,
+			std::optional<CameraComponent>* camComp);
 	};
 
 	class RenderSystemLit {
