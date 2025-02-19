@@ -4,6 +4,7 @@
 #include "mew/Render.hpp"
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
+#include <iostream>
 
 #define SHADOW_WIDTH (1024)
 #define SHADOW_HEIGHT (1024)
@@ -17,6 +18,9 @@ namespace MEW {
     depthMap = -1;
     depthFBO = -1;
 
+    near_plane = 0.1f;
+    far_plane = 100.0f;
+    lightProjection = glm::ortho(-40.0f, 40.0f, -40.0f, 40.0f, near_plane, far_plane);
 
     glGenFramebuffers(1, &depthFBO);
     // Initialize depth texture if not set
@@ -42,7 +46,9 @@ namespace MEW {
 
 
     glClear(GL_DEPTH_BUFFER_BIT);
-
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+      std::cerr << "Framebuffer is not complete!" << std::endl;
+    }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
   }

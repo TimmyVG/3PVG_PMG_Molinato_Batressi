@@ -195,7 +195,7 @@ project "Motor"
         files "examples/ecs.cpp"
 
     project"Lights"
-        kind "WindowedApp"
+        kind "ConsoleApp"
         language "C++"
         targetdir "build/%{prj.name}/%{cfg.buildcfg}"
         includedirs "include"

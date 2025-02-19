@@ -60,8 +60,18 @@ MEW::Shader::Shader(const char* vertexPath, const char* fragmentPath)
 	glAttachShader(shaderProgram_, fragmentShader_);
 	glLinkProgram(shaderProgram_);
 
+	GLint success;
+	GLchar infoLog[512];
+
+	glGetProgramiv(shaderProgram_, GL_LINK_STATUS, &success);
+	if (!success) {
+		glGetProgramInfoLog(shaderProgram_, 512, NULL, infoLog);
+		std::cout << "ERROR: Falló la vinculación del Shader Program:\n" << infoLog << std::endl;
+	}
+
 	glDeleteShader(vertexShader_);
 	glDeleteShader(fragmentShader_);
+
 }
 
 void MEW::Shader::Draw(unsigned int vao)
