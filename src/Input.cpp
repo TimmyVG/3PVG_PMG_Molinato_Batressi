@@ -23,6 +23,21 @@ namespace MEW {
 		return mousePos;
 	}
 
+	glm::vec2 Input::getMouseDelta()
+	{
+		return mousePos-lastMousePos;
+	}
+
+	int Input::GetWidth()
+	{
+		return width_;
+	}
+
+	int Input::GetHeight()
+	{
+		return height_;
+	}
+
 	void Input::key_callback(int key, int scancode, int action, int mods)
 	{
 		switch (action)
@@ -78,6 +93,7 @@ namespace MEW {
 		glfwSetKeyCallback(window, global_key_callback);
 		glfwSetCursorPosCallback(window, global_cursor_position_callback);
 		glfwSetMouseButtonCallback(window, global_mouse_button_callback);
+		glfwGetWindowSize(window_, &width_, &height_);
 		mousePos = { 0.0,0.0 };
 	}
 

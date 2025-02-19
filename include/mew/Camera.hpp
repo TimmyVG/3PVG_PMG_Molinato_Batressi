@@ -3,6 +3,8 @@
 #include <optional>
 #include <vector>
 #include "mew/Transform.hpp"
+#include "mew/ECSManager.hpp"
+#include "mew/Input.hpp"
 namespace MEW {
   typedef enum {
     CAMERA_ORTHOGRAPHIC,
@@ -25,11 +27,50 @@ namespace MEW {
     void operator()(const std::vector<std::optional<MEW::TransformComponent>>& vecTransform,
       std::vector<std::optional<CameraComponent>>& camComp);
   };
+  
 
   class CameraSystemView {
   public:
     void operator()(const std::vector<std::optional<MEW::TransformComponent>>& vecTransform,
       std::vector<std::optional<CameraComponent>>& camComp);
+  };
+
+  enum Actions
+  {
+    CAMERA_LEFT,
+    CAMERA_RIGHT,
+    CAMERA_FORWARD,
+    CAMERA_BACK,
+    CAMERA_ROTATE
+  };
+
+  class Camera
+  {
+  public:
+    Camera(MEW::ECSManager& ecs,
+            float aspectRatio,
+            CameraType type = CAMERA_PERSPECTIVE, 
+            float fov = 50.0f, 
+            float nearPlane = 0.01f, 
+            float farPlane = 1000.0f, 
+            float orthosize = 10.0f);
+    ~Camera() {};
+    void update(float deltaTime, Input& inputManager);
+    CameraComponent* cameraComp;
+    TransformComponent* transformComp;
+  private:
+    glm::vec3 forward_;
+    glm::vec3 up_;
+    glm::vec3 right_;
+
+    float moveSpeed_ = 5.0f;
+    float lookSensitivity_ = 100.0f;
+    float yaw_ = -90.0f;
+    float pitch_ = 0.0f;
+
+    void calculateProjection();
+    void calculateView();
+    size_t entity_;
   };
 }
 #endif

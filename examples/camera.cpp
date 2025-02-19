@@ -9,6 +9,7 @@
 #include <cstdlib>  // Para rand() y srand()
 #include <ctime> 
 #include <mew/Camera.hpp>
+#include "mew/Input.hpp"
 
 int global = 0;
 
@@ -19,7 +20,7 @@ int global = 0;
 
 int main() {
 	srand(static_cast<unsigned>(time(0)));
-
+	
 	MEW::ECSManager ecs;
 
 
@@ -29,9 +30,7 @@ int main() {
 	ecs.add_component_type<MEW::RenderComponent>();
 	ecs.add_component_type<MEW::CameraComponent>();
 
-	MEW::TransformSystem TS;
 	MEW::RenderSystem RS;
-	
 
 
 	auto maybe_ws = MEW::WindowSystem::make();
@@ -46,6 +45,17 @@ int main() {
 		return -1;
 	}
 	MEW::Window w = maybe_w.value();
+
+	MEW::Input input(w.window_);
+	input.assign(MEW::Input::Buttons::KEY_A, MEW::CAMERA_LEFT);
+	input.assign(MEW::Input::Buttons::KEY_LEFT, MEW::CAMERA_LEFT);
+	input.assign(MEW::Input::Buttons::KEY_D, MEW::CAMERA_RIGHT);
+	input.assign(MEW::Input::Buttons::KEY_RIGHT, MEW::CAMERA_RIGHT);
+	input.assign(MEW::Input::Buttons::KEY_W, MEW::CAMERA_FORWARD);
+	input.assign(MEW::Input::Buttons::KEY_UP, MEW::CAMERA_FORWARD);
+	input.assign(MEW::Input::Buttons::KEY_S, MEW::CAMERA_BACK);
+	input.assign(MEW::Input::Buttons::KEY_DOWN, MEW::CAMERA_BACK);
+	input.assign(MEW::Input::Buttons::MOUSE_2, MEW::CAMERA_ROTATE);
 	MEW::Shader shader("../data/example.vs","../data/example.fs");
 	
 	MEW::Object objmiku(&shader);
@@ -65,17 +75,19 @@ int main() {
 		ecs.add_component<MEW::TransformComponent>(entity);
 	
 		*ecs.get_component<MEW::RenderComponent>(entity).value().object = objsilla;
-		TS.Scale(glm::vec3(1), &ecs.get_component<MEW::TransformComponent>(entity).value());
-		TS.Translate(glm::vec3((rand() % 50) - 25.0f, (rand() % 30) - 15.0f, -40.0f), &ecs.get_component<MEW::TransformComponent>(entity).value());
+		ecs.get_component<MEW::TransformComponent>(entity).value().scale_ = glm::vec3(1);
+		ecs.get_component<MEW::TransformComponent>(entity).value().translation_ = glm::vec3((rand() % 50) - 25.0f, (rand() % 30) - 15.0f, -40.0f);
 	}
 	size_t miku = ecs.create_entity();
 	ecs.add_component<MEW::RenderComponent>(miku);
 	ecs.add_component<MEW::TransformComponent>(miku);
 	*ecs.get_component<MEW::RenderComponent>(miku).value().object = objmiku;
 
-	MEW::CameraSystemProjection csp;
-	MEW::CameraSystemView csv;
+	MEW::Camera cameraTest(ecs,640/460);
 
+	//MEW::CameraSystemProjection csp;
+	//MEW::CameraSystemView csv;
+	/*
 	size_t camera = ecs.create_entity();
 	ecs.add_component<MEW::CameraComponent>(camera);
 	ecs.add_component<MEW::TransformComponent>(camera);
@@ -87,42 +99,32 @@ int main() {
 	ecs.get_component<MEW::TransformComponent>(camera)->translation_ = glm::vec3(0, 0, 5);
 	csp(ecs.get_vectorComponent<MEW::TransformComponent>(),ecs.get_vectorComponent<MEW::CameraComponent>());
 	csv(ecs.get_vectorComponent<MEW::TransformComponent>(), ecs.get_vectorComponent<MEW::CameraComponent>());
+	*/
 	const float color[3] = { 0.25f,0.3f,0.4f };
 	const float color2[3] = { 0.4f,0.3f,0.25f };
 
 	bool done = false;
 	const float backgroundcolor[4] = { 0.2f, 0.3f, 0.3f, 1.0f };
 	double deltaTime;
-	auto getTransform = [camera, &ecs]() {return &ecs.get_component<MEW::TransformComponent>(camera).value(); };
+	//auto getTransform = [cameraTest, &ecs]() {return &ecs.get_component<MEW::TransformComponent>(camera).value(); };
 	auto getComponent = [&ecs]<typename T>(size_t entity) -> std::optional<T> {
 		return ecs.get_component<T>(entity).value();
 	};
 	while (!done) {
+		input.newframe();
 		w.newframe(backgroundcolor);
 		deltaTime = w.deltaTime();
-
+		cameraTest.update(deltaTime, input);
 		
 		
-		if (w.isKeyPressed('W')) TS.TranslateZ(static_cast<float>(deltaTime) * 5,getTransform());
-		if (w.isKeyPressed('A')) TS.TranslateX(static_cast<float>(deltaTime) * -5, getTransform());
-		if (w.isKeyPressed('S')) TS.TranslateZ(static_cast<float>(deltaTime) * -5, getTransform());
-		if (w.isKeyPressed('D')) TS.TranslateX(static_cast<float>(deltaTime) * 5, getTransform());
-		if (w.isKeyPressed('Q')) TS.RotateX(5 * static_cast<float>(deltaTime), getTransform());
-		if (w.isKeyPressed('E')) TS.RotateX(-5 * static_cast<float>(deltaTime), getTransform());
-		if (w.isKeyPressed('Z')) TS.Scale(glm::vec3(1 * static_cast<float>(deltaTime)), getTransform());
-		if (w.isKeyPressed('X')) TS.Scale(glm::vec3(-1 * static_cast<float>(deltaTime)), getTransform());
-		printf("Camera position X: %f, Y: %f, Z %f\n",getTransform()->translation_.x, 
-			getTransform()->translation_.y, 
-			getTransform()->translation_.z);
 		MEW::TransformSystemMat()(ecs.get_vectorComponent<MEW::TransformComponent>());
-		csp(ecs.get_vectorComponent<MEW::TransformComponent>(), ecs.get_vectorComponent<MEW::CameraComponent>());
-		csv(ecs.get_vectorComponent<MEW::TransformComponent>(), ecs.get_vectorComponent<MEW::CameraComponent>());
 		const auto& vecT = ecs.get_vectorComponent<MEW::TransformComponent>();
 		const auto& vecR = ecs.get_vectorComponent<MEW::RenderComponent>();
 		const auto& vecL = ecs.get_vectorComponent<MEW::LightComponent>();
-		ecs.get_component<MEW::CameraComponent>(camera);
-		MEW::RenderSystemUnlit()(vecT,vecR,RS, shader, &ecs.get_component<MEW::CameraComponent>(camera));
-		
+		MEW::RenderSystemUnlit()(vecT,vecR,RS, shader,cameraTest.cameraComp);
+		printf("MouseDelta | x = %f y = %f\n", input.getMouseDelta().x, input.getMouseDelta().y);
+		printf("MousePosition | x = %f y = %f\n", input.getMousePos().x, input.getMousePos().y);
+		printf("LastMousePosition | x = %f y = %f\n",input.lastMousePos.x,input.lastMousePos.y);
 		bool closePressed = w.closedPressed();
 		bool escPressed = w.isKeyPressed(GLFW_KEY_ESCAPE);
 		if (closePressed || escPressed) done = true;

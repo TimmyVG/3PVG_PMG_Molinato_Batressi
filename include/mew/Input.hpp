@@ -58,6 +58,10 @@ namespace MEW {
 
       void assign(Buttons k, int action);
       glm::vec2 getMousePos();
+      glm::vec2 getMouseDelta();
+      glm::vec2 lastMousePos;
+      int GetWidth();
+      int GetHeight();
     private:
       void key_callback(int key, int scancode, int action, int mods);
       void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
@@ -68,6 +72,7 @@ namespace MEW {
       std::map<Buttons, bool> last_frame_key_map;
       std::map<Buttons, bool> changed_key_map;
 
+      int width_, height_;
       GLFWwindow* window_;
       static std::unordered_map<GLFWwindow*, Input*> input_map;
       static void global_key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
