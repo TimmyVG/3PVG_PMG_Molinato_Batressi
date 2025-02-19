@@ -35,15 +35,15 @@ namespace MEW {
 	}
 	void RenderSystemUnlit::operator()(const std::vector<std::optional<MEW::TransformComponent>>& vecTransform,
 		const std::vector<std::optional<MEW::RenderComponent>>& vecRender, MEW::RenderSystem& RS, MEW::Shader& shader,
-		 std::optional<CameraComponent>* camComp) {
+		 CameraComponent* camComp) {
 
 		//for (const auto& transform : vecTransform) {
 		//for (std::vector<std::optional<MEW::TransformComponent>>::const_iterator itTransform = vecTransform.begin(); itTransform != vecTransform.end(); itTransform++) {
 		//for (auto itTransform = vecTransform.begin(); itTransform != vecTransform.end(); itTransform++) {
 		shader.UseProgram();
 
-		glm::mat4 view = camComp->value().viewMatrix;
-		glm::mat4 projection = camComp->value().projectionMatrix;
+		glm::mat4 view = camComp->viewMatrix;
+		glm::mat4 projection = camComp->projectionMatrix;
 		shader.setMat4("view", view);
 		shader.setMat4("projection", projection);
 		auto itRender = vecRender.begin();
