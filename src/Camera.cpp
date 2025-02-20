@@ -56,9 +56,9 @@ void MEW::CameraSystemProjection::operator()(const std::vector<std::optional<MEW
     }
   }
   
-  MEW::Camera::Camera(MEW::ECSManager& ecsman, float aspectRatio, CameraType type, float fov, float nearPlane, float farPlane, float orthosize)
+  MEW::Camera::Camera(MEW::ECSManager& ecsMan, float aspectRatio, CameraType type, float fov, float nearPlane, float farPlane, float orthosize)
   {
-    *ecs = ecsman;
+    ecs = &ecsMan;
     entity_ = ecs->create_entity();
     ecs->add_component<CameraComponent>(entity_);
     ecs->add_component<TransformComponent>(entity_);
@@ -76,7 +76,8 @@ void MEW::CameraSystemProjection::operator()(const std::vector<std::optional<MEW
 
   void MEW::Camera::update(float deltaTime, Input& inputManager)
   {
-    TransformComponent* transformComp = &ecs->get_component<TransformComponent>(entity_).value();
+      CameraComponent* cameraComp = &ecs->get_component<CameraComponent>(entity_).value();
+      TransformComponent* transformComp = &ecs->get_component<TransformComponent>(entity_).value();
       glm::vec3 moveDirection(0.0f);
 
       if (inputManager.isKeyPressed(CAMERA_FORWARD)) moveDirection += forward_;
@@ -87,13 +88,15 @@ void MEW::CameraSystemProjection::operator()(const std::vector<std::optional<MEW
       //if (inputManager.isKeyPressed(KEY_E)) moveDirection += up_;
 
       if (glm::length(moveDirection) > 0) moveDirection = glm::normalize(moveDirection) * moveSpeed_ * deltaTime;
-      if (inputManager.isKeyDown(CAMERA_ROTATE)) inputManager.lastMousePos = inputManager.getMousePos();
+      if (inputManager.isKeyDown(CAMERA_ROTATE)) {
+        glfwSetInputMode(inputManager.window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        inputManager.lastMousePos = inputManager.getMousePos();
+      }
       glm::vec2 current_pos = inputManager.getMousePos();
       glm::vec2 delta_mouse = current_pos - inputManager.lastMousePos;
       inputManager.lastMousePos = current_pos;
 
       if (inputManager.isKeyPressed(CAMERA_ROTATE)) {
-        glfwSetInputMode(inputManager.window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         transformComp->rotation_.x -= delta_mouse.y / inputManager.GetHeight() * lookSensitivity_;  // Pitch (invert Y)
         transformComp->rotation_.y += delta_mouse.x / inputManager.GetWidth() * lookSensitivity_;   // Yaw
 

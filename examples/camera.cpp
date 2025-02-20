@@ -121,7 +121,7 @@ int main() {
 		const auto& vecT = ecs.get_vectorComponent<MEW::TransformComponent>();
 		const auto& vecR = ecs.get_vectorComponent<MEW::RenderComponent>();
 		const auto& vecL = ecs.get_vectorComponent<MEW::LightComponent>();
-		MEW::RenderSystemUnlit()(vecT,vecR,RS, shader,cameraTest.cameraComp);
+		MEW::RenderSystemUnlit()(vecT, vecR, RS, shader, &ecs.get_component<MEW::CameraComponent>(cameraTest.entity_).value());
 		printf("MouseDelta | x = %f y = %f\n", input.getMouseDelta().x, input.getMouseDelta().y);
 		printf("MousePosition | x = %f y = %f\n", input.getMousePos().x, input.getMousePos().y);
 		printf("LastMousePosition | x = %f y = %f\n",input.lastMousePos.x,input.lastMousePos.y);
