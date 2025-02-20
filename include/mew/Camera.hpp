@@ -55,9 +55,11 @@ namespace MEW {
             float farPlane = 1000.0f, 
             float orthosize = 10.0f);
     ~Camera() {};
+
     void update(float deltaTime, Input& inputManager);
     CameraComponent* cameraComp;
     TransformComponent* transformComp;
+    size_t entity_;
   private:
     glm::vec3 forward_;
     glm::vec3 up_;
@@ -70,7 +72,6 @@ namespace MEW {
 
     void calculateProjection();
     void calculateView();
-    size_t entity_;
   };
 }
 #endif

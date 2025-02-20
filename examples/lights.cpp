@@ -9,6 +9,7 @@
 #include <cstdlib>  // Para rand() y srand()
 #include <ctime> 
 #include "mew/Camera.hpp"
+#include <stb_image.h>
 
 int global = 0;
 
@@ -30,7 +31,7 @@ int main() {
 	ecs.add_component_type<MEW::LightComponent>();
 	ecs.add_component_type<MEW::CameraComponent>();
 
-	MEW::TransformSystem TS;
+
 	MEW::RenderSystem RS;
 
 
@@ -49,6 +50,8 @@ int main() {
 	MEW::Window w = maybe_w.value();
 	MEW::Shader shader("../data/exampleLight.vs", "../data/exampleLight.fs");
 	MEW::Shader shaderDepth("../data/exampleDepth.vs", "../data/exampleDepth.fs");
+
+
 
 	MEW::Object objmiku(&shader);
 	objmiku.model->loadModel("../data/sponza.obj");
@@ -71,22 +74,14 @@ int main() {
 
 		*ecs.get_component<MEW::RenderComponent>(entity).value().object = objsilla;
 
-		TS.Translate(glm::vec3((rand() % 50) - 25.0f, (rand() % 30) - 15.0f, -50.0f), &ecs.get_component<MEW::TransformComponent>(entity).value());
+		//TS.Translate(glm::vec3((rand() % 50) - 25.0f, (rand() % 30) - 15.0f, -50.0f), &ecs.get_component<MEW::TransformComponent>(entity).value());
 	}
 
 
 	MEW::CameraSystemProjection csp;
 	MEW::CameraSystemView csv;
 
-	size_t camera = ecs.create_entity();
-	ecs.add_component<MEW::CameraComponent>(camera);
-	ecs.add_component<MEW::TransformComponent>(camera);
-	ecs.get_component<MEW::CameraComponent>(camera).value().aspectRatio = 640 / 460;
-	ecs.get_component<MEW::CameraComponent>(camera).value().fov = 60.0f;
-	ecs.get_component<MEW::CameraComponent>(camera).value().nearPlane = 1.0f;
-	ecs.get_component<MEW::CameraComponent>(camera).value().farPlane = 100.0f;
-	ecs.get_component<MEW::CameraComponent>(camera).value().type = MEW::CameraType::CAMERA_PERSPECTIVE;
-	ecs.get_component<MEW::TransformComponent>(camera)->translation_ = glm::vec3(0, 0, 5);
+
 	csp(ecs.get_vectorComponent<MEW::TransformComponent>(), ecs.get_vectorComponent<MEW::CameraComponent>());
 	csv(ecs.get_vectorComponent<MEW::TransformComponent>(), ecs.get_vectorComponent<MEW::CameraComponent>());
 
@@ -108,8 +103,19 @@ int main() {
 
 	ecs.get_component<MEW::TransformComponent>(light).value().translation_.z = 5.0f;
 
+	MEW::Input input(w.window_);
+	input.assign(MEW::Input::Buttons::KEY_A, MEW::CAMERA_LEFT);
+	input.assign(MEW::Input::Buttons::KEY_LEFT, MEW::CAMERA_LEFT);
+	input.assign(MEW::Input::Buttons::KEY_D, MEW::CAMERA_RIGHT);
+	input.assign(MEW::Input::Buttons::KEY_RIGHT, MEW::CAMERA_RIGHT);
+	input.assign(MEW::Input::Buttons::KEY_W, MEW::CAMERA_FORWARD);
+	input.assign(MEW::Input::Buttons::KEY_UP, MEW::CAMERA_FORWARD);
+	input.assign(MEW::Input::Buttons::KEY_S, MEW::CAMERA_BACK);
+	input.assign(MEW::Input::Buttons::KEY_DOWN, MEW::CAMERA_BACK);
+	input.assign(MEW::Input::Buttons::MOUSE_2, MEW::CAMERA_ROTATE);
+	MEW::Camera cameraTest(ecs, 640 / 460);
 
-	auto getTransform = [camera, &ecs]() {return &ecs.get_component<MEW::TransformComponent>(camera).value(); };
+	auto getTransform = [cameraTest, &ecs]() {return &ecs.get_component<MEW::TransformComponent>(cameraTest.entity_).value(); };
 	auto getComponent = [&ecs]<typename T>(size_t entity) -> std::optional<T> {
 		return ecs.get_component<T>(entity).value();
 	};
@@ -117,20 +123,13 @@ int main() {
 	while (!done) {
 		w.newframe(backgroundcolor);
 		deltaTime = w.deltaTime();
-
+		cameraTest.update(deltaTime, input);
 		for (auto object : entities) {
 		//	TS.Rotate(glm::vec3(0.03f, 0.05f, 0.00f) * 0.025f, &ecs.get_component<MEW::TransformComponent>(object).value());
 		}
 
 
-		if (w.isKeyPressed('W')) TS.TranslateZ(static_cast<float>(deltaTime) * 5, getTransform());
-		if (w.isKeyPressed('A')) TS.TranslateX(static_cast<float>(deltaTime) * -5, getTransform());
-		if (w.isKeyPressed('S')) TS.TranslateZ(static_cast<float>(deltaTime) * -5, getTransform());
-		if (w.isKeyPressed('D')) TS.TranslateX(static_cast<float>(deltaTime) * 5, getTransform());
-		if (w.isKeyPressed('Q')) TS.RotateX(5 * static_cast<float>(deltaTime), getTransform());
-		if (w.isKeyPressed('E')) TS.RotateX(-5 * static_cast<float>(deltaTime), getTransform());
-		if (w.isKeyPressed('Z')) TS.Scale(glm::vec3(1 * static_cast<float>(deltaTime)), getTransform());
-		if (w.isKeyPressed('X')) TS.Scale(glm::vec3(-1 * static_cast<float>(deltaTime)), getTransform());
+
 
 		csp(ecs.get_vectorComponent<MEW::TransformComponent>(), ecs.get_vectorComponent<MEW::CameraComponent>());
 		csv(ecs.get_vectorComponent<MEW::TransformComponent>(), ecs.get_vectorComponent<MEW::CameraComponent>());
@@ -138,8 +137,8 @@ int main() {
 		MEW::TransformSystemMat()(ecs.get_vectorComponent<MEW::TransformComponent>());
 		const auto& vecT = ecs.get_vectorComponent<MEW::TransformComponent>();
 		const auto& vecR = ecs.get_vectorComponent<MEW::RenderComponent>();
-		auto vecC = &ecs.get_component<MEW::CameraComponent>(camera);
-		auto vecCT = &ecs.get_component<MEW::TransformComponent>(camera);
+		auto vecC = &ecs.get_component<MEW::CameraComponent>(cameraTest.entity_);
+		auto vecCT = &ecs.get_component<MEW::TransformComponent>(cameraTest.entity_);
 		auto& vecL = ecs.get_vectorComponent<MEW::LightComponent>();
 
 		MEW::LightSystem()(vecT,vecR,vecL, shaderDepth, vecC);
