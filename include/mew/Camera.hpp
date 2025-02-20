@@ -22,19 +22,6 @@ namespace MEW {
     glm::mat4 projectionMatrix; 
   } CameraComponent;
 
-  class CameraSystemProjection {
-  public:
-    void operator()(const std::vector<std::optional<MEW::TransformComponent>>& vecTransform,
-      std::vector<std::optional<CameraComponent>>& camComp);
-  };
-  
-
-  class CameraSystemView {
-  public:
-    void operator()(const std::vector<std::optional<MEW::TransformComponent>>& vecTransform,
-      std::vector<std::optional<CameraComponent>>& camComp);
-  };
-
   enum Actions
   {
     CAMERA_LEFT,
