@@ -56,13 +56,14 @@ void MEW::CameraSystemProjection::operator()(const std::vector<std::optional<MEW
     }
   }
   
-  MEW::Camera::Camera(MEW::ECSManager& ecs, float aspectRatio, CameraType type, float fov, float nearPlane, float farPlane, float orthosize)
+  MEW::Camera::Camera(MEW::ECSManager& ecsman, float aspectRatio, CameraType type, float fov, float nearPlane, float farPlane, float orthosize)
   {
-    entity_ = ecs.create_entity();
-    ecs.add_component<CameraComponent>(entity_);
-    ecs.add_component<TransformComponent>(entity_);
-    cameraComp = &ecs.get_component<CameraComponent>(entity_).value();
-    transformComp = &ecs.get_component<TransformComponent>(entity_).value();
+    *ecs = ecsman;
+    entity_ = ecs->create_entity();
+    ecs->add_component<CameraComponent>(entity_);
+    ecs->add_component<TransformComponent>(entity_);
+    CameraComponent* cameraComp = &ecs->get_component<CameraComponent>(entity_).value();
+    TransformComponent* transformComp = &ecs->get_component<TransformComponent>(entity_).value();
     cameraComp->aspectRatio = aspectRatio;
     cameraComp->farPlane = farPlane;
     cameraComp->fov = fov;
@@ -75,6 +76,7 @@ void MEW::CameraSystemProjection::operator()(const std::vector<std::optional<MEW
 
   void MEW::Camera::update(float deltaTime, Input& inputManager)
   {
+    TransformComponent* transformComp = &ecs->get_component<TransformComponent>(entity_).value();
       glm::vec3 moveDirection(0.0f);
 
       if (inputManager.isKeyPressed(CAMERA_FORWARD)) moveDirection += forward_;
@@ -118,6 +120,7 @@ void MEW::CameraSystemProjection::operator()(const std::vector<std::optional<MEW
 
   void MEW::Camera::calculateProjection()
   {
+    CameraComponent* cameraComp = &ecs->get_component<CameraComponent>(entity_).value();
     if (cameraComp->type == CAMERA_PERSPECTIVE) {
       cameraComp->projectionMatrix = glm::perspective(
         glm::radians(cameraComp->fov), cameraComp->aspectRatio, cameraComp->nearPlane, cameraComp->farPlane
@@ -134,6 +137,8 @@ void MEW::CameraSystemProjection::operator()(const std::vector<std::optional<MEW
 
   void MEW::Camera::calculateView()
   {
+    CameraComponent* cameraComp = &ecs->get_component<CameraComponent>(entity_).value();
+    TransformComponent* transformComp = &ecs->get_component<TransformComponent>(entity_).value();
     glm::vec3 position = transformComp->translation_;
 
     forward_ = glm::normalize(glm::vec3(
