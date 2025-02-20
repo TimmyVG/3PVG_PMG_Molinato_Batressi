@@ -55,6 +55,7 @@ namespace MEW {
             float farPlane = 1000.0f, 
             float orthosize = 10.0f);
     ~Camera() {};
+
     void update(float deltaTime, Input& inputManager);
     void adjustSpeed(float offset);
     //CameraComponent* cameraComp;

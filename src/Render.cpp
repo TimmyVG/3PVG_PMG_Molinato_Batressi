@@ -174,6 +174,12 @@ namespace MEW {
             shader.setInt((name + number).c_str(), j);
             glBindTexture(GL_TEXTURE_2D, mesh.textures_[j].id);
           }
+
+          if (mesh.textures_.size() == 0) {
+            glBindTexture(GL_TEXTURE_2D, 0);
+
+          }
+
           glActiveTexture(GL_TEXTURE0);
 
           glDisable(GL_CULL_FACE);
