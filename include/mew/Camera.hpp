@@ -57,13 +57,13 @@ namespace MEW {
     ~Camera() {};
 
     void update(float deltaTime, Input& inputManager);
-    CameraComponent* cameraComp;
-    TransformComponent* transformComp;
+    void adjustSpeed(float offset);
     size_t entity_;
   private:
     glm::vec3 forward_;
     glm::vec3 up_;
     glm::vec3 right_;
+    ECSManager* ecs;
 
     float moveSpeed_ = 5.0f;
     float lookSensitivity_ = 100.0f;
