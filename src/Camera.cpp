@@ -91,6 +91,7 @@ void MEW::CameraSystemProjection::operator()(const std::vector<std::optional<MEW
       inputManager.lastMousePos = current_pos;
 
       if (inputManager.isKeyPressed(CAMERA_ROTATE)) {
+        glfwSetInputMode(inputManager.window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         transformComp->rotation_.x -= delta_mouse.y / inputManager.GetHeight() * lookSensitivity_;  // Pitch (invert Y)
         transformComp->rotation_.y += delta_mouse.x / inputManager.GetWidth() * lookSensitivity_;   // Yaw
 
@@ -98,11 +99,21 @@ void MEW::CameraSystemProjection::operator()(const std::vector<std::optional<MEW
         transformComp->rotation_.x = glm::clamp(transformComp->rotation_.x, -89.0f, 89.0f);
       }
 
+      if (inputManager.getScrollOffset()!=0)
+      {
+        moveSpeed_ = std::max(0.1f, moveSpeed_ + inputManager.getScrollOffset());
+        inputManager.SetScrollOffset(0.0f);
+      }
       transformComp->translation_ += moveDirection;
 
      
-     
+      if (inputManager.isKeyUp(CAMERA_ROTATE))glfwSetInputMode(inputManager.window_, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
       calculateView();
+  }
+
+  void MEW::Camera::adjustSpeed(float offset)
+  {
+    moveSpeed_ = std::max(0.1f, moveSpeed_ + offset);
   }
 
   void MEW::Camera::calculateProjection()

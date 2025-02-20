@@ -18,6 +18,15 @@ namespace MEW {
 		}
 	}
 
+	void Input::SetMainCamera(Camera* cameratoset)
+	{
+		mainCamera_ = cameratoset;
+	}
+
+	void Input::SetScrollOffset(float newoffset) {
+		scrollOffset_ = newoffset;
+	}
+
 	glm::vec2 Input::getMousePos()
 	{
 		return mousePos;
@@ -26,6 +35,11 @@ namespace MEW {
 	glm::vec2 Input::getMouseDelta()
 	{
 		return mousePos-lastMousePos;
+	}
+
+	float Input::getScrollOffset()
+	{
+		return scrollOffset_;
 	}
 
 	int Input::GetWidth()
@@ -66,6 +80,11 @@ namespace MEW {
 		}
 	}
 
+	void Input::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+	{
+		scrollOffset_ = static_cast<float>(yoffset);
+	}
+	 
 
 	void Input::global_key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
@@ -76,6 +95,11 @@ namespace MEW {
 	{
 		mousePos.x = static_cast<float>(xpos);
 		mousePos.y = static_cast<float>(ypos);
+	}
+
+	void Input::global_scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+	{
+		input_map[window]->scroll_callback(window, xoffset, yoffset);
 	}
 
 	void Input::global_cursor_position_callback(GLFWwindow* window, double xpos, double ypos) 
@@ -93,6 +117,7 @@ namespace MEW {
 		glfwSetKeyCallback(window, global_key_callback);
 		glfwSetCursorPosCallback(window, global_cursor_position_callback);
 		glfwSetMouseButtonCallback(window, global_mouse_button_callback);
+		glfwSetScrollCallback(window, global_scroll_callback);
 		glfwGetWindowSize(window_, &width_, &height_);
 		mousePos = { 0.0,0.0 };
 	}

@@ -6,6 +6,7 @@
 #include <vector>
 #include <glm/vec2.hpp>
 namespace MEW {
+  class Camera;
   class Input{
     public:
       enum Buttons {
@@ -57,28 +58,34 @@ namespace MEW {
       bool isKeyReleased(int action);
 
       void assign(Buttons k, int action);
+      void SetMainCamera(Camera* cameratoset);
+      void SetScrollOffset(float newoffset);
       glm::vec2 getMousePos();
       glm::vec2 getMouseDelta();
       glm::vec2 lastMousePos;
+      float getScrollOffset();
       int GetWidth();
       int GetHeight();
+      GLFWwindow* window_;
     private:
       void key_callback(int key, int scancode, int action, int mods);
       void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
       void mouse_button_callback(int button, int action, int mods);
+      void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
       glm::vec2 mousePos;
+      float scrollOffset_;
       std::map<int, std::list<Buttons>> action_map;
       std::map<Buttons, bool> current_frame_key_map;
       std::map<Buttons, bool> last_frame_key_map;
       std::map<Buttons, bool> changed_key_map;
 
       int width_, height_;
-      GLFWwindow* window_;
       static std::unordered_map<GLFWwindow*, Input*> input_map;
       static void global_key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
       static void global_cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
       static void global_mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
-
+      static void global_scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+      Camera* mainCamera_;
       GLFWgamepadstate state_;
   };
 
