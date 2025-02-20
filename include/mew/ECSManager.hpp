@@ -45,7 +45,7 @@ public:
     map_type::iterator it = component_list_map.find(key);
     if (it != component_list_map.end()) it->second.get()->grow(static_cast<int>(last_entity));
   }
-  
+
   template<typename T>
   std::optional<T>& get_component(size_t entity) {
     static std::optional<T> nullopt_val;
@@ -76,6 +76,22 @@ public:
       }
     }
     return component;
+  }
+
+  template<typename T, typename... Args> std::optional<T>& add_component(size_t entity, Args&&... args) {
+    size_t key = typeid(T).hash_code();
+    map_type::iterator it = component_list_map.find(key);
+    if (it == component_list_map.end()) {
+      static std::optional<T> null_opt = std::nullopt;
+      return null_opt;
+    }
+
+    assert((entity < it->second->size()) && "ADD_COMPONENT::entity has an index greater than my map size.");
+
+    ComponentListDerived<T>* cld = static_cast<ComponentListDerived<T>*>(it->second.get());
+    cld->component_list_[entity].emplace(std::forward<Args>(args)...);
+
+    return cld->component_list_[entity];
   }
 
   template<typename T>

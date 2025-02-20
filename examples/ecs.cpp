@@ -108,7 +108,7 @@ int WinMain() {
 		MEW::TransformSystemMat()(ecs.get_vectorComponent<MEW::TransformComponent>());
 		const auto& vecT = ecs.get_vectorComponent<MEW::TransformComponent>();
 		const auto& vecR = ecs.get_vectorComponent<MEW::RenderComponent>();
-		const auto& vecL = ecs.get_vectorComponent<MEW::LightComponent>();
+		auto& vecL = ecs.get_vectorComponent<MEW::LightComponent>();
 		MEW::RenderSystemUnlit()(vecT,vecR,RS, shader);
 		
 		bool closePressed = w.closedPressed();
