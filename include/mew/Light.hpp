@@ -3,6 +3,7 @@
 
 #include "glm/vec3.hpp"
 #include "glm/mat4x4.hpp"
+#include "mew/ECSManager.hpp"
 #include <vector>
 #include <optional>
 
@@ -20,8 +21,24 @@ namespace MEW {
     LightComponent();
   };
 
+  enum KTypeLight
+  {
+    None,
+    Directional,
+    Point,
+    Spot,
+    Ambient
+  };
 
-
+  class Light {
+  public:
+    size_t entity;
+    Light(ECSManager &ecs);
+  protected:
+    KTypeLight type;
+  private:
+    ECSManager* ecs;
+  };
 }
 
 #endif //__LIGHT__

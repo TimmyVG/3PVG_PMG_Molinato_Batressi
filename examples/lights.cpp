@@ -86,9 +86,8 @@ int main() {
 	csv(ecs.get_vectorComponent<MEW::TransformComponent>(), ecs.get_vectorComponent<MEW::CameraComponent>());
 
 	//Add lights
-	size_t light = ecs.create_entity();
-	ecs.add_component<MEW::LightComponent>(light);
-	ecs.add_component<MEW::TransformComponent>(light);
+	MEW::DirectionalLight directional(ecs);
+
 	//size_t light2 = ecs.create_entity();
 	//ecs.add_component<MEW::LightComponent>(light2);
 	//ecs.add_component<MEW::TransformComponent>(light2);
@@ -101,7 +100,6 @@ int main() {
 	const float backgroundcolor[4] = { 0.2f, 0.3f, 0.3f, 1.0f };
 	double deltaTime;
 
-	ecs.get_component<MEW::TransformComponent>(light).value().translation_.z = 5.0f;
 
 	MEW::Input input(w.window_);
 	input.assign(MEW::Input::Buttons::KEY_A, MEW::CAMERA_LEFT);
@@ -113,7 +111,8 @@ int main() {
 	input.assign(MEW::Input::Buttons::KEY_S, MEW::CAMERA_BACK);
 	input.assign(MEW::Input::Buttons::KEY_DOWN, MEW::CAMERA_BACK);
 	input.assign(MEW::Input::Buttons::MOUSE_2, MEW::CAMERA_ROTATE);
-	MEW::Camera cameraTest(ecs, 640 / 460);
+	MEW::Camera cameraTest(ecs, 640 / 460,MEW::CameraType::CAMERA_PERSPECTIVE,
+												50.0f,0.01f,5000.0f,10.0f);
 
 	auto getTransform = [cameraTest, &ecs]() {return &ecs.get_component<MEW::TransformComponent>(cameraTest.entity_).value(); };
 	auto getComponent = [&ecs]<typename T>(size_t entity) -> std::optional<T> {
@@ -121,8 +120,10 @@ int main() {
 	};
 
 	while (!done) {
+		input.newframe();
 		w.newframe(backgroundcolor);
 		deltaTime = w.deltaTime();
+
 		cameraTest.update(deltaTime, input);
 		for (auto object : entities) {
 		//	TS.Rotate(glm::vec3(0.03f, 0.05f, 0.00f) * 0.025f, &ecs.get_component<MEW::TransformComponent>(object).value());

@@ -53,5 +53,36 @@ namespace MEW {
 
   }
 
+  //Light
+  Light::Light(MEW::ECSManager& ecs)
+  {
+    this->ecs = &ecs;
+
+    type = KTypeLight::None;
+    entity = ecs.create_entity();
+    ecs.add_component<MEW::LightComponent>(entity);
+    ecs.add_component<MEW::TransformComponent>(entity);
+  }
+
+  //Directional
+  DirectionalLight::DirectionalLight(ECSManager& ecs) : Light(ecs)
+  {
+    type = KTypeLight::Directional;
+  }
+
+  PointLight::PointLight(ECSManager& ecs) : Light(ecs)
+  {
+    type = KTypeLight::Point;
+  }
+
+  SpotLight::SpotLight(ECSManager& ecs) : Light(ecs)
+  {
+    type = KTypeLight::Spot;
+  }
+
+  Ambient::Ambient(ECSManager& ecs) : Light(ecs)
+  {
+    type = KTypeLight::Ambient;
+  }
 
 }
