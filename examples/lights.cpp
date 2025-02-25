@@ -11,6 +11,7 @@
 #include "mew/Camera.hpp"
 #include <stb_image.h>
 #include "mew/Inspector.hpp"
+#include "imgui_impl_glfw.h"
 
 int global = 0;
 
@@ -115,7 +116,7 @@ int main() {
 	auto getComponent = [&ecs]<typename T>(size_t entity) -> std::optional<T> {
 		return ecs.get_component<T>(entity).value();
 	};
-	MEW::Inspector inspector;
+	MEW::Inspector inspector(w);
 
 	while (!done) {
 		w.newframe(backgroundcolor);

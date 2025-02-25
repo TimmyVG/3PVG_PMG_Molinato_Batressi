@@ -2,6 +2,7 @@
 #define __INSPECTOR_H__ 1
 
 #include "ImgUtil.h"
+#include "mew/Window.hpp"
 
 namespace MEW {
   class Inspector {
@@ -13,12 +14,14 @@ namespace MEW {
     void WindowEntities();
     void HideAll();
     void ShowAll();
-
+    void Render();
+   // ImGuiIO& io;
   protected:
-
     template <typename T>
     void OpenWindow();
 
+  private:
+    //ImFontAtlas *atlas;
   };
 }
 #endif

@@ -2,6 +2,8 @@
 #define __WINDOW_H__ 1
 #include <optional>
 #include <string>
+//#include "imgui_impl_glfw.h"
+//#include "imgui_impl_opengl3.h"
 #include "GLFW/glfw3.h"
 
 
@@ -50,6 +52,8 @@ namespace MEW {
 			auto w = glfwCreateWindow(x, y, name.c_str(), nullptr, nullptr);
 			if (nullptr == w) return std::nullopt;
 			glfwMakeContextCurrent(w);
+			//ImGui_ImplOpenGL3_Init();
+			//ImGui_ImplGlfw_InitForOpenGL(w,);
 			return Window{ w };
 		}
 

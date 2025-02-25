@@ -10,3 +10,12 @@ imgui/1.91.4
 [generators]
 premake
 [options]
+
+
+[imports]
+./res/bindings, imgui_impl_glfw.cpp -> ../bindings
+./res/bindings, imgui_impl_opengl3.cpp -> ../bindings
+./res/bindings, imgui_impl_glfw.h -> ../bindings_include
+./res/bindings, imgui_impl_opengl3.h -> ../bindings_include
+./res/bindings, imgui_impl_opengl3_loader.h -> ../bindings_include
+
