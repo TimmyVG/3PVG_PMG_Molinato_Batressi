@@ -90,7 +90,7 @@ project "Motor"
     targetname "mew"
     targetdir "build/%{cfg.buildcfg}"
     
-    includedirs "include"
+    includedirs { "include", "build/deps/bindings_include" }
     conan_config_lib()
     pchheader "stdafx.hpp"
     pchsource "src/stdafx.cpp"
@@ -101,6 +101,7 @@ project "Motor"
         "src/build/conanfile.txt",
         "src/build/conan.lua",
         "src/*.cpp", "include/mew/*.hpp",
+        "build/deps/bindings/*.cpp","build/deps/bindings_include/*.h"
         }
 
     project"Window"

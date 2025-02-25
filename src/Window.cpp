@@ -1,5 +1,6 @@
 #include "stdafx.hpp"
 #include "mew/Window.hpp"
+
 #include "GLFW/glfw3.h"
 #include <cctype>
 
@@ -34,6 +35,7 @@ namespace MEW {
 	void Window::newframe(const float* color) 
 	{
 		currentFrame_ = glfwGetTime();
+		//ImGui_ImplOpenGL3_NewFrame();
 		deltaTime_ = currentFrame_ - lastFrame_;
 		lastFrame_ = currentFrame_;
 		glClearColor(color[0], color[1], color[2], color[3]);

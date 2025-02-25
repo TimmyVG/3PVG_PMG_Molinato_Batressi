@@ -10,6 +10,8 @@
 #include <ctime> 
 #include "mew/Camera.hpp"
 #include <stb_image.h>
+#include "mew/Inspector.hpp"
+#include "imgui_impl_glfw.h"
 
 int global = 0;
 
@@ -78,12 +80,7 @@ int main() {
 	}
 
 
-	MEW::CameraSystemProjection csp;
-	MEW::CameraSystemView csv;
 
-
-	csp(ecs.get_vectorComponent<MEW::TransformComponent>(), ecs.get_vectorComponent<MEW::CameraComponent>());
-	csv(ecs.get_vectorComponent<MEW::TransformComponent>(), ecs.get_vectorComponent<MEW::CameraComponent>());
 
 	//Add lights
 	MEW::DirectionalLight directional(ecs);
@@ -118,6 +115,7 @@ int main() {
 	auto getComponent = [&ecs]<typename T>(size_t entity) -> std::optional<T> {
 		return ecs.get_component<T>(entity).value();
 	};
+	MEW::Inspector inspector(w);
 
 	while (!done) {
 		input.newframe();
@@ -125,6 +123,9 @@ int main() {
 		deltaTime = w.deltaTime();
 
 		cameraTest.update(deltaTime, input);
+
+		inspector.WindowEntities();
+
 		for (auto object : entities) {
 		//	TS.Rotate(glm::vec3(0.03f, 0.05f, 0.00f) * 0.025f, &ecs.get_component<MEW::TransformComponent>(object).value());
 		}
@@ -132,8 +133,7 @@ int main() {
 
 
 
-		csp(ecs.get_vectorComponent<MEW::TransformComponent>(), ecs.get_vectorComponent<MEW::CameraComponent>());
-		csv(ecs.get_vectorComponent<MEW::TransformComponent>(), ecs.get_vectorComponent<MEW::CameraComponent>());
+
 
 		MEW::TransformSystemMat()(ecs.get_vectorComponent<MEW::TransformComponent>());
 		const auto& vecT = ecs.get_vectorComponent<MEW::TransformComponent>();
