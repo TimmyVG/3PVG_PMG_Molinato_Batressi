@@ -7,7 +7,6 @@
 #include <vector>
 #include <optional>
 
-
 namespace MEW {
 
   struct LightComponent {
@@ -38,6 +37,29 @@ namespace MEW {
     KTypeLight type;
   private:
     ECSManager* ecs;
+  };
+
+  class DirectionalLight : Light {
+  public:
+    DirectionalLight(ECSManager& ecs);
+  };
+
+  class PointLight : Light {
+  public:
+
+    PointLight(ECSManager& ecs);
+  };
+
+  class SpotLight : Light {
+  public:
+
+    SpotLight(ECSManager& ecs);
+  };
+
+  class Ambient : Light {
+  public:
+
+    Ambient(ECSManager& ecs);
   };
 }
 

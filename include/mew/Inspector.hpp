@@ -1,13 +1,15 @@
 #ifndef __INSPECTOR_H__
 #define __INSPECTOR_H__ 1
 
-#include "ImgUtil.h"
+#include "imgui.h"
 #include "mew/Window.hpp"
+//#include "imgui_impl_glfw.h"
+//#include "imgui_impl_glfw.h"
 
 namespace MEW {
   class Inspector {
   public:
-    Inspector();
+    Inspector(MEW::Window);
 
 
 
@@ -15,7 +17,7 @@ namespace MEW {
     void HideAll();
     void ShowAll();
     void Render();
-   // ImGuiIO& io;
+    ImGuiIO& io;
   protected:
     template <typename T>
     void OpenWindow();

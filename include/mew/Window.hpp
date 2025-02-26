@@ -2,8 +2,7 @@
 #define __WINDOW_H__ 1
 #include <optional>
 #include <string>
-//#include "imgui_impl_glfw.h"
-//#include "imgui_impl_opengl3.h"
+#include "gl/glew.h"
 #include "GLFW/glfw3.h"
 
 
@@ -12,22 +11,8 @@ namespace MEW {
 	class WindowSystem {
 	public:
 		bool isDeletable_;
-		static std::optional<WindowSystem> make() {
-
-			if (!glfwInit()) {
-				return std::nullopt;
-			}
-
-			return WindowSystem{ };
-		};
-		~WindowSystem(){ 
-			if (isDeletable_) {
-				glfwTerminate();
-			}
-			else {
-				isDeletable_ = true;
-			}
-		}
+		static std::optional<WindowSystem> make();
+		~WindowSystem();
 		WindowSystem(WindowSystem&) {
 			isDeletable_ = true;
 		}
@@ -48,14 +33,7 @@ namespace MEW {
 	public:
 		GLFWwindow* window_;
 		bool isDeletable_;
-		static std::optional<Window> make(int x, int y, std::string& name, WindowSystem&) {
-			auto w = glfwCreateWindow(x, y, name.c_str(), nullptr, nullptr);
-			if (nullptr == w) return std::nullopt;
-			glfwMakeContextCurrent(w);
-			//ImGui_ImplOpenGL3_Init();
-			//ImGui_ImplGlfw_InitForOpenGL(w,);
-			return Window{ w };
-		}
+		static std::optional<Window> make(int x, int y, std::string& name, WindowSystem&);
 
 		bool isOpen();
 		bool isKeyPressed(char key);
