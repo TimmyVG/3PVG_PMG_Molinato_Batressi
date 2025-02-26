@@ -17,11 +17,11 @@ namespace MEW {
     void HideAll();
     void ShowAll();
     void Render();
-    ImGuiIO& io;
+
   protected:
     template <typename T>
     void OpenWindow();
-
+    ImGuiContext* context;
   private:
     //ImFontAtlas *atlas;
   };

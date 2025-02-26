@@ -142,9 +142,11 @@ namespace MEW {
 	}
 
 	std::optional<Window> Window::make(int x, int y, std::string& name, WindowSystem&) {
-		auto w = glfwCreateWindow(x, y, name.c_str(), nullptr, nullptr);
+		GLFWwindow* w = glfwCreateWindow(x, y, name.c_str(), nullptr, nullptr);
 		if (nullptr == w) return std::nullopt;
 		glfwMakeContextCurrent(w);
+
+
 
 
 		return Window{ w };

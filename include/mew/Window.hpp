@@ -57,7 +57,7 @@ namespace MEW {
 		double lastFrame_;
 		int window_width;
 		int window_height;
-		Window(GLFWwindow* w) : window_{ w } ,isDeletable_(false) {  }
+		Window(GLFWwindow* w) : window_{ w } ,isDeletable_(false), window_width(0),window_height(0) {  }
 		Window& operator=(const Window&) = delete;
 		Window& operator=( Window&&) = delete; //ASIGNACION DE MOVIMIENTO
 	};
