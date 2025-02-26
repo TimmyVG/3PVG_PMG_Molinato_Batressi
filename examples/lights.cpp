@@ -1,4 +1,3 @@
-#include "GLFW/glfw3.h"
 #include "mew/Window.hpp"
 #include "mew/Shader.hpp"
 #include "mew/Object.hpp"
@@ -11,7 +10,7 @@
 #include "mew/Camera.hpp"
 #include <stb_image.h>
 #include "mew/Inspector.hpp"
-#include "imgui_impl_glfw.h"
+
 
 int global = 0;
 
@@ -120,11 +119,11 @@ int main() {
 	while (!done) {
 		input.newframe();
 		w.newframe(backgroundcolor);
+		inspector.WindowEntities();
 		deltaTime = w.deltaTime();
 
 		cameraTest.update(deltaTime, input);
 
-		inspector.WindowEntities();
 
 		for (auto object : entities) {
 		//	TS.Rotate(glm::vec3(0.03f, 0.05f, 0.00f) * 0.025f, &ecs.get_component<MEW::TransformComponent>(object).value());
@@ -142,6 +141,7 @@ int main() {
 		auto vecCT = &ecs.get_component<MEW::TransformComponent>(cameraTest.entity_);
 		auto& vecL = ecs.get_vectorComponent<MEW::LightComponent>();
 
+		inspector.Render();
 		MEW::LightSystem()(vecT,vecR,vecL, shaderDepth, vecC);
 		MEW::RenderSystemLit()(vecT, vecR, vecL, shader, vecC, vecCT);
 		//MEW::RenderSystemUnlit()(vecT, vecR, RS, shader);

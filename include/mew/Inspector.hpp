@@ -18,6 +18,7 @@ namespace MEW {
     void ShowAll();
     void Render();
 
+    ~Inspector();
   protected:
     template <typename T>
     void OpenWindow();

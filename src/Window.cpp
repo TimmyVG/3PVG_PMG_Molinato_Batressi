@@ -85,7 +85,9 @@ namespace MEW {
 	void Window::newframe(const float* color) 
 	{
 		currentFrame_ = glfwGetTime();
-		//ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
 		deltaTime_ = currentFrame_ - lastFrame_;
 		lastFrame_ = currentFrame_;
 		glClearColor(color[0], color[1], color[2], color[3]);
