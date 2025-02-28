@@ -7,8 +7,8 @@
 
 #define SHADOW_WIDTH (1024)
 #define SHADOW_HEIGHT (1024)
-#define CAMERA_WIDTH (640)
-#define cAMERA_HEIGHT (460)
+#define CAMERA_WIDTH (1280)
+#define cAMERA_HEIGHT (720)
 namespace MEW {
   void GLAPIENTRY
     MessageCallback(GLenum source,
@@ -205,7 +205,7 @@ namespace MEW {
     glCullFace(GL_FRONT);
 
     glEnable(GL_DEBUG_OUTPUT);
-    glDebugMessageCallback(MessageCallback, 0);
+    //glDebugMessageCallback(MessageCallback, 0);
     auto itLight = vecLight.begin();
     auto itLightT = vecTrans.begin();
     for (; itLight != vecLight.end() && itLightT != vecTrans.end(); itLight++, itLightT++) {

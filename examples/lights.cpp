@@ -10,6 +10,7 @@
 #include "mew/Camera.hpp"
 #include <stb_image.h>
 #include "mew/Inspector.hpp"
+#include <mew/Identity.hpp>
 
 
 int global = 0;
@@ -31,7 +32,7 @@ int main() {
 	ecs.add_component_type<MEW::RenderComponent>();
 	ecs.add_component_type<MEW::LightComponent>();
 	ecs.add_component_type<MEW::CameraComponent>();
-
+	ecs.add_component_type<MEW::IdentityComponent>();
 
 	MEW::RenderSystem RS;
 
@@ -44,7 +45,7 @@ int main() {
 	}
 	auto ws = maybe_ws.value();
 	std::string title = "Window Example Triangle";
-	auto maybe_w = MEW::Window::make(640, 460, title, ws);
+	auto maybe_w = MEW::Window::make(1280, 720, title, ws);
 	if (!maybe_w) {
 		return -1;
 	}
@@ -55,7 +56,7 @@ int main() {
 
 
 	MEW::Object objmiku(&shader);
-	objmiku.model->loadModel("../data/sponza.obj");
+	objmiku.model->loadModel("../data/sponza/sponza.obj");
 	objmiku.model->loadMeshes();
 
 	MEW::Object objsilla(&shader);
@@ -63,7 +64,7 @@ int main() {
 	objsilla.model->loadMeshes();
 
 	std::vector<size_t> entities;
-	size_t miku = ecs.create_entity();
+	size_t miku = ecs.create_entity("miku");
 	ecs.add_component<MEW::RenderComponent>(miku);
 	ecs.add_component<MEW::TransformComponent>(miku);
 	*ecs.get_component<MEW::RenderComponent>(miku).value().object = objmiku;
@@ -107,32 +108,24 @@ int main() {
 	input.assign(MEW::Input::Buttons::KEY_S, MEW::CAMERA_BACK);
 	input.assign(MEW::Input::Buttons::KEY_DOWN, MEW::CAMERA_BACK);
 	input.assign(MEW::Input::Buttons::MOUSE_2, MEW::CAMERA_ROTATE);
-	MEW::Camera cameraTest(ecs, 640 / 460,MEW::CameraType::CAMERA_PERSPECTIVE,
+	MEW::Camera cameraTest(ecs, 1280 / 720,MEW::CameraType::CAMERA_PERSPECTIVE,
 												50.0f,0.01f,5000.0f,10.0f);
 
 	auto getTransform = [cameraTest, &ecs]() {return &ecs.get_component<MEW::TransformComponent>(cameraTest.entity_).value(); };
 	auto getComponent = [&ecs]<typename T>(size_t entity) -> std::optional<T> {
 		return ecs.get_component<T>(entity).value();
 	};
-	MEW::Inspector inspector(w);
 
+	MEW::Inspector inspector(w);
+	inspector.LinkECS(ecs);
 	while (!done) {
 		input.newframe();
 		w.newframe(backgroundcolor);
-		inspector.WindowEntities();
+		inspector.NewFrame();
+
 		deltaTime = w.deltaTime();
 
 		cameraTest.update(deltaTime, input);
-
-
-		for (auto object : entities) {
-		//	TS.Rotate(glm::vec3(0.03f, 0.05f, 0.00f) * 0.025f, &ecs.get_component<MEW::TransformComponent>(object).value());
-		}
-
-
-
-
-
 
 		MEW::TransformSystemMat()(ecs.get_vectorComponent<MEW::TransformComponent>());
 		const auto& vecT = ecs.get_vectorComponent<MEW::TransformComponent>();
@@ -141,7 +134,8 @@ int main() {
 		auto vecCT = &ecs.get_component<MEW::TransformComponent>(cameraTest.entity_);
 		auto& vecL = ecs.get_vectorComponent<MEW::LightComponent>();
 
-		inspector.Render();
+		inspector.WindowEntities();
+
 		MEW::LightSystem()(vecT,vecR,vecL, shaderDepth, vecC);
 		MEW::RenderSystemLit()(vecT, vecR, vecL, shader, vecC, vecCT);
 		//MEW::RenderSystemUnlit()(vecT, vecR, RS, shader);
@@ -149,6 +143,12 @@ int main() {
 		printf(" pos camera : %f  / %f   / %f\n", vecCT->value().translation_.x,
 					vecCT->value().translation_.y,
 					vecCT->value().translation_.z );
+
+		
+
+
+
+		inspector.Render();
 
 		bool closePressed = w.closedPressed();
 		bool escPressed = w.isKeyPressed(GLFW_KEY_ESCAPE);

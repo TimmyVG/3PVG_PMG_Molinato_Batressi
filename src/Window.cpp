@@ -23,7 +23,7 @@ namespace MEW {
 		if (!glfwInit()) {
 			return std::nullopt;
 		}
-
+		/*
 		// Decide GL+GLSL versions
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 		// GL ES 2.0 + GLSL 100 (WebGL 1.0)
@@ -52,7 +52,7 @@ namespace MEW {
 		//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
 		//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
 #endif
-
+		*/
 		return WindowSystem{ };
 	}
 
@@ -85,13 +85,12 @@ namespace MEW {
 	void Window::newframe(const float* color) 
 	{
 		currentFrame_ = glfwGetTime();
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
+
 		deltaTime_ = currentFrame_ - lastFrame_;
 		lastFrame_ = currentFrame_;
 		glClearColor(color[0], color[1], color[2], color[3]);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	}
 
 	double Window::deltaTime() {

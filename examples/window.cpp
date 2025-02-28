@@ -1,7 +1,8 @@
 #include "mew/Window.hpp"
 #include "GLFW/glfw3.h"
+#include <mew/Inspector.hpp>
 
-int WinMain() {
+int main() {
 	auto maybe_ws = MEW::WindowSystem::make();
 	if (!maybe_ws)
 	{
@@ -17,8 +18,17 @@ int WinMain() {
 
 	bool done = false;
 	const float backgroundcolor[4] = { 0.2f, 0.3f, 0.3f, 1.0f };
+
+	MEW::Inspector inspector(w);
 	while (!done) {
 		w.newframe(backgroundcolor);
+		inspector.NewFrame();
+		bool show_demo_window = true;
+		if (show_demo_window)
+			ImGui::ShowDemoWindow(&show_demo_window);
+		inspector.Render();
+		
+
 
 
 		bool closePressed = w.closedPressed();

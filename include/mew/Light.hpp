@@ -14,7 +14,7 @@ namespace MEW {
     glm::vec3 direction;
     unsigned int depthMap;
     unsigned int depthFBO;
-    float near_plane = 1.0f, far_plane = 7.5;
+    float near_plane = -80.0f, far_plane = 40.0f;
     glm::mat4 lightProjection;
 
     LightComponent();

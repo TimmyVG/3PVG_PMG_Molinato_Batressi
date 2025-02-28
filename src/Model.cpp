@@ -6,6 +6,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
+#include <unordered_map>
+
 namespace MEW {
   Model::Model()
   {
@@ -37,11 +39,18 @@ namespace MEW {
   }
   void Model::loadMeshes()
   {
+    std::unordered_map<std::string, int> map;
     for (unsigned int i = 0; i < meshes.size(); i++)
     {
       for (unsigned int j = 0; j < meshes[i].textures_.size(); j++)
       {
-        meshes[i].textures_[j].id = TextureFromFile(meshes[i].textures_[j].path.c_str(), directory, false);
+        if (map.find(meshes[i].textures_[j].path) == map.end()) {
+          meshes[i].textures_[j].id = TextureFromFile(meshes[i].textures_[j].path.c_str(), directory, false);
+          map[meshes[i].textures_[j].path] = meshes[i].textures_[j].id;
+        }
+        else {
+          meshes[i].textures_[j].id = map[meshes[i].textures_[j].path];
+        }
       
       }
       meshes[i].setupMesh();
@@ -152,8 +161,9 @@ namespace MEW {
         filename = directory + '/' + filename;
         bool isPng = (filename.ends_with(".png"));
         bool isJPG = (filename.ends_with(".jpg"));
+        bool isTGA = (filename.ends_with(".tga"));
         bool exist = std::filesystem::exists(filename);
-        if (!exist || !( isPng || isJPG)){
+        if (!exist || !( isPng || isJPG || isTGA)){
           textureTypeWithExtension = typeName + ".png";
         }
        // texture.id = TextureFromFile(textureTypeWithExtension.c_str(), directory, false);

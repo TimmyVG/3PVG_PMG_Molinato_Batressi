@@ -3,15 +3,19 @@
 
 #include "imgui.h"
 #include "mew/Window.hpp"
+#include "ECSManager.hpp"
 //#include "imgui_impl_glfw.h"
 //#include "imgui_impl_glfw.h"
 
 namespace MEW {
   class Inspector {
   public:
-    Inspector(MEW::Window);
+    Inspector(MEW::Window &w);
 
+    //Need it to call WindowEntities
+    void LinkECS(MEW::ECSManager &ecs);
 
+    void NewFrame();
 
     void WindowEntities();
     void HideAll();
@@ -20,10 +24,14 @@ namespace MEW {
 
     ~Inspector();
   protected:
-    template <typename T>
-    void OpenWindow();
-    ImGuiContext* context;
+    size_t EntityInspector;
+
+    template<typename T>
+    void TextComponent();
+    bool InspectorEntitiesVisible;
+    bool InspectorEntityVisible;
   private:
+    ECSManager* ecs;
     //ImFontAtlas *atlas;
   };
 }

@@ -1,6 +1,11 @@
 #include <optional>
 #include <unordered_map>
 #include <memory>
+#include <cassert>
+#include <any>
+#include <type_traits>
+#include "mew/Identity.hpp"
+#include <typeindex>
 #ifndef __ECSManager_H__
 #define __ECSManager_H__ 1
 
@@ -10,6 +15,8 @@ namespace MEW {
 struct ComponentListBase {
   virtual ~ComponentListBase() = default;
   virtual void grow(int optUntil = 0) = 0;
+  virtual size_t size() = 0;
+
 };
 
 template<typename T>
@@ -20,23 +27,39 @@ struct ComponentListDerived : ComponentListBase {
      do {
        component_list_.resize(component_list_.size() + 1);
      } while (optUntil != 0 && component_list_.size() < optUntil);
+   }
 
-  }
-  
+   size_t size() override {
+     return component_list_.size();
+   } 
 };
 
 class ECSManager {
 public:
   ECSManager() {
     last_entity = 0;
+    add_component_type<MEW::IdentityComponent>();
   }
   size_t create_entity() {
     size_t entity_id = last_entity++;
     for (auto& it: component_list_map) {
       it.second.get()->grow();
     }
+    std::string defaultname = "Empty_";
+    add_component<MEW::IdentityComponent>(entity_id, defaultname + std::to_string(entity_id));
     return entity_id;
   }
+
+  size_t create_entity(std::string nameEntity) {
+    size_t entity_id = last_entity++;
+    for (auto& it : component_list_map) {
+      it.second.get()->grow();
+    }
+
+    add_component<MEW::IdentityComponent>(entity_id, nameEntity);
+    return entity_id;
+  }
+
 
   template<typename T>
   void add_component_type() {
@@ -127,7 +150,7 @@ public:
     }
     return component;
   }
-    
+ 
 private:
   typedef std::unordered_map<size_t, std::unique_ptr<ComponentListBase>> map_type;
   map_type component_list_map;
