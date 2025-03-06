@@ -9,6 +9,7 @@
 namespace MEW {
 
 
+
   Inspector::Inspector(MEW::Window &w) {
     ecs = nullptr;
     EntityInspector = -1;
@@ -30,6 +31,15 @@ namespace MEW {
     ImGui::StyleColorsDark();
   }
 
+  void Inspector::update(float deltaTime, Input& inputManager)
+  {
+    if (inputManager.isKeyPressed(ActionsInspector::CLICK_OUT)) {
+      if (!ImGui::IsAnyItemActive() && !ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow)) {
+        ImGui::SetKeyboardFocusHere(-1);
+      }
+    }
+  }
+
   void Inspector::LinkECS(MEW::ECSManager &ecs)
   {
     this->ecs = &ecs;
@@ -41,6 +51,8 @@ namespace MEW {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
   }
+
+
 
   void Inspector::WindowEntities(){
 
@@ -77,18 +89,26 @@ namespace MEW {
         auto transform = &ecs->get_component<MEW::TransformComponent>(EntityInspector);
         if (transform->has_value()) {
           ImGui::Text("Transform");
-          if(ImGui::InputFloat3("Position", &transform->value().translation_.x));
-          if(ImGui::InputFloat3("Rotation", &transform->value().rotation_.x));
+          if (ImGui::InputFloat3("Position", &transform->value().translation_.x)) {}
+          if (ImGui::InputFloat3("Rotation", &transform->value().rotation_.x)) {}
+          if (ImGui::InputFloat3("Scale", &transform->value().scale_.x)) {}
         }
 
         auto light = &ecs->get_component<MEW::LightComponent>(EntityInspector);
+        auto lightT = &ecs->get_component<MEW::TransformComponent>(EntityInspector);
 
         if (light->has_value()) {
           ImGui::Text("Light");
 
           // Luego pasas el arreglo a ImGui::ColorPicker3
-          if (ImGui::ColorPicker3("Color", &light->value().color.x));
-          if (ImGui::InputFloat3("Direction", &light->value().direction.x));
+          if (ImGui::ColorPicker3("Color", &light->value().diffuse_color.x)) {}
+          if (ImGui::InputFloat("Diffuse Strenght", &light->value().diffuse_strenght)) {}
+
+          if (ImGui::ColorPicker3("Color Spec", &light->value().spec_color.x)) {}
+
+          if (ImGui::InputFloat("Spec Strenght", &light->value().spec_strength)) {}
+          if (ImGui::InputFloat("Shin", &light->value().shinisses)) {}
+      
         }
          
 

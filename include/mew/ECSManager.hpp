@@ -15,6 +15,7 @@ namespace MEW {
 struct ComponentListBase {
   virtual ~ComponentListBase() = default;
   virtual void grow(int optUntil = 0) = 0;
+  virtual void Paint(size_t entidad) = 0;
   virtual size_t size() = 0;
 
 };
@@ -27,6 +28,12 @@ struct ComponentListDerived : ComponentListBase {
      do {
        component_list_.resize(component_list_.size() + 1);
      } while (optUntil != 0 && component_list_.size() < optUntil);
+   }
+
+   void Paint(size_t entidad) override {
+
+    // Paint(component_list_[entidad]);
+
    }
 
    size_t size() override {

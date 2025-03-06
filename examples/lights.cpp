@@ -67,6 +67,7 @@ int main() {
 	size_t miku = ecs.create_entity("miku");
 	ecs.add_component<MEW::RenderComponent>(miku);
 	ecs.add_component<MEW::TransformComponent>(miku);
+	ecs.get_component<MEW::TransformComponent>(miku).value().scale_ = glm::vec3(0.1f);
 	*ecs.get_component<MEW::RenderComponent>(miku).value().object = objmiku;
 	for (int i = 0; i < 4; ++i) {
 		size_t entity = ecs.create_entity();
@@ -83,7 +84,7 @@ int main() {
 
 
 	//Add lights
-	MEW::DirectionalLight directional(ecs);
+	MEW::Light directional(ecs, MEW::KTypeLight::Directional);
 
 	//size_t light2 = ecs.create_entity();
 	//ecs.add_component<MEW::LightComponent>(light2);
@@ -108,8 +109,9 @@ int main() {
 	input.assign(MEW::Input::Buttons::KEY_S, MEW::CAMERA_BACK);
 	input.assign(MEW::Input::Buttons::KEY_DOWN, MEW::CAMERA_BACK);
 	input.assign(MEW::Input::Buttons::MOUSE_2, MEW::CAMERA_ROTATE);
+	input.assign(MEW::Input::Buttons::MOUSE_2, MEW::ActionsInspector::CLICK_OUT);
 	MEW::Camera cameraTest(ecs, 1280 / 720,MEW::CameraType::CAMERA_PERSPECTIVE,
-												50.0f,0.01f,5000.0f,10.0f);
+												50.0f,0.1f,5000.0f,10.0f);
 
 	auto getTransform = [cameraTest, &ecs]() {return &ecs.get_component<MEW::TransformComponent>(cameraTest.entity_).value(); };
 	auto getComponent = [&ecs]<typename T>(size_t entity) -> std::optional<T> {
@@ -126,18 +128,20 @@ int main() {
 		deltaTime = w.deltaTime();
 
 		cameraTest.update(deltaTime, input);
+		inspector.update(deltaTime, input);
 
 		MEW::TransformSystemMat()(ecs.get_vectorComponent<MEW::TransformComponent>());
-		const auto& vecT = ecs.get_vectorComponent<MEW::TransformComponent>();
-		const auto& vecR = ecs.get_vectorComponent<MEW::RenderComponent>();
+		const auto& constVecTransform = ecs.get_vectorComponent<MEW::TransformComponent>();
+	  auto& VecTransform = ecs.get_vectorComponent<MEW::TransformComponent>();
+		const auto& constVecRender = ecs.get_vectorComponent<MEW::RenderComponent>();
 		auto vecC = &ecs.get_component<MEW::CameraComponent>(cameraTest.entity_);
 		auto vecCT = &ecs.get_component<MEW::TransformComponent>(cameraTest.entity_);
 		auto& vecL = ecs.get_vectorComponent<MEW::LightComponent>();
 
 		inspector.WindowEntities();
-
-		MEW::LightSystem()(vecT,vecR,vecL, shaderDepth, vecC);
-		MEW::RenderSystemLit()(vecT, vecR, vecL, shader, vecC, vecCT);
+		//MEW::UpdateLights()(VecTransform, vecL,vecCT);
+		//MEW::LightSystem()(constVecTransform, constVecRender,vecL, shaderDepth, vecC);
+		MEW::RenderSystemLit()(constVecTransform, constVecRender, vecL, shader, vecC, vecCT);
 		//MEW::RenderSystemUnlit()(vecT, vecR, RS, shader);
 
 		printf(" pos camera : %f  / %f   / %f\n", vecCT->value().translation_.x,

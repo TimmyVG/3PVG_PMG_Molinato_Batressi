@@ -5,16 +5,15 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <iostream>
-
+#include <glm/glm.hpp>
 #define SHADOW_WIDTH (1024)
 #define SHADOW_HEIGHT (1024)
 
 namespace MEW {
 
 
-  LightComponent::LightComponent() {
+  LightComponent::LightComponent(KTypeLight type) : type(type) {
     color = glm::vec3(0.0f);
-    direction = glm::vec3(0.0f);
     depthMap = -1;
     depthFBO = -1;
 
@@ -25,6 +24,32 @@ namespace MEW {
     glGenFramebuffers(1, &depthFBO);
     // Initialize depth texture if not set
 
+    shinisses = 0.2f;
+    diffuse_strenght = 0.2f;
+    diffuse_color = glm::vec3(1.0f);
+    spec_strength = 0.2f;
+    spec_color = glm::vec3(1.0f);
+
+
+    switch (type)
+    {
+    case MEW::None:
+      break;
+    case MEW::Directional:
+      break;
+    case MEW::Point:
+      break;
+    case MEW::Spot:
+      cutoff = 1.0f;
+      outercutoff = 1.0f;
+      break;
+    case MEW::Ambient:
+      ambient_color = glm::vec3(1.0f);
+      ambient_strength = 0.2f;
+      break;
+    default:
+      break;
+    }
 
     glGenTextures(1, &depthMap);
     glBindTexture(GL_TEXTURE_2D, depthMap);
@@ -54,35 +79,41 @@ namespace MEW {
   }
 
   //Light
-  Light::Light(MEW::ECSManager& ecs)
+  Light::Light(MEW::ECSManager& ecs, KTypeLight type) : ecs(&ecs)
   {
-    this->ecs = &ecs;
 
-    type = KTypeLight::None;
-    entity = ecs.create_entity();
-    ecs.add_component<MEW::LightComponent>(entity);
+    entity = ecs.create_entity("Light");
+    ecs.add_component<MEW::LightComponent>(entity,type);
     ecs.add_component<MEW::TransformComponent>(entity);
   }
 
-  //Directional
-  DirectionalLight::DirectionalLight(ECSManager& ecs) : Light(ecs)
+  void UpdateLights::operator()(std::vector<std::optional<MEW::TransformComponent>>& vecTrans,
+                                std::vector<std::optional<MEW::LightComponent>>& vecLight, 
+                                std::optional<TransformComponent> *transformCamera)
   {
-    type = KTypeLight::Directional;
-  }
+    auto itLight = vecLight.begin();
+    auto itTransformLight = vecTrans.begin();
+    for (; itLight != vecLight.end(); itLight++, itTransformLight++) {
+      if (!itLight->has_value()) continue;
+      auto light = itLight->value();
+      
 
-  PointLight::PointLight(ECSManager& ecs) : Light(ecs)
-  {
-    type = KTypeLight::Point;
-  }
-
-  SpotLight::SpotLight(ECSManager& ecs) : Light(ecs)
-  {
-    type = KTypeLight::Spot;
-  }
-
-  Ambient::Ambient(ECSManager& ecs) : Light(ecs)
-  {
-    type = KTypeLight::Ambient;
+      if (light.type == KTypeLight::Directional && transformCamera->has_value()) {
+        if (!itTransformLight->has_value()) continue;
+        auto transformLight = &itTransformLight->value();
+/*
+        transformLight->translation_ = transformCamera->value().translation_;
+        glm::vec3 forward;
+        auto CameraRotacion = transformCamera->value().rotation_;
+        forward.x = cos(glm::radians(CameraRotacion.y)) * cos(glm::radians(CameraRotacion.x));
+        forward.y = sin(glm::radians(CameraRotacion.x));
+        forward.z = sin(glm::radians(CameraRotacion.y)) * cos(glm::radians(CameraRotacion.x));
+        forward = glm::normalize(forward);
+        transformLight->translation_.x -= forward.x * 20.0f;
+        transformLight->translation_.z -= forward.z * 20.0f;
+        transformLight->translation_.y += 20.0f;*/
+      }
+    }
   }
 
 }

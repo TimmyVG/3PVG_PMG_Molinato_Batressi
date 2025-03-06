@@ -24,7 +24,7 @@ namespace MEW {
 
   enum Actions
   {
-    CAMERA_LEFT,
+    CAMERA_LEFT = 333,
     CAMERA_RIGHT,
     CAMERA_FORWARD,
     CAMERA_BACK,

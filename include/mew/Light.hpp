@@ -6,19 +6,9 @@
 #include "mew/ECSManager.hpp"
 #include <vector>
 #include <optional>
+#include "Camera.hpp"
 
 namespace MEW {
-
-  struct LightComponent {
-    glm::vec3 color;
-    glm::vec3 direction;
-    unsigned int depthMap;
-    unsigned int depthFBO;
-    float near_plane = -80.0f, far_plane = 40.0f;
-    glm::mat4 lightProjection;
-
-    LightComponent();
-  };
 
   enum KTypeLight
   {
@@ -29,37 +19,41 @@ namespace MEW {
     Ambient
   };
 
+  struct LightComponent {
+    glm::vec3 color;
+    unsigned int depthMap;
+    unsigned int depthFBO;
+    float near_plane = -80.0f, far_plane = 40.0f;
+    glm::mat4 lightProjection;
+    KTypeLight type;
+    float shinisses;
+    float diffuse_strenght;
+    glm::vec3 diffuse_color;
+    float spec_strength;
+    glm::vec3 spec_color;
+    float cutoff;
+    float outercutoff;
+    float ambient_strength;
+    glm::vec3 ambient_color;
+    LightComponent(KTypeLight type);
+  };
+
+
+
   class Light {
   public:
     size_t entity;
-    Light(ECSManager &ecs);
+    Light(ECSManager& ecs, KTypeLight type);
   protected:
-    KTypeLight type;
   private:
     ECSManager* ecs;
   };
 
-  class DirectionalLight : Light {
+  class UpdateLights {
   public:
-    DirectionalLight(ECSManager& ecs);
-  };
-
-  class PointLight : Light {
-  public:
-
-    PointLight(ECSManager& ecs);
-  };
-
-  class SpotLight : Light {
-  public:
-
-    SpotLight(ECSManager& ecs);
-  };
-
-  class Ambient : Light {
-  public:
-
-    Ambient(ECSManager& ecs);
+    void operator()(std::vector<std::optional<MEW::TransformComponent>>& vecTrans,
+      std::vector<std::optional<MEW::LightComponent>>& vecLight,
+      std::optional<TransformComponent> *camCompT);
   };
 }
 

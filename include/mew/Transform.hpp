@@ -18,7 +18,9 @@ namespace MEW {
 		glm::vec3 translation_;
 		glm::mat4 model;
 		TransformComponent();
+
 	};
+
 
 	class TransformSystemMat {
 	public:

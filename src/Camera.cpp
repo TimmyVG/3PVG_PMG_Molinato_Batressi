@@ -4,7 +4,7 @@
   MEW::Camera::Camera(MEW::ECSManager& ecsMan, float aspectRatio, CameraType type, float fov, float nearPlane, float farPlane, float orthosize)
   {
     ecs = &ecsMan;
-    entity_ = ecs->create_entity();
+    entity_ = ecs->create_entity("Camera");
     ecs->add_component<CameraComponent>(entity_);
     ecs->add_component<TransformComponent>(entity_);
     CameraComponent* cameraComp = &ecs->get_component<CameraComponent>(entity_).value();

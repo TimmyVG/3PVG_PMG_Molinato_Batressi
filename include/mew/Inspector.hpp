@@ -4,14 +4,22 @@
 #include "imgui.h"
 #include "mew/Window.hpp"
 #include "ECSManager.hpp"
+#include "mew/Input.hpp"
 //#include "imgui_impl_glfw.h"
 //#include "imgui_impl_glfw.h"
 
 namespace MEW {
+  enum ActionsInspector
+  {
+    CLICK_OUT = 500,
+  };
+
+  //void Paint(const MEW::LightComponent &light);
+
   class Inspector {
   public:
     Inspector(MEW::Window &w);
-
+    void update(float deltaTime, Input& inputManager);
     //Need it to call WindowEntities
     void LinkECS(MEW::ECSManager &ecs);
 

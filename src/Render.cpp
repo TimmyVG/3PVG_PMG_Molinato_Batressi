@@ -4,6 +4,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/ext/matrix_clip_space.hpp"
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 #define SHADOW_WIDTH (1024)
 #define SHADOW_HEIGHT (1024)
@@ -111,8 +113,9 @@ namespace MEW {
     glViewport(0, 0, CAMERA_WIDTH, cAMERA_HEIGHT);
     glm::mat4 view = camComp->value().viewMatrix;
     glm::mat4 projection = camComp->value().projectionMatrix;
-    shader.setMat4("view", view);
-    shader.setMat4("projection", projection);
+
+    shader.setMat4("u_view_projection", projection * view);
+    shader.setFloat3("u_camera_pos", &camCompT->value().translation_.x);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_BLEND);
@@ -120,6 +123,10 @@ namespace MEW {
     auto itT = vecTrans.begin();
 
     glBlendFunc(GL_ONE, GL_ZERO);
+
+    glCullFace(GL_BACK);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
 
     auto itLight = vecLight.begin();
     auto itLightT = vecTrans.begin();
@@ -138,14 +145,31 @@ namespace MEW {
         sinf(glm::radians(lightT.rotation_.x)),
         -cosf(glm::radians(lightT.rotation_.y)) * cosf(glm::radians(lightT.rotation_.x))
       ));
-      glm::mat4 lightView = glm::lookAt(lightT.translation_,lightT.rotation_ + forward,lightT.scale_);
+      glm::mat4 lightView = glm::lookAt(lightT.translation_, lightT.translation_ + forward, glm::vec3(0.0f, 1.0f, 0.0f));
       glm::mat4 lightSpaceMatrix = lightL.lightProjection * lightView;
 
       //Uniforms
-      shader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
-      shader.setInt("shadowMap", 10);
-      shader.setFloat3("lightPos", &itLightT->value().translation_.x);
-      shader.setFloat3("viewPos", &camCompT->value().translation_.x);
+      shader.setInt("u_type", itLight->value().type);
+      shader.setMat4("u_lightSpaceMatrix", lightSpaceMatrix);
+      shader.setInt("u_shadowMap", 10);
+      shader.setFloat3("u_lightPos", &itLightT->value().translation_.x);
+      glm::vec3 euler  = glm::radians(itLightT->value().rotation_);
+      glm::quat rotation = glm::quat(euler);
+      glm::vec3 forwardD(0.0f, 0.0f, 1.0f);
+      glm::vec3 direction = rotation * forwardD;
+      direction = glm::normalize(direction);
+      shader.setFloat3("u_light_dir", &direction.x);
+      shader.setFloat3("u_viewPos", &camCompT->value().translation_.x);
+      shader.setFloat("u_shininess", itLight->value().shinisses);
+      shader.setFloat("u_diffuse_strength", itLight->value().diffuse_strenght);
+      shader.setFloat3("u_diffuse_color", &itLight->value().diffuse_color.x);
+      shader.setFloat("u_spec_strength", itLight->value().spec_strength);
+      shader.setFloat3("u_spec_color", &itLight->value().spec_color.x);
+      shader.setFloat("u_cutoff", itLight->value().cutoff);
+      shader.setFloat("u_outercutoff", itLight->value().outercutoff);
+      shader.setFloat("u_ambient_strength", itLight->value().ambient_strength);
+      shader.setFloat3("u_ambient_color", &itLight->value().ambient_color.x);
+
 
       //shader.setMat4("lightSpaceMatrix", itLightT->value().)
       auto itRender = vecRender.begin();
@@ -155,8 +179,9 @@ namespace MEW {
         auto& render = itRender->value();
         auto& transform = itTransform->value();
 
-        shader.setMat4("model", transform.model);
-
+        shader.setMat4("u_model", transform.model);
+        glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(transform.model)));
+        shader.setMat4("u_normalMatrix", normalMatrix);
 
 
         for (const auto& mesh : render.object->model->meshes)
@@ -182,14 +207,14 @@ namespace MEW {
 
           glActiveTexture(GL_TEXTURE0);
 
-          glDisable(GL_CULL_FACE);
-          glEnable(GL_DEPTH_TEST);
+
           glBindVertexArray(mesh.VAO);
           glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(mesh.indices_.size()), GL_UNSIGNED_INT, 0);
           glBindVertexArray(0);
         }
       }
       glBlendFunc(GL_ONE, GL_ONE);
+      glCullFace(GL_BACK);
 
     }
   }
@@ -201,7 +226,6 @@ namespace MEW {
     std::optional<CameraComponent>* camComp) {
 
     shader.UseProgram();
-    
     glCullFace(GL_FRONT);
 
     glEnable(GL_DEBUG_OUTPUT);
@@ -221,11 +245,13 @@ namespace MEW {
       glEnable(GL_DEPTH_TEST);
       glDepthFunc(GL_LESS);
       glBlendFunc(GL_ONE, GL_ZERO);
-
+      glDepthFunc(GL_LEQUAL);
 
 
       glm::mat4 view = camComp->value().viewMatrix;
       glm::mat4 projection = camComp->value().projectionMatrix;
+
+      shader.setMat4("u_view_projection", projection * view);
 
       //Light space transforms
       glm::vec3 forward = glm::normalize(glm::vec3(
@@ -237,11 +263,11 @@ namespace MEW {
       glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
       glm::vec3 right = glm::normalize(glm::cross(forward, up));
       up = glm::cross(right, forward);
-      glm::mat4 lightView = glm::lookAt(lightT.translation_, lightT.rotation_ + forward, up);
+      glm::mat4 lightView = glm::lookAt(lightT.translation_, lightT.translation_ + forward, up);
       glm::mat4 lightSpaceMatrix = light.lightProjection * lightView;
 
       //Uniforms
-      shader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
+      shader.setMat4("u_lightSpaceMatrix", lightSpaceMatrix);
 
 
       auto itRender = vecRender.begin();
@@ -251,7 +277,7 @@ namespace MEW {
         auto& render = itRender->value();
         auto& transform = itTransform->value();
 
-        shader.setMat4("model", transform.model);
+        shader.setMat4("u_model", transform.model);
         for (const auto& mesh : render.object->model->meshes) {
           glBindVertexArray(mesh.VAO);
           glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(mesh.indices_.size()), GL_UNSIGNED_INT, 0);
