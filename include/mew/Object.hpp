@@ -11,10 +11,11 @@
 namespace MEW {
 	class Object {
 		public:
+			/*
 			Object();
 			Object(std::string, Shader* shader);
 			Object(Shader* shader);
-
+			~Object();
 			void Draw();
 			void UseProgram();
 			Model* model;
@@ -29,6 +30,7 @@ namespace MEW {
 
 		private:
 			std::vector<Mesh> meshes_;
+			*/
 	};
 }
 

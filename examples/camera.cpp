@@ -84,22 +84,6 @@ int main() {
 	*ecs.get_component<MEW::RenderComponent>(miku).value().object = objmiku;
 
 	MEW::Camera cameraTest(ecs,640/460);
-
-	//MEW::CameraSystemProjection csp;
-	//MEW::CameraSystemView csv;
-	/*
-	size_t camera = ecs.create_entity();
-	ecs.add_component<MEW::CameraComponent>(camera);
-	ecs.add_component<MEW::TransformComponent>(camera);
-	ecs.get_component<MEW::CameraComponent>(camera).value().aspectRatio = 640/460;
-	ecs.get_component<MEW::CameraComponent>(camera).value().fov = 60.0f;
-	ecs.get_component<MEW::CameraComponent>(camera).value().nearPlane = 1.0f;
-	ecs.get_component<MEW::CameraComponent>(camera).value().farPlane = 100.0f;
-	ecs.get_component<MEW::CameraComponent>(camera).value().type = MEW::CameraType::CAMERA_PERSPECTIVE;
-	ecs.get_component<MEW::TransformComponent>(camera)->translation_ = glm::vec3(0, 0, 5);
-	csp(ecs.get_vectorComponent<MEW::TransformComponent>(),ecs.get_vectorComponent<MEW::CameraComponent>());
-	csv(ecs.get_vectorComponent<MEW::TransformComponent>(), ecs.get_vectorComponent<MEW::CameraComponent>());
-	*/
 	const float color[3] = { 0.25f,0.3f,0.4f };
 	const float color2[3] = { 0.4f,0.3f,0.25f };
 

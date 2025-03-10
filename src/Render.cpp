@@ -24,13 +24,9 @@ namespace MEW {
       type, severity, message);
   }
 
-  RenderComponent::RenderComponent()
-  {
-    object = std::make_shared<Object>();
-  }
 
   void RenderSystem::Draw(RenderComponent* rc, TransformComponent* tc)
-  {
+  {/*
     rc->object->UseProgram();
     glm::mat4 modelo = glm::mat4(1.0f);
     glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.5f));
@@ -48,6 +44,7 @@ namespace MEW {
 		rc->object->shader_->setMat4("view", view);
 		rc->object->shader_->setMat4("projection", projection);
 		rc->object->model->Draw(*rc->object->shader_);
+    */
 	}
 	void RenderSystemUnlit::operator()(const std::vector<std::optional<MEW::TransformComponent>>& vecTransform,
 		const std::vector<std::optional<MEW::RenderComponent>>& vecRender, MEW::RenderSystem& RS, MEW::Shader& shader,
@@ -69,35 +66,29 @@ namespace MEW {
 
       shader.setMat4("model", transform.model);
 
-      //rc->object->model->Draw(*rc->object->shader_);
-      //for (unsigned int i = 0; i < render.object->model->meshes.size(); i++)
-      for (const auto& mesh : render.object->model->meshes)
+      for (auto& mesh : render.model->value().meshes)
       {
         // draw mesh
         unsigned int diffuseNr = 1;
         for (unsigned int j = 0; j < mesh.textures_.size(); j++) {
           glActiveTexture(GL_TEXTURE0 + j);
           std::string number;
-          std::string name = mesh.textures_[j].type;
-          //To simplificar
-          if (name == "texture_diffuse") {
-            number = std::to_string(diffuseNr++);
-          }
-          shader.setInt((name + number).c_str(), j);
-          glBindTexture(GL_TEXTURE_2D, mesh.textures_[j].id);
+          number = std::to_string(diffuseNr++);
+          shader.setInt(("texture_diffuse" + number).c_str(), j);
+          glBindTexture(GL_TEXTURE_2D, mesh.textures_[j].id_);
         }
         glActiveTexture(GL_TEXTURE0);
 
         glDisable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
-        glBindVertexArray(mesh.VAO);
+        glBindVertexArray(mesh.getVAO());
         glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(mesh.indices_.size()), GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
       }
     }
 
   }
-
+  /*
   void RenderSystemLit::operator()(
     const std::vector<std::optional<MEW::TransformComponent>>& vecTrans,
     const std::vector<std::optional<MEW::RenderComponent>>& vecRender,
@@ -265,4 +256,5 @@ namespace MEW {
     }
     glCullFace(GL_BACK);
   }
+*/
 }

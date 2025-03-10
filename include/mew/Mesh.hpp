@@ -4,13 +4,16 @@
 #include <glm/ext/vector_float2.hpp>
 #include <string>
 #include <vector>
+#include <optional>
+#include <memory>
 #include "Shader.hpp"
+#include "Texture.hpp"
 
 #define MAX_BONE_INFLUENCE 4
 
 namespace MEW {
 
-  struct Vertex {
+  struct VertexData {
     glm::vec3 Position;
     glm::vec3 Normal;
     glm::vec2 TexCoords;
@@ -22,29 +25,30 @@ namespace MEW {
     float m_Weights[MAX_BONE_INFLUENCE];
   };
 
-
-  struct Texture {
-    unsigned int id;
-    std::string type;
-    std::string path;
-
+  struct MeshData {
+    std::vector<VertexData> vertices_;
+    std::vector<unsigned int> ids_;
+    std::optional<std::vector<TextureData>> tex_data;
   };
 
   class Mesh {
   public:
-    // mesh data
-    std::vector<MEW::Vertex> vertices_;
     std::vector<unsigned int> indices_;
     std::vector<MEW::Texture> textures_;
-    unsigned int VAO;
 
-    Mesh(std::vector<MEW::Vertex> vertices, std::vector<unsigned int> indices, std::vector<MEW::Texture> textures);
-    void Draw(Shader& shader);
-
-    void setupMesh();
+    Mesh(const MeshData& other_mesh_data);
+    ~Mesh();
+    Mesh(Mesh&& other) noexcept;
+    Mesh& operator=(const Mesh& other);
+    Mesh(const Mesh& other);
+    void setupMesh(const MeshData& data);
+    unsigned int getVAO() { return VAO; };
   private:
     //  render data
-    unsigned int VBO, EBO;
+    unsigned int VAO;
+    unsigned int VBO;
+    unsigned int EBO;
+    bool isMeshLoaded;
   };
 
 }

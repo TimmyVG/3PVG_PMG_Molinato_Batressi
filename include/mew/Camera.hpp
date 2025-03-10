@@ -24,7 +24,7 @@ namespace MEW {
 
   enum Actions
   {
-    CAMERA_LEFT,
+    CAMERA_LEFT = 333,
     CAMERA_RIGHT,
     CAMERA_FORWARD,
     CAMERA_BACK,
@@ -45,8 +45,6 @@ namespace MEW {
 
     void update(float deltaTime, Input& inputManager);
     void adjustSpeed(float offset);
-    //CameraComponent* cameraComp;
-    //TransformComponent* transformComp;
     size_t entity_;
   private:
     ECSManager* ecs;

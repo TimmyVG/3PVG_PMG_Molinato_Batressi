@@ -16,9 +16,8 @@
 
 namespace MEW {
 	struct RenderComponent {
-		RenderComponent();
-		std::shared_ptr<Object> object;
-
+		std::shared_ptr<std::optional<Model>> model;
+		RenderComponent() : model(std::make_shared<std::optional<Model>>()) {};
 	};
 
 	class RenderSystem {
@@ -34,7 +33,7 @@ namespace MEW {
 			const std::vector<std::optional<MEW::RenderComponent>>& vecRender, MEW::RenderSystem& RS, MEW::Shader& shader,
 			CameraComponent* camComp);
 	};
-
+	/*
 	class RenderSystemLit {
 	public:
 		void operator()(const std::vector<std::optional<MEW::TransformComponent>>& vecTrans,
@@ -53,7 +52,7 @@ namespace MEW {
 			Shader& shader, std::optional<CameraComponent>* camComp);
 	};
 
-
+	*/
 }
 
 #endif //__Render__

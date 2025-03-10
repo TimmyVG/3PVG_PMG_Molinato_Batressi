@@ -25,7 +25,6 @@ int WinMain() {
 	ecs.add_component_type<MEW::RenderComponent>();
 
 
-	MEW::TransformSystem TS;
 	MEW::RenderSystem RS;
 
 
@@ -60,10 +59,8 @@ int WinMain() {
 		ecs.add_component<MEW::TransformComponent>(entity);
 		MEW::RenderComponent* rc = &ecs.get_component<MEW::RenderComponent>(entity).value();
 		*rc->object = objsilla;
-		TS.Translate(glm::vec3((rand() % 50) - 25.0f, (rand() % 30) - 15.0f, -50.0f), &ecs.get_component<MEW::TransformComponent>(entity).value());
-	
-
-
+		ecs.get_component<MEW::TransformComponent>(entity).value().translation_=
+			glm::vec3((rand() % 50) - 25.0f, (rand() % 30) - 15.0f, -50.0f);
 
 	const float color[3] = { 0.25f,0.3f,0.4f };
 	const float color2[3] = { 0.4f,0.3f,0.25f };
@@ -77,14 +74,6 @@ int WinMain() {
 		deltaTime = w.deltaTime();
 
 
-		if (w.isKeyPressed('W')) TS.TranslateY(static_cast<float>(deltaTime) * 1, &ecs.get_component<MEW::TransformComponent>(entities.at(0)).value());
-		if (w.isKeyPressed('A')) TS.TranslateX(static_cast<float>(deltaTime) * -1, &ecs.get_component<MEW::TransformComponent>(entities.at(0)).value());
-		if (w.isKeyPressed('S')) TS.TranslateY(static_cast<float>(deltaTime) * -1, &ecs.get_component<MEW::TransformComponent>(entities.at(0)).value());
-		if (w.isKeyPressed('D')) TS.TranslateX(static_cast<float>(deltaTime) * 1, &ecs.get_component<MEW::TransformComponent>(entities.at(0)).value());
-		if (w.isKeyPressed('Q')) TS.RotateX(1 * static_cast<float>(deltaTime), &ecs.get_component<MEW::TransformComponent>(entities.at(0)).value());
-		if (w.isKeyPressed('E')) TS.RotateX(-1 * static_cast<float>(deltaTime), &ecs.get_component<MEW::TransformComponent>(entities.at(0)).value());
-		if (w.isKeyPressed('Z')) TS.Scale(glm::vec3(1 * static_cast<float>(deltaTime)), &ecs.get_component<MEW::TransformComponent>(entities.at(0)).value());
-		if (w.isKeyPressed('X')) TS.Scale(glm::vec3(-1 * static_cast<float>(deltaTime)), &ecs.get_component<MEW::TransformComponent>(entities.at(0)).value());
 
 
 			RS.Draw(&ecs.get_component<MEW::RenderComponent>(entities.at(0)).value(),
