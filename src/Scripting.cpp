@@ -1,4 +1,7 @@
 #include "mew/Scripting.hpp"
+#include "mew/World.hpp"
+#include "mew/ECSManager.hpp"
+#include "mew/Transform.hpp"
 namespace MEW {
   void ScriptingSystem::check(const ScriptingComponent& sc,int error){
     if (error != LUA_OK) {
@@ -55,5 +58,32 @@ namespace MEW {
     lua_pushinteger(L, a * b);  // Return the product of a and b to Lua
     return 1;  // One return value on the stack
   }
+  
+  int lua_get_position(lua_State* L) {
+    ECSManager* ecs = World::GetWorld().getECSManager();
+    if (!ecs->get_component<TransformComponent>(luaL_checkinteger(L, 1)).has_value())
+    {
+      lua_pushnumber(L, -1);
+      lua_pushnumber(L, -1);
+      lua_pushnumber(L, -1);
+      return 3;
+    }
+
+    MEW::TransformComponent* transform = &ecs->get_component<TransformComponent>(luaL_checkinteger(L,1)).value();
+    lua_pushnumber(L, transform->translation_.x);
+    lua_pushnumber(L, transform->translation_.y);
+    lua_pushnumber(L, transform->translation_.z);
+    return 3; // Returning x, y, and z
+  }
+
+  int lua_set_position(lua_State* L) {
+    ECSManager* ecs = World::GetWorld().getECSManager();
+    MEW::TransformComponent* transform = &ecs->get_component<TransformComponent>(luaL_checkinteger(L, 1)).value();
+    transform->translation_.x = static_cast<float>(luaL_checknumber(L, 2));
+    transform->translation_.y = static_cast<float>(luaL_checknumber(L, 3));
+    transform->translation_.z = static_cast<float>(luaL_checknumber(L, 4));
+    return 0; // No return values
+  }
+ 
 
 }

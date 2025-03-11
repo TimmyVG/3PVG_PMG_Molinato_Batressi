@@ -45,8 +45,8 @@ namespace MEW {
 
     void update(float deltaTime, Input& inputManager);
     void adjustSpeed(float offset);
-    //CameraComponent* cameraComp;
-    //TransformComponent* transformComp;
+    CameraComponent* GetCameraComponent();
+    TransformComponent* GetTransformComp();
     size_t entity_;
   private:
     ECSManager* ecs;

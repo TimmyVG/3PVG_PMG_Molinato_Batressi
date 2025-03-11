@@ -82,6 +82,23 @@
       );
     }
   }
+  
+  MEW::CameraComponent* MEW::Camera::GetCameraComponent() {
+    if (!ecs->get_component<CameraComponent>(entity_).has_value())
+    {
+      return nullptr;
+    }
+    return &ecs->get_component<CameraComponent>(entity_).value();
+  }
+
+  MEW::TransformComponent* MEW::Camera::GetTransformComp()
+  {
+    if (!ecs->get_component<TransformComponent>(entity_).has_value())
+    {
+      return nullptr;
+    }
+    return &ecs->get_component<TransformComponent>(entity_).value();
+  }
 
   void MEW::Camera::calculateView()
   {

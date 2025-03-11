@@ -1,4 +1,3 @@
-#include "GLFW/glfw3.h"
 #include "mew/Window.hpp"
 #include "mew/Shader.hpp"
 #include "mew/Object.hpp"
@@ -12,11 +11,6 @@
 #include "mew/Input.hpp"
 
 int global = 0;
-
-
-
-
-
 
 int main() {
 	srand(static_cast<unsigned>(time(0)));
@@ -47,15 +41,6 @@ int main() {
 	MEW::Window w = maybe_w.value();
 
 	MEW::Input input(w.window_);
-	input.assign(MEW::Input::Buttons::KEY_A, MEW::CAMERA_LEFT);
-	input.assign(MEW::Input::Buttons::KEY_LEFT, MEW::CAMERA_LEFT);
-	input.assign(MEW::Input::Buttons::KEY_D, MEW::CAMERA_RIGHT);
-	input.assign(MEW::Input::Buttons::KEY_RIGHT, MEW::CAMERA_RIGHT);
-	input.assign(MEW::Input::Buttons::KEY_W, MEW::CAMERA_FORWARD);
-	input.assign(MEW::Input::Buttons::KEY_UP, MEW::CAMERA_FORWARD);
-	input.assign(MEW::Input::Buttons::KEY_S, MEW::CAMERA_BACK);
-	input.assign(MEW::Input::Buttons::KEY_DOWN, MEW::CAMERA_BACK);
-	input.assign(MEW::Input::Buttons::MOUSE_2, MEW::CAMERA_ROTATE);
 	MEW::Shader shader("../data/example.vs","../data/example.fs");
 	
 	MEW::Object objmiku(&shader);
@@ -83,33 +68,25 @@ int main() {
 	ecs.add_component<MEW::TransformComponent>(miku);
 	*ecs.get_component<MEW::RenderComponent>(miku).value().object = objmiku;
 
-	MEW::Camera cameraTest(ecs,640/460);
 
-	//MEW::CameraSystemProjection csp;
-	//MEW::CameraSystemView csv;
-	/*
-	size_t camera = ecs.create_entity();
-	ecs.add_component<MEW::CameraComponent>(camera);
-	ecs.add_component<MEW::TransformComponent>(camera);
-	ecs.get_component<MEW::CameraComponent>(camera).value().aspectRatio = 640/460;
-	ecs.get_component<MEW::CameraComponent>(camera).value().fov = 60.0f;
-	ecs.get_component<MEW::CameraComponent>(camera).value().nearPlane = 1.0f;
-	ecs.get_component<MEW::CameraComponent>(camera).value().farPlane = 100.0f;
-	ecs.get_component<MEW::CameraComponent>(camera).value().type = MEW::CameraType::CAMERA_PERSPECTIVE;
-	ecs.get_component<MEW::TransformComponent>(camera)->translation_ = glm::vec3(0, 0, 5);
-	csp(ecs.get_vectorComponent<MEW::TransformComponent>(),ecs.get_vectorComponent<MEW::CameraComponent>());
-	csv(ecs.get_vectorComponent<MEW::TransformComponent>(), ecs.get_vectorComponent<MEW::CameraComponent>());
-	*/
+
 	const float color[3] = { 0.25f,0.3f,0.4f };
 	const float color2[3] = { 0.4f,0.3f,0.25f };
 
 	bool done = false;
 	const float backgroundcolor[4] = { 0.2f, 0.3f, 0.3f, 1.0f };
 	double deltaTime;
-	//auto getTransform = [cameraTest, &ecs]() {return &ecs.get_component<MEW::TransformComponent>(camera).value(); };
-	auto getComponent = [&ecs]<typename T>(size_t entity) -> std::optional<T> {
-		return ecs.get_component<T>(entity).value();
-	};
+
+	input.assign(MEW::Input::Buttons::KEY_A, MEW::CAMERA_LEFT);
+	input.assign(MEW::Input::Buttons::KEY_LEFT, MEW::CAMERA_LEFT);
+	input.assign(MEW::Input::Buttons::KEY_D, MEW::CAMERA_RIGHT);
+	input.assign(MEW::Input::Buttons::KEY_RIGHT, MEW::CAMERA_RIGHT);
+	input.assign(MEW::Input::Buttons::KEY_W, MEW::CAMERA_FORWARD);
+	input.assign(MEW::Input::Buttons::KEY_UP, MEW::CAMERA_FORWARD);
+	input.assign(MEW::Input::Buttons::KEY_S, MEW::CAMERA_BACK);
+	input.assign(MEW::Input::Buttons::KEY_DOWN, MEW::CAMERA_BACK);
+	input.assign(MEW::Input::Buttons::MOUSE_2, MEW::CAMERA_ROTATE);
+	MEW::Camera cameraTest(ecs,640/460);
 	while (!done) {
 		input.newframe();
 		w.newframe(backgroundcolor);
@@ -122,9 +99,6 @@ int main() {
 		const auto& vecR = ecs.get_vectorComponent<MEW::RenderComponent>();
 		const auto& vecL = ecs.get_vectorComponent<MEW::LightComponent>();
 		MEW::RenderSystemUnlit()(vecT, vecR, RS, shader, &ecs.get_component<MEW::CameraComponent>(cameraTest.entity_).value());
-		printf("MouseDelta | x = %f y = %f\n", input.getMouseDelta().x, input.getMouseDelta().y);
-		printf("MousePosition | x = %f y = %f\n", input.getMousePos().x, input.getMousePos().y);
-		printf("LastMousePosition | x = %f y = %f\n",input.lastMousePos.x,input.lastMousePos.y);
 		bool closePressed = w.closedPressed();
 		bool escPressed = w.isKeyPressed(GLFW_KEY_ESCAPE);
 		if (closePressed || escPressed) done = true;
