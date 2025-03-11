@@ -30,7 +30,7 @@ in vec3 FragPos;
 in vec3 Normal;
 in vec2 TexCoords;
 in vec4 FragPosLightSpace;
-/*
+
 float ShadowCalculation(vec4 FragPosLightSpace)
 {
     // perform perspective divide
@@ -38,7 +38,7 @@ float ShadowCalculation(vec4 FragPosLightSpace)
     // transform to [0,1] range
     projCoords = projCoords * 0.5 + 0.5;
     // get closest depth value from light's perspective (using [0,1] range FragPosLight as coords)
-    float closestDepth = texture(shadowMap, projCoords.xy).r; 
+    float closestDepth = texture(u_shadowMap, projCoords.xy).r; 
     // get depth of current fragment from light's perspective
     float currentDepth = projCoords.z;
     // check whether current frag pos is in shadow
@@ -46,7 +46,7 @@ float ShadowCalculation(vec4 FragPosLightSpace)
 
     return shadow;
 }  
-
+/*
 void main() {
     vec3 color = texture(texture_diffuse0, TexCoords).rgb;
     vec3 normal = normalize(Normal);
@@ -70,13 +70,13 @@ void main() {
     FragColor = vec4(lighting, 1.0);
 }
 */
-vec3 light = vec3(0.0,0.0,0.0);
+
 
 /*TODO ARANAU*/
 vec3 DirectionalLight()
 {
     vec3 normal = normalize(Normal);
-    vec3 lightDir = normalize(-u_light_dir);
+    vec3 lightDir = normalize(u_light_dir);
     // diffuse shading
     float diff = max(dot(normal, lightDir), 0.001);
     // specular shading
@@ -84,10 +84,10 @@ vec3 DirectionalLight()
     vec3 reflectDir = reflect(-lightDir, normal);
     float spec = pow(max(dot(viewDir, reflectDir), 0.00), u_shininess);
     // combine results
-    vec3 diffuse  = u_diffuse_color  * diff;
+    vec3 diffuse  = u_diffuse_color  * diff * u_diffuse_strength;
     vec3 specular = u_spec_color * u_spec_strength * spec ;
     //return  diffuse + specular;
-    return  diffuse + specular;
+    return  diffuse ;
 }  
 
     vec3 SpotLight(){
@@ -148,12 +148,14 @@ void main() {
 
 //create light
 //funciona type 1
-
+  vec3 light = vec3(0.0,0.0,0.0);
 
 
         switch(u_type){
           case 1:
             light = DirectionalLight();
+            float shadow = ShadowCalculation(FragPosLightSpace);
+            light = light * (1.0 - shadow);
         break;
 
         case 2:
