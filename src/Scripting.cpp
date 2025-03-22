@@ -44,6 +44,13 @@ namespace MEW {
     }
   }
 
+  void ScriptingSystem::register_functions(const std::vector<std::optional<ScriptingComponent>>& scl)
+  {
+    add_global(scl, "GetPosition", MEW::lua_get_position);
+    add_global(scl, "SetPosition", MEW::lua_set_position);
+    add_global(scl, "multiplication", MEW::multiplication);
+  }
+
   std::string file_to_string(const std::filesystem::path& path)
   {
     std::ifstream f(path.c_str());
@@ -84,6 +91,5 @@ namespace MEW {
     transform->translation_.z = static_cast<float>(luaL_checknumber(L, 4));
     return 0; // No return values
   }
- 
 
 }

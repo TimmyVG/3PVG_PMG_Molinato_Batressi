@@ -39,6 +39,7 @@ namespace MEW {
   public:
     void add_global(const std::vector<std::optional<ScriptingComponent>>& sc, const std::string& name, int(*f)(lua_State*));
     void operator()(const std::vector<std::optional<ScriptingComponent>>& scl);
+    void register_functions(const std::vector<std::optional<ScriptingComponent>>& scl);
   protected:
     void check(const ScriptingComponent& sc, int error);
     void run(const ScriptingComponent& sc);

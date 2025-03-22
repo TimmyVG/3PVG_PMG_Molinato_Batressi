@@ -71,9 +71,7 @@ int main() {
 	ecs.get_component<MEW::TransformComponent>(entities.at(0)).value().translation_.y = 0;
 	ecs.get_component<MEW::TransformComponent>(entities.at(0)).value().translation_.z = 0;
   auto& vecS = ecs.get_vectorComponent<MEW::ScriptingComponent>();
-	SS.add_global(vecS, "multiplication", MEW::multiplication);
-	SS.add_global(vecS, "GetPosition", MEW::lua_get_position);
-	SS.add_global(vecS, "SetPosition", MEW::lua_set_position);
+	SS.register_functions(vecS);
 	SS(vecS);
 	input.assign(MEW::Input::Buttons::KEY_A, MEW::CAMERA_LEFT);
 	input.assign(MEW::Input::Buttons::KEY_LEFT, MEW::CAMERA_LEFT);
