@@ -63,7 +63,7 @@ public:
       it.second.get()->grow();
     }
 
-    add_component<MEW::IdentityComponent>(entity_id, nameEntity);
+    add_component<MEW::IdentityComponent>(entity_id, nameEntity + std::to_string(entity_id));
     return entity_id;
   }
 

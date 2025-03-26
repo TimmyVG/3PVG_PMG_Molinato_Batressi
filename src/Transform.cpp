@@ -1,7 +1,8 @@
 #include "mew/Transform.hpp"
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_transform.hpp>
-
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 namespace MEW {
 	void TransformSystemMat::operator()(std::vector<std::optional<MEW::TransformComponent>>& vecTransform)
@@ -11,12 +12,22 @@ namespace MEW {
 			auto transform = &ctransform.value();
 			transform->model = glm::mat4(1.0f);
 
+			// Aplicar transformacion en orden correcto: Translate  Rotate  Scale
 			transform->model = glm::translate(transform->model, transform->translation_);
-			transform->model = glm::rotate(transform->model, transform->rotation_.x, glm::vec3(1.0f, 0.0f, 0.0f));
-			transform->model = glm::rotate(transform->model, transform->rotation_.y, glm::vec3(0.0f, 1.0f, 0.0f));
-			transform->model = glm::rotate(transform->model, transform->rotation_.z, glm::vec3(0.0f, 0.0f, 1.0f));
+			transform->model = glm::rotate(transform->model, glm::radians(transform->rotation_.x), glm::vec3(1.0f, 0.0f, 0.0f));
+			transform->model = glm::rotate(transform->model, glm::radians(transform->rotation_.y), glm::vec3(0.0f, 1.0f, 0.0f));
+			transform->model = glm::rotate(transform->model, glm::radians(transform->rotation_.z), glm::vec3(0.0f, 0.0f, 1.0f));
 			transform->model = glm::scale(transform->model, transform->scale_);
 
+			// Convertir rotacion a radianes antes de usar en glm::quat()
+			glm::vec3 euler = glm::radians(transform->rotation_);
+			glm::quat rotation = glm::quat(euler);
+
+			// Calcular vectores de direccion
+			glm::vec3 forwardD(0.0f, 0.0f, 1.0f);
+			transform->fwd = glm::normalize(rotation * forwardD);
+			transform->right = glm::normalize(rotation * glm::vec3(1.0f, 0.0f, 0.0f));
+			transform->up = glm::normalize(glm::cross(transform->right, transform->fwd));
 		}
 	}
 

@@ -48,7 +48,7 @@ int main() {
 	objmiku.model->loadMeshes();
 
 	MEW::Object objsilla(&shader);
-	objsilla.model->loadModel("../data/silla/WoodenChair_low.fbx");
+	objsilla.model->loadModel("../data/miku/source/Miku.fbx");
 	objsilla.model->loadMeshes();
 
 	std::vector<size_t> entities;

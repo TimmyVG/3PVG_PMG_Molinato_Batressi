@@ -17,6 +17,9 @@ namespace MEW {
 		glm::vec3 rotation_;
 		glm::vec3 translation_;
 		glm::mat4 model;
+		glm::vec3 fwd;
+		glm::vec3 up;
+		glm::vec3 right;
 		TransformComponent();
 
 	};

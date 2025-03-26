@@ -21,6 +21,12 @@ cfg["frameworks"] = conan_frameworks
 
 end
 
+function file_exists(name)
+    local f=io.open(name,"r")
+    if f~=nil then io.close(f) return true else return false end
+ end
+
+
 function conan_config_exec()
 
     configs = {'Debug','Release','RelWithDebInfo'}
@@ -85,129 +91,16 @@ workspace "Motor"
         symbols "On"
     filter {}
 
-project "Motor"
-    kind "StaticLib"
-    targetname "mew"
-    targetdir "build/%{cfg.buildcfg}"
-    
-    includedirs { "include", "build/deps/bindings_include" }
-    conan_config_lib()
-    pchheader "stdafx.hpp"
-    pchsource "src/stdafx.cpp"
-    forceincludes { "stdafx.hpp" }
+    if(file_exists("./devPremake5.lua")) then dev = true end
 
-    files {
-        "premake5.lua",
-        "src/build/conanfile.txt",
-        "src/build/conan.lua",
-        "src/*.cpp", "include/mew/*.hpp",
-        "build/deps/bindings/*.cpp","build/deps/bindings_include/*.h"
-        }
+    if dev then include("./devPremake5.lua")
+    else 
+        libdirs { "lib/%{cfg.buildcfg}" }
+        links {"lib/%{cfg.buildcfg}/mew.lib"}
+    end
 
-    project"Window"
-        kind "ConsoleApp"
-        language "C++"
-        targetdir "build/%{prj.name}/%{cfg.buildcfg}"
-        includedirs "include"
-        libdirs { "build/%{cfg.buildcfg}" }
-        links {"mew"}
-        conan_config_exec("Debug")
-        conan_config_exec("Release")
-        conan_config_exec("RelWithDebInfo")
-        debugargs { _MAIN_SCRIPT_DIR .. "/examples/data" }
-        files "examples/window.cpp"
 
-    project"Triangle"
-        kind "WindowedApp"
-        language "C++"
-        targetdir "build/%{prj.name}/%{cfg.buildcfg}"
-        includedirs "include"
-        libdirs { "build/%{cfg.buildcfg}" }
-        links {"mew"}
-        conan_config_exec("Debug")
-        conan_config_exec("Release")
-        conan_config_exec("RelWithDebInfo")
-        debugargs { _MAIN_SCRIPT_DIR .. "/examples/data" }
-        files "examples/triangle.cpp"
-
-    project"TriangleMove"
-        kind "WindowedApp"
-        language "C++"
-        targetdir "build/%{prj.name}/%{cfg.buildcfg}"
-        includedirs "include"
-        libdirs { "build/%{cfg.buildcfg}" }
-        links {"mew"}
-        conan_config_exec("Debug")
-        conan_config_exec("Release")
-        conan_config_exec("RelWithDebInfo")
-        debugargs { _MAIN_SCRIPT_DIR .. "/examples/data" }
-        files "examples/trianglemove.cpp"
-
-    project"MeshTextureLoader"
-        kind "WindowedApp"
-        language "C++"
-        targetdir "build/%{prj.name}/%{cfg.buildcfg}"
-        includedirs "include"
-        libdirs { "build/%{cfg.buildcfg}" }
-        links {"mew"}
-        conan_config_exec("Debug")
-        conan_config_exec("Release")
-        conan_config_exec("RelWithDebInfo")
-        debugargs { _MAIN_SCRIPT_DIR .. "/examples/data" }
-        files "examples/meshtextureloader.cpp"
-
-    project"JobSystem"
-        kind "ConsoleApp"
-        language "C++"
-        targetdir "build/%{prj.name}/%{cfg.buildcfg}"
-        includedirs "include"
-        libdirs { "build/%{cfg.buildcfg}" }
-        links {"mew"}
-        conan_config_exec("Debug")
-        conan_config_exec("Release")
-        conan_config_exec("RelWithDebInfo")
-        debugargs { _MAIN_SCRIPT_DIR .. "/examples/data" }
-        files "examples/jobsystem.cpp"
-
-     project"Scripting"
-        kind "ConsoleApp"
-        language "C++"
-        targetdir "build/%{prj.name}/%{cfg.buildcfg}"
-        includedirs "include"
-        libdirs { "build/%{cfg.buildcfg}" }
-        links {"mew"}
-        conan_config_exec("Debug")
-        conan_config_exec("Release")
-        conan_config_exec("RelWithDebInfo")
-        debugargs { _MAIN_SCRIPT_DIR .. "/examples/data" }
-        files "examples/scriptinglua.cpp"
-
-    project"ECS"
-        kind "consoleApp"
-        language "C++"
-        targetdir "build/%{prj.name}/%{cfg.buildcfg}"
-        includedirs "include"
-        libdirs { "build/%{cfg.buildcfg}" }
-        links {"mew"}
-        conan_config_exec("Debug")
-        conan_config_exec("Release")
-        conan_config_exec("RelWithDebInfo")
-        debugargs { _MAIN_SCRIPT_DIR .. "/examples/data" }
-        files "examples/ecs.cpp"
-
-    project"Lights"
-        kind "ConsoleApp"
-        language "C++"
-        targetdir "build/%{prj.name}/%{cfg.buildcfg}"
-        includedirs "include"
-        libdirs { "build/%{cfg.buildcfg}" }
-        links {"mew"}
-        conan_config_exec("Debug")
-        conan_config_exec("Release")
-        conan_config_exec("RelWithDebInfo")
-        debugargs { _MAIN_SCRIPT_DIR .. "/examples/data" }
-        files "examples/lights.cpp"
-
+ 
     project"Camera"
         kind "consoleApp"
         language "C++"

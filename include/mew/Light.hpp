@@ -8,8 +8,10 @@
 #include <optional>
 #include "Camera.hpp"
 
-namespace MEW {
 
+
+namespace MEW {
+  std::vector<glm::vec4> getFrustumCornersWorldSpace(const glm::mat4& proj, const glm::mat4& view);
   enum KTypeLight
   {
     None,
@@ -20,22 +22,28 @@ namespace MEW {
   };
 
   struct LightComponent {
-    glm::vec3 color;
-    unsigned int depthMap;
-    unsigned int depthFBO;
-    float near_plane = -80.0f, far_plane = 40.0f;
-    glm::mat4 lightProjection;
     KTypeLight type;
-    float shinisses;
-    float diffuse_strenght;
-    glm::vec3 diffuse_color;
-    float spec_strength;
-    glm::vec3 spec_color;
-    float cutoff;
-    float outercutoff;
-    float ambient_strength;
-    glm::vec3 ambient_color;
+    glm::vec3 direction;
+
+    glm::vec3 diffuse;
+    float fDiffuse;
+
+    glm::vec3 specular;
+    float fSpecular;
+
+    float constant;
+    float linear;
+    float quadratic;
+
+    float cutOff;
+    float outerCutOff;
+
+    float shininess;
+
+    float* cameraFarPlane;
+    std::vector<float> shadowCascadeLevels;
     LightComponent(KTypeLight type);
+
   };
 
 
@@ -53,7 +61,8 @@ namespace MEW {
   public:
     void operator()(std::vector<std::optional<MEW::TransformComponent>>& vecTrans,
       std::vector<std::optional<MEW::LightComponent>>& vecLight,
-      std::optional<TransformComponent> *camCompT);
+      const std::optional<TransformComponent>& transformCamera,
+      const std::optional<CameraComponent>& cameraComponent);
   };
 }
 

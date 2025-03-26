@@ -20,6 +20,7 @@ namespace MEW {
     float orthoSize;
     glm::mat4 viewMatrix;       
     glm::mat4 projectionMatrix; 
+    float zoom;
   } CameraComponent;
 
   enum Actions
@@ -40,7 +41,8 @@ namespace MEW {
             float fov = 50.0f, 
             float nearPlane = 0.01f, 
             float farPlane = 1000.0f, 
-            float orthosize = 10.0f);
+            float orthosize = 10.0f,
+            float zoom = 1.0f);
     ~Camera() {};
 
     void update(float deltaTime, Input& inputManager);

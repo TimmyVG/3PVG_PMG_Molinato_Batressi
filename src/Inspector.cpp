@@ -101,13 +101,13 @@ namespace MEW {
           ImGui::Text("Light");
 
           // Luego pasas el arreglo a ImGui::ColorPicker3
-          if (ImGui::ColorPicker3("Color", &light->value().diffuse_color.x)) {}
-          if (ImGui::InputFloat("Diffuse Strenght", &light->value().diffuse_strenght)) {}
+          if (ImGui::ColorPicker3("Color Diffuse", &light->value().diffuse.x)) {}
+          if (ImGui::InputFloat("Diffuse Strenght", &light->value().fDiffuse)) {}
 
-          if (ImGui::ColorPicker3("Color Spec", &light->value().spec_color.x)) {}
+          if (ImGui::ColorPicker3("Color Spec", &light->value().specular.x)) {}
 
-          if (ImGui::InputFloat("Spec Strenght", &light->value().spec_strength)) {}
-          if (ImGui::InputFloat("Shin", &light->value().shinisses)) {}
+          if (ImGui::InputFloat("Spec Strenght", &light->value().fSpecular)) {}
+          if (ImGui::InputFloat("Shininess", &light->value().shininess)) {}
       
         }
          

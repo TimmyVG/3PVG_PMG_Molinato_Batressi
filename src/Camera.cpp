@@ -1,7 +1,7 @@
 #include "mew/Camera.hpp"
 #include <glm/gtc/matrix_transform.hpp>
 
-  MEW::Camera::Camera(MEW::ECSManager& ecsMan, float aspectRatio, CameraType type, float fov, float nearPlane, float farPlane, float orthosize)
+  MEW::Camera::Camera(MEW::ECSManager& ecsMan, float aspectRatio, CameraType type, float fov, float nearPlane, float farPlane, float orthosize, float zoom)
   {
     ecs = &ecsMan;
     entity_ = ecs->create_entity("Camera");
@@ -15,6 +15,7 @@
     cameraComp->nearPlane = nearPlane;
     cameraComp->orthoSize = orthosize;
     cameraComp->type = type;
+    cameraComp->zoom = zoom;
     calculateProjection();
     calculateView();
   }
