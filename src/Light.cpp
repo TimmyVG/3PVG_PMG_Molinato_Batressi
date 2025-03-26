@@ -30,6 +30,7 @@ namespace MEW {
 
     cutOff = 12.5f;
     outerCutOff = 15.0f;
+    bling = true;
   }
 
   //Light

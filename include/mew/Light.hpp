@@ -40,6 +40,8 @@ namespace MEW {
 
     float shininess;
 
+    bool bling;
+
     float* cameraFarPlane;
     std::vector<float> shadowCascadeLevels;
     LightComponent(KTypeLight type);

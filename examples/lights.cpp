@@ -71,13 +71,13 @@ int global = 0;
 
 
 		//Add lights
-		MEW::Light directional(ecs, MEW::KTypeLight::Point);
-		//MEW::Light directional1(ecs, MEW::KTypeLight::Directional);
+		MEW::Light directional(ecs, MEW::KTypeLight::Spot);
+		MEW::Light directional1(ecs, MEW::KTypeLight::Spot);
 
 		auto light = &ecs.get_component<MEW::LightComponent>(directional.entity);
 		light->value().specular = glm::vec3(0.01f, 0.01f, 1.0f);
-		//auto light1 = &ecs.get_component<MEW::LightComponent>(directional1.entity);
-		//light1->value().specular = glm::vec3(1.0f, 0.01f, 0.01f);
+		auto light1 = &ecs.get_component<MEW::LightComponent>(directional1.entity);
+		light1->value().specular = glm::vec3(1.0f, 0.01f, 0.01f);
 
 
 		const float color[3] = { 0.25f,0.3f,0.4f };
