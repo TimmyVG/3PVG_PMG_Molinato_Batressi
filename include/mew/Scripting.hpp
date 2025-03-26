@@ -42,12 +42,12 @@ namespace MEW {
     void register_functions(const std::vector<std::optional<ScriptingComponent>>& scl);
   protected:
     void check(const ScriptingComponent& sc, int error);
-    void run(const ScriptingComponent& sc);
   };
 
   std::string file_to_string(const std::filesystem::path& path);
   int multiplication(lua_State* L);
   int lua_get_position(lua_State* L);
   int lua_set_position(lua_State* L);
+  int lua_create_entity(lua_State* L);
 }
 #endif
