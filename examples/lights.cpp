@@ -13,6 +13,7 @@
 #include <mew/Identity.hpp>
 
 
+
 int global = 0;
 
 
@@ -71,13 +72,13 @@ int global = 0;
 
 
 		//Add lights
-		MEW::Light directional(ecs, MEW::KTypeLight::Spot);
+		MEW::Light directional(ecs, MEW::KTypeLight::Directional);
 		MEW::Light directional1(ecs, MEW::KTypeLight::Spot);
 
 		auto light = &ecs.get_component<MEW::LightComponent>(directional.entity);
-		light->value().specular = glm::vec3(0.01f, 0.01f, 1.0f);
-		auto light1 = &ecs.get_component<MEW::LightComponent>(directional1.entity);
-		light1->value().specular = glm::vec3(1.0f, 0.01f, 0.01f);
+		light->value().specular = glm::vec3(1.00f, 1.0f, 1.0f);
+		auto light1 = &ecs.get_component<MEW::TransformComponent>(directional1.entity);
+		//light1->value().rotation_ = glm::vec3(0.0f, 180.00f, 1.00f);
 
 
 		const float color[3] = { 0.25f,0.3f,0.4f };
@@ -120,7 +121,7 @@ int global = 0;
 
 
 
-			inspector.WindowEntities();
+			inspector.WindowEntities(cameraTest);
 
 			MEW::UpdateLights()(ecs.get_vectorComponent<MEW::TransformComponent>(),
 				ecs.get_vectorComponent<MEW::LightComponent>(),
@@ -130,7 +131,7 @@ int global = 0;
 			MEW::LightSystem()(ecs.get_vectorComponent<MEW::TransformComponent>(),
 										ecs.get_vectorComponent<MEW::RenderComponent>(),
 										ecs.get_vectorComponent<MEW::LightComponent>(),
-										shader,
+										shaderDepth,
 										ecs.get_component<MEW::CameraComponent>(cameraTest.entity_));
 
 			MEW::RenderSystemLit()(ecs.get_vectorComponent<MEW::TransformComponent>(),

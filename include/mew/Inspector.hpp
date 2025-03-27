@@ -25,7 +25,7 @@ namespace MEW {
 
     void NewFrame();
 
-    void WindowEntities();
+    void WindowEntities(MEW::Camera caCamera);
     void HideAll();
     void ShowAll();
     void Render();

@@ -6,10 +6,13 @@
 #include "glm/ext/matrix_clip_space.hpp"
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <iostream>
 
 
 #define CAMERA_WIDTH (1280)
 #define CAMERA_HEIGHT (720)
+#define SHADOW_WIDTH (1024)
+#define SHADOW_HEIGHT (1024)
 namespace MEW {
   void GLAPIENTRY
     MessageCallback(GLenum source,
@@ -30,7 +33,7 @@ namespace MEW {
     object = std::make_shared<Object>();
   }
 
-  
+
 
   void RenderSystem::Draw(RenderComponent* rc, TransformComponent* tc)
   {
@@ -47,28 +50,28 @@ namespace MEW {
 
 
 
-		rc->object->shader_->setMat4("model", modelo);
-		rc->object->shader_->setMat4("view", view);
-		rc->object->shader_->setMat4("projection", projection);
-		rc->object->model->Draw(*rc->object->shader_);
-	}
-	void RenderSystemUnlit::operator()(const std::vector<std::optional<MEW::TransformComponent>>& vecTransform,
-		const std::vector<std::optional<MEW::RenderComponent>>& vecRender, MEW::RenderSystem& RS, MEW::Shader& shader,
-		 CameraComponent* camComp) {
+    rc->object->shader_->setMat4("model", modelo);
+    rc->object->shader_->setMat4("view", view);
+    rc->object->shader_->setMat4("projection", projection);
+    rc->object->model->Draw(*rc->object->shader_);
+  }
+  void RenderSystemUnlit::operator()(const std::vector<std::optional<MEW::TransformComponent>>& vecTransform,
+    const std::vector<std::optional<MEW::RenderComponent>>& vecRender, MEW::RenderSystem& RS, MEW::Shader& shader,
+    CameraComponent* camComp) {
 
 
     shader.UseProgram();
 
-		glm::mat4 view = camComp->viewMatrix;
-		glm::mat4 projection = camComp->projectionMatrix;
-		shader.setMat4("view", view);
-		shader.setMat4("projection", projection);
-		auto itRender = vecRender.begin();
-		auto itTransform = vecTransform.begin();
-		for (; itTransform != vecTransform.end() && itRender != vecRender.end(); itTransform++, itRender++) {
-			if (!itRender->has_value() || !itTransform->has_value()) continue;
-			auto& render = itRender->value();
-			auto& transform = itTransform->value();
+    glm::mat4 view = camComp->viewMatrix;
+    glm::mat4 projection = camComp->projectionMatrix;
+    shader.setMat4("view", view);
+    shader.setMat4("projection", projection);
+    auto itRender = vecRender.begin();
+    auto itTransform = vecTransform.begin();
+    for (; itTransform != vecTransform.end() && itRender != vecRender.end(); itTransform++, itRender++) {
+      if (!itRender->has_value() || !itTransform->has_value()) continue;
+      auto& render = itRender->value();
+      auto& transform = itTransform->value();
 
       shader.setMat4("model", transform.model);
 
@@ -110,8 +113,10 @@ namespace MEW {
     auto caCamera = camComp.value();
     auto trCamera = camCompT.value();
 
-    //General settings
+    //General settings    
+
     shader.UseProgram();
+    glViewport(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_BLEND);
 
@@ -130,8 +135,8 @@ namespace MEW {
     auto itTransformL = vecTrans.begin();
     auto itLightL = vecLight.begin();
 
-    for (; itTransformL != vecTrans.end()  && itLightL != vecLight.end(); itTransformL++, itLightL++) {
-      if (!itTransformL->has_value()  || !itLightL->has_value()) continue;
+    for (; itTransformL != vecTrans.end() && itLightL != vecLight.end(); itTransformL++, itLightL++) {
+      if (!itTransformL->has_value() || !itLightL->has_value()) continue;
       auto trLight = itTransformL->value();
       auto liLight = itLightL->value();
 
@@ -152,9 +157,14 @@ namespace MEW {
       shader.setFloat("u_cutoff", glm::cos(glm::radians(liLight.cutOff)));
       shader.setFloat("u_outercutoff", glm::cos(glm::radians(liLight.outerCutOff)));
 
+      shader.setInt("u_blin", liLight.bling);
+
       shader.setFloat3("u_light_dir", &trLight.fwd.x);
       shader.setFloat3("u_lightPos", &trLight.translation_.x);
-      shader.setMat4("u_lightSpaceMatrix", trLight.mat_);
+      shader.setMat4("u_lightSpaceMatrix", liLight.lightSpaceMatrix);
+      shader.setFloat("u_near", liLight.near_plane);
+      shader.setFloat("u_far", liLight.far_plane);
+      shader.setInt("u_shadowMap", 10);
       // Now we draw each object
       auto itTransformO = vecTrans.begin();
       auto itRenderO = vecRender.begin();
@@ -162,12 +172,12 @@ namespace MEW {
         if (!itTransformO->has_value() || !itRenderO->has_value()) continue;
         auto trObject = itTransformO->value();
         auto reObject = itRenderO->value();
-        
+
         // Draw
         shader.setMat4("u_model", trObject.model);
         glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(trObject.model)));
         shader.setMat4("u_normalMatrix", normalMatrix);
-        
+
         //Material prop
         shader.setFloat("u_shininess", liLight.shininess);
         for (const auto& mesh : reObject.object->model->meshes)
@@ -185,7 +195,9 @@ namespace MEW {
             glBindTexture(GL_TEXTURE_2D, mesh.textures_[j].id);
           }
           glActiveTexture(GL_TEXTURE0);
-          glBindVertexArray(mesh.VAO);   
+          glActiveTexture(GL_TEXTURE0 + 10);
+          glBindTexture(GL_TEXTURE_2D, liLight.depthMap);
+          glBindVertexArray(mesh.VAO);
           glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(mesh.indices_.size()), GL_UNSIGNED_INT, 0);
           glBindVertexArray(0);
         }
@@ -194,14 +206,74 @@ namespace MEW {
     }
     glDisable(GL_BLEND);
   }
-  
-    void LightSystem::operator()(
-      const std::vector<std::optional<MEW::TransformComponent>>&vecTrans,
-      const std::vector<std::optional<MEW::RenderComponent>>&vecRender,
-      std::vector<std::optional<MEW::LightComponent>>&vecLight,
-      Shader & shader,
-      std::optional<CameraComponent>&camComp) {
+
+  void LightSystem::operator()(
+    const std::vector<std::optional<MEW::TransformComponent>>& vecTrans,
+    const std::vector<std::optional<MEW::RenderComponent>>& vecRender,
+    std::vector<std::optional<MEW::LightComponent>>& vecLight,
+    Shader& shader,
+    std::optional<CameraComponent>& camComp) {
+    if (!camComp.has_value()) return;
+
+    shader.UseProgram();
+    glCullFace(GL_FRONT);
+    glDepthFunc(GL_LEQUAL);
+    auto itLight = vecLight.begin();
+    auto itLightT = vecTrans.begin();
+    for (; itLight != vecLight.end() && itLightT != vecTrans.end(); itLight++, itLightT++) {
+      if (!itLight->has_value()) continue;
+      if (!itLightT->has_value()) continue;
+      auto &liLight = itLight->value();
+      auto &trLight = itLightT->value();
+      //liLight.lightProjection = glm::ortho(-40.0f, 40.0f, -40.0f, 40.0f, liLight.near_plane, liLight.far_plane);
 
 
+      if (KTypeLight::Directional == liLight.type) {
+        liLight.lightProjection = glm::ortho(-40.0f, 40.0f, -40.0f, 40.0f, liLight.near_plane, liLight.far_plane);
+
+        //liLight.lightProjection = glm::perspective(glm::radians(90.0f), 1.0f, liLight.near_plane, liLight.far_plane);
+
+      }
+      if(KTypeLight::Spot == liLight.type){
+        liLight.lightProjection = glm::perspective(glm::radians(90.0f), 1.0f, liLight.near_plane, liLight.far_plane);
+
+      }
+
+      liLight.lightView = glm::lookAt(trLight.translation_, trLight.translation_ + trLight.fwd, glm::vec3(0.0, 1.0, 0.0));
+      liLight.lightSpaceMatrix = liLight.lightProjection * liLight.lightView;
+
+      shader.setMat4("u_lightSpaceMatrix", liLight.lightSpaceMatrix);
+
+      glViewport(0, 0, liLight.shadow_width, liLight.shadow_height);
+      glBindFramebuffer(GL_FRAMEBUFFER, liLight.depthMapFBO);
+      glClear(GL_DEPTH_BUFFER_BIT);
+
+      auto itRender = vecRender.begin();
+      auto itTransform = vecTrans.begin();
+      for (; itTransform != vecTrans.end() && itRender != vecRender.end(); itTransform++, itRender++) {
+        if (!itRender->has_value() || !itTransform->has_value()) continue;
+        auto& render = itRender->value();
+        auto& transform = itTransform->value();
+        shader.setMat4("u_model", transform.model);
+        for (const auto& mesh : render.object->model->meshes)
+        {
+          // Draw mesh
+          unsigned int diffuseNr = 1;
+
+          glBindVertexArray(mesh.VAO);
+          glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(mesh.indices_.size()), GL_UNSIGNED_INT, 0);
+          glBindVertexArray(0);
+        }
+
+      }
     }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    GLenum err;
+    while ((err = glGetError()) != GL_NO_ERROR) {
+      std::cout << "OpenGL Error: " << err << std::endl;
+    }
+    glCullFace(GL_BACK);
+  }
 }

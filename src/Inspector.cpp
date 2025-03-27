@@ -6,6 +6,8 @@
 #include <mew/Identity.hpp>
 #include <mew/Transform.hpp>
 #include <mew/Light.hpp>
+#include "ImGuizmo.h"
+#include "glm/gtc/type_ptr.hpp"
 namespace MEW {
 
 
@@ -50,11 +52,12 @@ namespace MEW {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
+    ImGuizmo::BeginFrame();
   }
 
 
 
-  void Inspector::WindowEntities(){
+  void Inspector::WindowEntities(MEW::Camera caCamera){
 
     bool state = true;
     if(ImGui::Begin("Entities", &InspectorEntitiesVisible)) {
@@ -108,12 +111,32 @@ namespace MEW {
 
           if (ImGui::InputFloat("Spec Strenght", &light->value().fSpecular)) {}
           if (ImGui::InputFloat("Shininess", &light->value().shininess)) {}
-          if (ImGui::Checkbox("Blin",&light->value().bling))
-        }
-         
-
-        
+          if (ImGui::InputFloat("Near", &light->value().near_plane)) {}
+          if (ImGui::InputFloat("Far", &light->value().far_plane)) {}
+          bool blingValue = light->value().bling;  // Copia el valor
+          if (ImGui::Checkbox("Blin", &blingValue)) {
+            light->value().bling = blingValue;  // Actualiza el valor original
+          }
+        }  
       }
+
+
+
+      auto trEntity = ecs->get_component<MEW::TransformComponent>(EntityInspector);
+      if (EntityInspector  && trEntity.has_value()) {
+        ImGuizmo::SetOrthographic(false);
+        ImGuizmo::SetDrawlist();
+        float windowWidth = (float)ImGui::GetWindowWidth();
+        float windowHeight = (float)ImGui::GetWindowHeight();
+
+        glm::mat4 cameraView = glm::inverse(caCamera.GetTransformComp()->mat_);
+        glm::mat4 projection = caCamera.GetCameraComponent()->projectionMatrix;
+        ImGuizmo::SetRect(0,0, windowWidth, windowHeight);
+
+        ImGuizmo::Manipulate(glm::value_ptr(cameraView),glm::value_ptr(projection),
+                             ImGuizmo::OPERATION::TRANSLATE,ImGuizmo::LOCAL,glm::value_ptr(trEntity.value().model));
+      }
+
       ImGui::End();
     }
   }

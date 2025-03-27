@@ -97,6 +97,7 @@ void MEW::Shader::setInt(const char* name, int value) const
 	glUniform1i(glGetUniformLocation(shaderProgram_, name), value);
 }
 
+
 void MEW::Shader::setFloat(const char* name, float value) const
 {
 	glUniform1f(glGetUniformLocation(shaderProgram_, name), value);

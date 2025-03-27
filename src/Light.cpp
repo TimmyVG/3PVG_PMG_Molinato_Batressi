@@ -8,8 +8,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
-#define SHADOW_WIDTH (1024)
-#define SHADOW_HEIGHT (1024)
+
 
 namespace MEW {
 
@@ -18,12 +17,13 @@ namespace MEW {
     direction = glm::vec3(0.0f);
 
     diffuse = glm::vec3(1.0f);
-    fDiffuse = 0.10f;
+    fDiffuse = 1.0f;
 
 
     specular = glm::vec3(1.0f);
-    fSpecular = 0.10f;
-    shininess = 1.0f;
+    fSpecular = 1.0f;
+
+    shininess = 32.0f;
     constant = 1.0f;
     linear = 0.09;
     quadratic = 0.032f;
@@ -31,6 +31,34 @@ namespace MEW {
     cutOff = 12.5f;
     outerCutOff = 15.0f;
     bling = true;
+
+    near_plane = 0.10f;
+    far_plane = 100.5f;
+    shadow_width = 1024;
+    shadow_height = 1024;
+    glGenFramebuffers(1, &depthMapFBO);
+
+
+    glGenTextures(1, &depthMap);
+    glBindTexture(GL_TEXTURE_2D, depthMap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
+      shadow_width, shadow_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+
+    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+      std::cout << "Framebuffer error: " << status << std::endl;
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
   }
 
   //Light
