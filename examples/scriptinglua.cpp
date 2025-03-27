@@ -30,7 +30,7 @@ int main() {
 	const float backgroundcolor[4] = { 0.2f, 0.3f, 0.3f, 1.0f };
 	double deltaTime;
 	#pragma endregion
-	int nEntity = 5;
+	int nEntity = 10;
 	MEW::ECSManager ecs;
 	std::vector<size_t> entities;
 	MEW::ScriptingSystem SS;
@@ -46,16 +46,15 @@ int main() {
 	MEW::Input input(w.window_);
 	MEW::Shader shader("../data/example.vs", "../data/example.fs");
 	MEW::RenderSystem RS;
-
 	MEW::Object objmiku(&shader);
 	objmiku.model->loadModel("../data/miku/source/Miku.fbx");
 	objmiku.model->loadMeshes();
 
-	size_t miku = ecs.create_entity();
-	entities.push_back(miku);
-	ecs.add_component<MEW::RenderComponent>(miku);
-	ecs.add_component<MEW::TransformComponent>(miku);
-	*ecs.get_component<MEW::RenderComponent>(miku).value().object = objmiku;
+	//size_t miku = ecs.create_entity();
+	//entities.push_back(miku);
+	//ecs.add_component<MEW::RenderComponent>(miku);
+	//ecs.add_component<MEW::TransformComponent>(miku);
+	//*ecs.get_component<MEW::RenderComponent>(miku).value().object = objmiku;
 
 	for (int i = 0; i < nEntity; i++) {
 		size_t entity = ecs.create_entity();
