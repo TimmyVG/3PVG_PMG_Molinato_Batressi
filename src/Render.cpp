@@ -165,6 +165,7 @@ namespace MEW {
       shader.setFloat("u_near", liLight.near_plane);
       shader.setFloat("u_far", liLight.far_plane);
       shader.setInt("u_shadowMap", 10);
+      shader.setInt("u_cubeMap", 11);
       // Now we draw each object
       auto itTransformO = vecTrans.begin();
       auto itRenderO = vecRender.begin();
@@ -195,8 +196,17 @@ namespace MEW {
             glBindTexture(GL_TEXTURE_2D, mesh.textures_[j].id);
           }
           glActiveTexture(GL_TEXTURE0);
-          glActiveTexture(GL_TEXTURE0 + 10);
-          glBindTexture(GL_TEXTURE_2D, liLight.depthMap);
+
+          if (KTypeLight::Point == liLight.type) {
+            glActiveTexture(GL_TEXTURE0 + 11);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, liLight.depthMap);
+
+          }
+          else {
+            glActiveTexture(GL_TEXTURE0 + 10);
+            glBindTexture(GL_TEXTURE_2D, liLight.depthMap);
+
+          }
           glBindVertexArray(mesh.VAO);
           glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(mesh.indices_.size()), GL_UNSIGNED_INT, 0);
           glBindVertexArray(0);
@@ -238,12 +248,35 @@ namespace MEW {
         liLight.lightProjection = glm::perspective(glm::radians(90.0f), 1.0f, liLight.near_plane, liLight.far_plane);
 
       }
+      if (KTypeLight::Point == liLight.type) {
+        liLight.lightProjection = glm::perspective(glm::radians(90.0f), 1.0f, liLight.near_plane, liLight.far_plane);
+        std::vector<glm::mat4> shadowTransforms;
+        shadowTransforms.push_back(liLight.lightProjection *
+          glm::lookAt(trLight.translation_, trLight.translation_ + glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
+        shadowTransforms.push_back(liLight.lightProjection *
+          glm::lookAt(trLight.translation_, trLight.translation_ + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
+        shadowTransforms.push_back(liLight.lightProjection *
+          glm::lookAt(trLight.translation_, trLight.translation_ + glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0)));
+        shadowTransforms.push_back(liLight.lightProjection *
+          glm::lookAt(trLight.translation_, trLight.translation_ + glm::vec3(0.0, -1.0, 0.0), glm::vec3(0.0, 0.0, -1.0)));
+        shadowTransforms.push_back(liLight.lightProjection *
+          glm::lookAt(trLight.translation_, trLight.translation_ + glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0, -1.0, 0.0)));
+        shadowTransforms.push_back(liLight.lightProjection *
+          glm::lookAt(trLight.translation_, trLight.translation_ + glm::vec3(0.0, 0.0, -1.0), glm::vec3(0.0, -1.0, 0.0)));
+        for (unsigned int i = 0; i < 6; ++i) {
+
+          std::string uniformName = "shadowMatrices[" + std::to_string(i) + "]";
+          shader.setMat4(uniformName.c_str(), shadowTransforms[i]);
+        }
+      }
 
       liLight.lightView = glm::lookAt(trLight.translation_, trLight.translation_ + trLight.fwd, glm::vec3(0.0, 1.0, 0.0));
       liLight.lightSpaceMatrix = liLight.lightProjection * liLight.lightView;
 
       shader.setMat4("u_lightSpaceMatrix", liLight.lightSpaceMatrix);
-
+      shader.setFloat("u_far", liLight.far_plane);
+      shader.setInt("u_type", liLight.type);
+      shader.setFloat3("u_lightPos", &trLight.translation_.x);
       glViewport(0, 0, liLight.shadow_width, liLight.shadow_height);
       glBindFramebuffer(GL_FRAMEBUFFER, liLight.depthMapFBO);
       glClear(GL_DEPTH_BUFFER_BIT);

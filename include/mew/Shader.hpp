@@ -10,10 +10,12 @@ namespace MEW {
 		public:
 			unsigned int vertexShader_;
 			unsigned int fragmentShader_;
+			unsigned int geometryShader_;
 			unsigned int shaderProgram_;
 
 			Shader();
 			Shader(const char* vertexPath, const char* fragmentPath);
+			Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath);
 			void Draw(unsigned int vao);
 			void UseProgram();
 			void setBool(const char* name, bool value) const;

@@ -51,7 +51,7 @@ int global = 0;
 		}
 		MEW::Window w = maybe_w.value();
 		MEW::Shader shader("../data/exampleLight.vs", "../data/exampleLight.fs");
-		MEW::Shader shaderDepth("../data/exampleDepth.vs", "../data/exampleDepth.fs");
+		MEW::Shader shaderDepth("../data/exampleDepth.vs", "../data/exampleDepth.fs", "../data/exampleDepth.gs" );
 
 
 
@@ -72,13 +72,13 @@ int global = 0;
 
 
 		//Add lights
-		MEW::Light directional(ecs, MEW::KTypeLight::Directional);
-		MEW::Light directional1(ecs, MEW::KTypeLight::Spot);
+		MEW::Light directional(ecs, MEW::KTypeLight::Point);
+		//MEW::Light directional1(ecs, MEW::KTypeLight::Point);
 
-		auto light = &ecs.get_component<MEW::LightComponent>(directional.entity);
-		light->value().specular = glm::vec3(1.00f, 1.0f, 1.0f);
-		auto light1 = &ecs.get_component<MEW::TransformComponent>(directional1.entity);
-		//light1->value().rotation_ = glm::vec3(0.0f, 180.00f, 1.00f);
+		auto light = &ecs.get_component<MEW::TransformComponent>(directional.entity);
+		light->value().translation_ = glm::vec3(0.0f, 5.0f, 0.00f);
+		//auto light1 = &ecs.get_component<MEW::TransformComponent>(directional1.entity);
+		//light1->value().translation_ = glm::vec3(0.0f, 5.0f, 1.00f);
 
 
 		const float color[3] = { 0.25f,0.3f,0.4f };
