@@ -51,7 +51,8 @@ int global = 0;
 		}
 		MEW::Window w = maybe_w.value();
 		MEW::Shader shader("../data/exampleLight.vs", "../data/exampleLight.fs");
-		MEW::Shader shaderDepth("../data/exampleDepth.vs", "../data/exampleDepth.fs", "../data/exampleDepth.gs" );
+		MEW::Shader shaderDepth("../data/exampleDepth.vs", "../data/exampleDepth.fs");
+		MEW::Shader shaderDepthCube("../data/exampleDepthCube.vs", "../data/exampleDepthCube.fs", "../data/exampleDepth.gs" );
 
 
 
@@ -131,7 +132,7 @@ int global = 0;
 			MEW::LightSystem()(ecs.get_vectorComponent<MEW::TransformComponent>(),
 										ecs.get_vectorComponent<MEW::RenderComponent>(),
 										ecs.get_vectorComponent<MEW::LightComponent>(),
-										shaderDepth,
+				shaderDepthCube,shaderDepthCube,
 										ecs.get_component<MEW::CameraComponent>(cameraTest.entity_));
 
 			MEW::RenderSystemLit()(ecs.get_vectorComponent<MEW::TransformComponent>(),

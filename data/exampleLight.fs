@@ -8,6 +8,7 @@ uniform mat4 u_lightSpaceMatrix;
 uniform sampler2D texture_diffuse0;
 
 uniform sampler2D u_shadowMap;
+uniform samplerCube u_cubeMap;
 
 uniform vec3 u_camera_pos;
 //TODO
@@ -52,10 +53,10 @@ float LinearizeDepth(float depth)
     return (2.0 * u_near * u_far) / (u_far + u_near - z * (u_far - u_near));
 }
 
-float ShadowCalculation()
+float ShadowCalculationDefault(float bias)
 {
     vec3 Normal = normalize(normal);
-    float bias = 0.0005;
+    
     //float bias = max(0.05 * (1.0 - dot(Normal, normalize(u_light_dir))), 0.05);  
     // perform perspective divide
     vec3 projCoords = FragPosLightSpace.xyz / FragPosLightSpace.w;
@@ -83,6 +84,37 @@ float ShadowCalculation()
 
     shadow /= 9.0;
 
+    return shadow;
+}
+
+vec3 sampleOffsetDirections[20] = vec3[]
+(
+   vec3(1, 1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1), vec3(-1, 1,  1), 
+   vec3(1, 1, -1), vec3( 1, -1, -1), vec3(-1, -1, -1), vec3(-1, 1, -1),
+   vec3(1, 1,  0), vec3( 1, -1,  0), vec3(-1, -1,  0), vec3(-1, 1,  0),
+   vec3(1, 0,  1), vec3(-1,  0,  1), vec3( 1,  0, -1), vec3(-1, 0, -1),
+   vec3(0, 1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0, 1, -1)
+);   
+float ShadowCalculationPoint(float bias)
+{
+    vec3 fragToLight = FragPos - u_lightPos;
+
+    float currentDepth = length(fragToLight);
+    // 20 points
+    float shadow = 0.0;
+    int samples = 20;
+    float closestDepth;
+    float viewDistance = length(u_camera_pos - FragPos);
+    float diskRadius = (1.0 + (viewDistance / u_far)) / 25.0;
+    for(int i = 0; i < samples; ++i)
+    {
+        closestDepth = texture(u_cubeMap, fragToLight + sampleOffsetDirections[i] * diskRadius).r;
+        closestDepth *= u_far;   // undo mapping [0;1]
+        if(currentDepth - bias > closestDepth)
+            shadow += 1.0;
+    }
+    shadow /= float(samples);
+    // FragColor = vec4(vec3(closestDepth / far_plane), 1.0);    
     return shadow;
 }
 
@@ -146,8 +178,9 @@ vec3 DirectionalLight()
       vec3 viewDir = normalize(u_camera_pos - FragPos);
       vec3 lightDir = normalize(u_lightPos - FragPos);
       vec3 Normal = normalize(normal);
-      float diff = max(dot(Normal, lightDir),0.0);
+      float diff = max(dot(lightDir, Normal),0.0);
       float spec = 0.0;
+      
       if(u_blin == 1){
         vec3 halfwayDir = normalize(lightDir + viewDir);
         spec = pow(max(dot(Normal, halfwayDir),0.0),u_shininess * 2.0);
@@ -180,22 +213,22 @@ void main() {
 
   vec3 light = vec3(0.0,0.0,0.0);
     float shadow = 0.0f;
-
+    float bias = 0.0005;
         switch(u_type){
           case 1:
             light = DirectionalLight();
-            shadow = ShadowCalculation();
+            shadow = ShadowCalculationDefault(max(0.05 * (1.0 - dot(normalize(normal), normalize(u_light_dir))), 0.05));
             //light = light * (1.0 - shadow);
         break;
 
         case 2:
             light = PointLight();
-            shadow = ShadowCalculation();
+            shadow = ShadowCalculationPoint(0.15);
         break;
 
         case 3:
             light = SpotLight();
-            shadow = ShadowCalculation();
+            shadow = ShadowCalculationDefault(bias);
             break;
         case 4:
             light = AmbientLight();
