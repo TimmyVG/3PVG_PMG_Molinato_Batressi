@@ -76,7 +76,7 @@ project "Motor"
         files "examples/trianglemove.cpp"
 
     project"MeshTextureLoader"
-        kind "WindowedApp"
+        kind "ConsoleApp"
         language "C++"
         targetdir "build/%{prj.name}/%{cfg.buildcfg}"
         includedirs "include"

@@ -108,7 +108,7 @@ namespace MEW {
 
           if (ImGui::InputFloat("Spec Strenght", &light->value().fSpecular)) {}
           if (ImGui::InputFloat("Shininess", &light->value().shininess)) {}
-          if (ImGui::Checkbox("Blin",&light->value().bling))
+          if (ImGui::Checkbox("Blin", &light->value().bling)) {}
         }
          
 

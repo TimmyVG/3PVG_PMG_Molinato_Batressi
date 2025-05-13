@@ -15,7 +15,6 @@ namespace MEW {
 			Object(std::string, Shader* shader);
 			Object(Shader* shader);
 
-			void Draw();
 			void UseProgram();
 			Model* model;
 			size_t entity_;

@@ -11,15 +11,17 @@
 #include "mew/Object.hpp"
 #include <memory>
 #include "mew/Camera.hpp"
+#include "mew/ECSManager.hpp"
 #include "mew/Shader.hpp"
 
 
 namespace MEW {
 	struct RenderComponent {
-		RenderComponent();
-		std::shared_ptr<Object> object;
-
+		std::shared_ptr<std::optional<Model>> model;
+		bool cast_shadows;
+		RenderComponent() : model(std::make_shared<std::optional<Model>>()), cast_shadows(false) {};
 	};
+
 
 	class RenderSystem {
 	public:
@@ -31,7 +33,7 @@ namespace MEW {
 	class RenderSystemUnlit {
 	public:
 		void operator()(const std::vector<std::optional<MEW::TransformComponent>>& vecTransform,
-			const std::vector<std::optional<MEW::RenderComponent>>& vecRender, MEW::RenderSystem& RS, MEW::Shader& shader,
+			const std::vector<std::optional<MEW::RenderComponent>>& vecRender, MEW::Shader& shader,
 			CameraComponent* camComp);
 	};
 
@@ -54,7 +56,17 @@ namespace MEW {
 	};
 
 
-	
+	class ModelObject {
+	public:
+		MEW::TransformComponent* GetTransformComponent();
+		MEW::RenderComponent* GetRenderComponent();
+		ModelObject(MEW::ECSManager& ecs);
+		size_t GetEntity();
+
+	private:
+		size_t entity_;
+		MEW::ECSManager* ecs_;
+	};
 
 }
 

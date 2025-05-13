@@ -8,7 +8,7 @@ namespace MEW {
     if (error != LUA_OK) {
       int top = lua_gettop(sc.s);
       std::string err = (top > 0) ? lua_tostring(sc.s, -1) : "Unknown Lua error";
-      lua_pop(sc.s, (top > 0) ? 1 : 0);  // Pop only if there's something on the stack
+      lua_pop(sc.s, (top > 0) ? 1 : 0); 
       throw std::runtime_error("Lua error: " + err);
     }
   }
@@ -109,9 +109,15 @@ namespace MEW {
   }
   int lua_create_entity(lua_State* L) {
     ECSManager* ecs = World::GetWorld().getECSManager();
-    //size_t entity = ecs->create_entity();
-    //lua_pushinteger(L, entity);
-    return 0; // Returning entity number
+    size_t entity = ecs->create_entity();
+    lua_pushinteger(L, entity);
+    return 1; // Returning entity number
+  }
+
+  int lua_destroy_entity(lua_State* l) {
+    ECSManager* ecs = World::GetWorld().getECSManager();
+    //size_t entity = ecs->destroy_entity(luaL_checkinteger(L, 1));
+    return 0; 
   }
 
 }

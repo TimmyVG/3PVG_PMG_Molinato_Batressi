@@ -30,7 +30,7 @@ int main() {
 	const float backgroundcolor[4] = { 0.2f, 0.3f, 0.3f, 1.0f };
 	double deltaTime;
 	#pragma endregion
-	int nEntity = 10;
+	int nEntity = 1;
 	MEW::ECSManager ecs;
 	std::vector<size_t> entities;
 	MEW::ScriptingSystem SS;

@@ -1,4 +1,3 @@
-#include "GLFW/glfw3.h"
 #include "mew/Window.hpp"
 #include "mew/Shader.hpp"
 #include "mew/Object.hpp"
@@ -27,9 +26,9 @@ int main() {
 	//AddComponents to ecs
 
 	ecs.add_component_type<MEW::TransformComponent>();
+	ecs.add_component_type<MEW::CameraComponent>();
 	ecs.add_component_type<MEW::RenderComponent>();
-	MEW::TransformSystem TS;
-	MEW::RenderSystem RS;
+
 	JobSystem js;
 	
 	std::mutex output_mutex;
@@ -47,16 +46,6 @@ int main() {
 	MEW::Window w = maybe_w.value();
 
 	MEW::Shader shader("../data/example.vs", "../data/example.fs");
-	MEW::Shader shaderTriangle("../data/triangle.vs", "../data/triangle.fs");
-	std::vector<float> pointvertex = {
- 0.5f,  0.5f, 0.0f,  // top right
- 0.5f, -0.5f, 0.0f,  // bottom right
--0.5f,  0.5f, 0.0f,  // top left 
-	};
-
-
-	MEW::Object obj2(&shader);
-	MEW::Object objaux(&shader);
 
 	size_t entity = ecs.create_entity();
 	ecs.add_component<MEW::TransformComponent>(entity);
@@ -64,93 +53,70 @@ int main() {
 	MEW::RenderComponent* rc = &ecs.get_component<MEW::RenderComponent>(entity).value();
 	MEW::TransformComponent* tc = &ecs.get_component<MEW::TransformComponent>(entity).value();
 
-	MEW::Geometry triangle(pointvertex, &shaderTriangle);
 	const float color[3] = { 0.4f,0.3f,0.25f };
 	MEW::Input input(w.window_);
 	input.assign(MEW::Input::Buttons::MOUSE_1, CHANGE);
-	input.assign(MEW::Input::Buttons::MOUSE_2, CHANGE2);
-	//Triangle Movement
-	input.assign(MEW::Input::Buttons::KEY_A, LEFT);
-	input.assign(MEW::Input::Buttons::KEY_LEFT, LEFT);
-	input.assign(MEW::Input::Buttons::KEY_D, RIGHT);
-	input.assign(MEW::Input::Buttons::KEY_RIGHT, RIGHT);
-	input.assign(MEW::Input::Buttons::KEY_W, UP);
-	input.assign(MEW::Input::Buttons::KEY_UP, UP);
-	input.assign(MEW::Input::Buttons::KEY_S, DOWN);
-	input.assign(MEW::Input::Buttons::KEY_DOWN, DOWN);
-	TS.TranslateZ(-10,tc);
-	TS.TranslateY(-3, tc);
-
-	TS.RotateX(-45.0f, tc);
-
-	TS.SetScale(glm::vec3(1.0f), tc);
 
 	bool done = false;
 	const float backgroundcolor[4] = { 0.2f, 0.3f, 0.3f, 1.0f };
 	double deltaTime;
-	std::string objdirectory = "../data/Silla.fbx";
-	std::string objdirectorymiku = "../data/miku/source/Miku.fbx";
-	std::string objdirectorycube = "../data/spiderman.fbx";
-	std::vector<std::string> directories;
-	directories.push_back(objdirectory);
-	directories.push_back(objdirectorymiku);
-	directories.push_back(objdirectorycube);
-	int objindex = 0;
-	auto pruebaFuture = js.add([&objaux,objindex,directories]() {
-		 return objaux.model->loadModel(directories[objindex]);
-		});
-	objindex++;
 
-	bool obj_loaded = false;
-	bool aux_loaded = true;
+	std::optional<MEW::Model> currentModel_;
+
+	std::vector<std::string> obj_paths;
+	obj_paths.push_back("../data/cube/cube.obj");
+	obj_paths.push_back("../data/Silla.fbx");
+
+	int objIndex = 0;
+	std::future<std::optional<std::vector<MEW::MeshData>>> current_meshdata_future = js.add([objIndex, obj_paths]() { return MEW::loadModel(obj_paths[objIndex]); });
+	objIndex++;
+
+	MEW::ModelObject currentObject(ecs);
+
+	input.assign(MEW::Input::Buttons::KEY_A, MEW::CAMERA_LEFT);
+	input.assign(MEW::Input::Buttons::KEY_LEFT, MEW::CAMERA_LEFT);
+	input.assign(MEW::Input::Buttons::KEY_D, MEW::CAMERA_RIGHT);
+	input.assign(MEW::Input::Buttons::KEY_RIGHT, MEW::CAMERA_RIGHT);
+	input.assign(MEW::Input::Buttons::KEY_W, MEW::CAMERA_FORWARD);
+	input.assign(MEW::Input::Buttons::KEY_UP, MEW::CAMERA_FORWARD);
+	input.assign(MEW::Input::Buttons::KEY_S, MEW::CAMERA_BACK);
+	input.assign(MEW::Input::Buttons::KEY_DOWN, MEW::CAMERA_BACK);
+	input.assign(MEW::Input::Buttons::MOUSE_2, MEW::CAMERA_ROTATE);
+	MEW::Camera cameraTest(ecs, 640 / 460);
+	bool loaded = false;
 	while (!done) {
 		input.newframe();
 
 		w.newframe(backgroundcolor);
 		deltaTime = w.deltaTime();
+		cameraTest.update(deltaTime, input);
 
-		obj2.UseProgram();
+		if (current_meshdata_future.valid() && current_meshdata_future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
 
-		if (pruebaFuture.valid() && pruebaFuture.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
-			obj_loaded = pruebaFuture.get();
-			obj2.model = objaux.model;
-			obj2.model->loadMeshes();
-			MEW::RenderComponent *auxrc =  &ecs.get_component<MEW::RenderComponent>(entity).value();
-			*auxrc->object = std::move(obj2);
-			aux_loaded = false;
+			std::vector<MEW::MeshData> current_meshData = current_meshdata_future.get().value();
+			currentModel_ = MEW::Model(current_meshData);
+			*currentObject.GetRenderComponent()->model = currentModel_;
+			current_meshData.clear();
 		}
-		if (input.isKeyPressed(UP)) triangle.TranslateY(static_cast<float>(deltaTime) * 1.0f);
-		if (input.isKeyPressed(LEFT)) triangle.TranslateX(static_cast<float>(deltaTime) * -1.0f);
-		if (input.isKeyPressed(DOWN)) triangle.TranslateY(static_cast<float>(deltaTime) * -1.0f);
-		if (input.isKeyPressed(RIGHT)) triangle.TranslateX(static_cast<float>(deltaTime) * 1.0f);
-		if (obj_loaded&&!aux_loaded)
-		{
-			RS.Draw(&ecs.get_component<MEW::RenderComponent>(entity).value(), &ecs.get_component<MEW::TransformComponent>(entity).value());
-			if (input.isKeyUp(CHANGE))
-			{
-				if (objindex!=2)
-				{
-					TS.SetScale(glm::vec3(1.0f), &ecs.get_component<MEW::TransformComponent>(entity).value());
-				}
-				else
-				{
-					TS.SetScale(glm::vec3(0.1f), &ecs.get_component<MEW::TransformComponent>(entity).value());
-				}
-				objaux.model->meshes.clear();
-				objaux.model->textures_loaded.clear();
-				pruebaFuture = js.add([&objaux, objindex, directories]() {
-					return objaux.model->loadModel(directories[objindex]);
+
+		if (currentModel_) {
+
+			if (input.isKeyDown(Actions::CHANGE)) {
+
+				current_meshdata_future = js.add([&currentModel_, objIndex, obj_paths]() {
+					std::optional<std::vector<MEW::MeshData>> next_meshData = MEW::loadModel(obj_paths[objIndex]);
+					return next_meshData;
 					});
-				aux_loaded = true;
-				objindex++;
-				if (objindex >= directories.size())
-				{
-					objindex = 0;
-				}
+
+				objIndex++;
+				if (objIndex >= obj_paths.size()) objIndex = 0;
 			}
 		}
-		triangle.Draw();
-
+		
+		const auto& vecT = ecs.get_vectorComponent<MEW::TransformComponent>();
+		const auto& vecR = ecs.get_vectorComponent<MEW::RenderComponent>();
+		MEW::TransformSystemMat()(ecs.get_vectorComponent<MEW::TransformComponent>());
+		MEW::RenderSystemUnlit()(vecT, vecR, shader, &ecs.get_component<MEW::CameraComponent>(cameraTest.entity_).value());
 
 		bool closePressed = w.closedPressed();
 		bool escPressed = w.isKeyPressed(GLFW_KEY_ESCAPE);
