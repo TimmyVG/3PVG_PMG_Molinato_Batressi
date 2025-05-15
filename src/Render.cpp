@@ -225,7 +225,7 @@ namespace MEW {
     std::optional<CameraComponent>& camComp) {
     if (!camComp.has_value()) return;
 
-    
+
     glCullFace(GL_FRONT);
     glDepthFunc(GL_LEQUAL);
     auto itLight = vecLight.begin();
@@ -233,8 +233,8 @@ namespace MEW {
     for (; itLight != vecLight.end() && itLightT != vecTrans.end(); itLight++, itLightT++) {
       if (!itLight->has_value()) continue;
       if (!itLightT->has_value()) continue;
-      auto &liLight = itLight->value();
-      auto &trLight = itLightT->value();
+      auto& liLight = itLight->value();
+      auto& trLight = itLightT->value();
       //liLight.lightProjection = glm::ortho(-40.0f, 40.0f, -40.0f, 40.0f, liLight.near_plane, liLight.far_plane);
 
 
@@ -245,14 +245,14 @@ namespace MEW {
         //liLight.lightProjection = glm::perspective(glm::radians(90.0f), 1.0f, liLight.near_plane, liLight.far_plane);
 
       }
-      if(KTypeLight::Spot == liLight.type){
+      if (KTypeLight::Spot == liLight.type) {
         shader.UseProgram();
         liLight.lightProjection = glm::perspective(glm::radians(90.0f), 1.0f, liLight.near_plane, liLight.far_plane);
 
       }
       if (KTypeLight::Point == liLight.type) {
         shaderCube.UseProgram();
-        liLight.lightProjection = glm::perspective(glm::radians(90.0f), (float)liLight.shadow_width/ (float)liLight.shadow_height, liLight.near_plane, liLight.far_plane);
+        liLight.lightProjection = glm::perspective(glm::radians(90.0f), (float)liLight.shadow_width / (float)liLight.shadow_height, liLight.near_plane, liLight.far_plane);
         std::vector<glm::mat4> shadowTransforms;
         shadowTransforms.push_back(liLight.lightProjection *
           glm::lookAt(trLight.translation_, trLight.translation_ + glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));

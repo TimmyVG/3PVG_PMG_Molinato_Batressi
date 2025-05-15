@@ -6,7 +6,7 @@
 #include <mew/Identity.hpp>
 #include <mew/Transform.hpp>
 #include <mew/Light.hpp>
-#include "ImGuizmo.h"
+
 #include "glm/gtc/type_ptr.hpp"
 namespace MEW {
 
@@ -31,6 +31,8 @@ namespace MEW {
 
     ImGui_ImplOpenGL3_Init("#version 330");
     ImGui::StyleColorsDark();
+
+    ImGuizmo::SetImGuiContext(ImGui::GetCurrentContext());
   }
 
   void Inspector::update(float deltaTime, Input& inputManager)
@@ -122,19 +124,38 @@ namespace MEW {
 
 
 
-      auto trEntity = ecs->get_component<MEW::TransformComponent>(EntityInspector);
-      if (EntityInspector  && trEntity.has_value()) {
-        ImGuizmo::SetOrthographic(false);
-        ImGuizmo::SetDrawlist();
-        float windowWidth = (float)ImGui::GetWindowWidth();
-        float windowHeight = (float)ImGui::GetWindowHeight();
+      auto trEntity = &ecs->get_component<MEW::TransformComponent>(EntityInspector);
+      if (EntityInspector != -1  && trEntity->has_value()) {
+        ImGuiIO& io = ImGui::GetIO();
 
-        glm::mat4 cameraView = glm::inverse(caCamera.GetTransformComp()->mat_);
+        if (io.KeysDown[GLFW_KEY_T]) operation = ImGuizmo::TRANSLATE; // Mover
+        if (io.KeysDown[GLFW_KEY_R]) operation = ImGuizmo::ROTATE;    // Rotar
+        if (io.KeysDown[GLFW_KEY_S]) operation = ImGuizmo::SCALE;
+
+        ImGuizmo::SetOrthographic(false);
+        ImGuizmo::SetDrawlist(ImGui::GetForegroundDrawList());
+        float windowWidth = (float)1280;
+        float windowHeight = (float)720;
+
+        glm::mat4 cameraView = caCamera.GetCameraComponent()->viewMatrix;
         glm::mat4 projection = caCamera.GetCameraComponent()->projectionMatrix;
         ImGuizmo::SetRect(0,0, windowWidth, windowHeight);
 
         ImGuizmo::Manipulate(glm::value_ptr(cameraView),glm::value_ptr(projection),
-                             ImGuizmo::OPERATION::TRANSLATE,ImGuizmo::LOCAL,glm::value_ptr(trEntity.value().model));
+          operation,mCurrentGizmoMode,glm::value_ptr(trEntity->value().model));
+
+        if (ImGuizmo::IsUsing()) {
+          float matrixTranslation[3], matrixRotation[3], matrixScale[3];
+          ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(trEntity->value().model), matrixTranslation, matrixRotation, matrixScale);
+          ImGui::InputFloat3("Tr", matrixTranslation);
+          ImGui::InputFloat3("Rt", matrixRotation);
+          ImGui::InputFloat3("Sc", matrixScale);
+          ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, glm::value_ptr(trEntity->value().model));
+          trEntity->value().translation_ = glm::vec3(matrixTranslation[0], matrixTranslation[1], matrixTranslation[2]);
+          trEntity->value().rotation_ = glm::vec3(matrixRotation[0], matrixRotation[1], matrixRotation[2]);
+          trEntity->value().scale_ = glm::vec3(matrixScale[0], matrixScale[1], matrixScale[2]);
+          
+        }
       }
 
       ImGui::End();
