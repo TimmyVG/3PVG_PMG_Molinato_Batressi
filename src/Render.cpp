@@ -28,7 +28,7 @@ namespace MEW {
       type, severity, message);
   }
 
-	void RenderSystemUnlit::operator()operator()operator()(const std::vector<std::optional<MEW::TransformComponent>>& vecTransform,
+	void RenderSystemUnlit::operator()(const std::vector<std::optional<MEW::TransformComponent>>& vecTransform,
 		const std::vector<std::optional<MEW::RenderComponent>>& vecRender, MEW::Shader& shader,
 		 CameraComponent* camComp) {
 
@@ -91,13 +91,6 @@ namespace MEW {
 
  
   
-    void LightSystem::operator()(
-      const std::vector<std::optional<MEW::TransformComponent>>&vecTrans,
-      const std::vector<std::optional<MEW::RenderComponent>>&vecRender,
-      std::vector<std::optional<MEW::LightComponent>>&vecLight,
-      Shader & shader,
-      std::optional<CameraComponent>&camComp) {
-    }
 
     TransformComponent* ModelObject::GetTransformComponent() {
       return &ecs_->get_component<TransformComponent>(entity_).value();
@@ -198,20 +191,17 @@ namespace MEW {
 
         //Material prop
         shader.setFloat("u_shininess", liLight.shininess);
-        for (const auto& mesh : reObject.object->model->meshes)
+        for (const auto& mesh : reObject.model->value().meshes_)
         {
           // Draw mesh
           unsigned int diffuseNr = 1;
-          for (unsigned int j = 0; j < mesh.textures_.size(); j++) {
-            glActiveTexture(GL_TEXTURE0 + j);
-            std::string number;
-            std::string name = mesh.textures_[j].type;
-            if (name == "texture_diffuse") {
-              number = std::to_string(diffuseNr++);
-            }
-            shader.setInt((name + number).c_str(), j);
-            glBindTexture(GL_TEXTURE_2D, mesh.textures_[j].id);
+          unsigned int textureUnit = 1;
+          if (mesh.diffuse_tex_.has_value()) {
+            glActiveTexture(GL_TEXTURE0 + textureUnit);
+            shader.setInt("texture_diffuse0", textureUnit);
+            glBindTexture(GL_TEXTURE_2D, mesh.diffuse_tex_.value().getID());
           }
+
           glActiveTexture(GL_TEXTURE0);
 
           if (KTypeLight::Point == liLight.type) {
@@ -224,7 +214,7 @@ namespace MEW {
             glBindTexture(GL_TEXTURE_2D, liLight.depthMap);
 
           }
-          glBindVertexArray(mesh.VAO);
+          glBindVertexArray(mesh.GetVAO());
           glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(mesh.indices_.size()), GL_UNSIGNED_INT, 0);
           glBindVertexArray(0);
         }
@@ -308,12 +298,12 @@ namespace MEW {
         auto& render = itRender->value();
         auto& transform = itTransform->value();
         shader.setMat4("u_model", transform.model);
-        for (const auto& mesh : render.object->model->meshes)
+        for (const auto& mesh : render.model->value().meshes_)
         {
           // Draw mesh
           unsigned int diffuseNr = 1;
 
-          glBindVertexArray(mesh.VAO);
+          glBindVertexArray(mesh.GetVAO());
           glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(mesh.indices_.size()), GL_UNSIGNED_INT, 0);
           glBindVertexArray(0);
         }

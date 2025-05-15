@@ -55,18 +55,17 @@ int global = 0;
 		MEW::Shader shaderDepthCube("../data/exampleDepthCube.vs", "../data/exampleDepthCube.fs", "../data/exampleDepth.gs" );
 
 
+		std::optional<MEW::Model> CorvModel;
+		std::vector<MEW::MeshData> CorvMeshData = MEW::loadModel("../data/sponza/sponza.obj").value();
+		CorvModel = MEW::Model(CorvMeshData);
+		MEW::ModelObject objmiku(ecs);
+		*objmiku.GetRenderComponent()->model = CorvModel;
+		objmiku.GetTransformComponent()->scale_ = glm::vec3(1, 1, 1);
+		objmiku.GetTransformComponent()->rotation_ = glm::vec3(0.0f, 0.0f, 0.0f);
+		objmiku.GetTransformComponent()->translation_ = glm::vec3(0.0f, 0.0f, 0.0f);
 
-		MEW::Object objmiku(&shader);
-		objmiku.model->loadModel("../data/sponza/sponza.obj");
-		objmiku.model->loadMeshes();
 
 
-		std::vector<size_t> entities;
-		size_t miku = ecs.create_entity("miku");
-		ecs.add_component<MEW::RenderComponent>(miku);
-		ecs.add_component<MEW::TransformComponent>(miku);
-		ecs.get_component<MEW::TransformComponent>(miku).value().scale_ = glm::vec3(0.1f);
-		*ecs.get_component<MEW::RenderComponent>(miku).value().object = objmiku;
 
 
 
