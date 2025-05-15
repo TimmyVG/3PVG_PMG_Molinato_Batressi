@@ -52,7 +52,7 @@ namespace MEW {
 		void operator()(const std::vector<std::optional<MEW::TransformComponent>>& vecTrans,
 			const std::vector<std::optional<MEW::RenderComponent>>& vecRender,
 			std::vector<std::optional<MEW::LightComponent>>& vecLight,
-			Shader& shader, std::optional<CameraComponent>& camComp);
+			Shader& shader, Shader& shaderCube, std::optional<CameraComponent>& camComp);
 	};
 
 

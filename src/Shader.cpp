@@ -73,6 +73,81 @@ MEW::Shader::Shader(const char* vertexPath, const char* fragmentPath)
 	glDeleteShader(fragmentShader_);
 
 }
+MEW::Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath)
+{
+	fragmentShader_ = 0;
+	vertexShader_ = 0;
+	geometryShader_ = 0;
+	shaderProgram_ = 0;
+	std::string vertexCode;
+	std::string fragmentCode;
+	std::string geometryCode;
+	std::ifstream vShaderFile;
+	std::ifstream fShaderFile;
+	std::ifstream gShaderFile;
+	// open files
+	vShaderFile.open(vertexPath);
+	fShaderFile.open(fragmentPath);
+	gShaderFile.open(geometryPath);
+	std::stringstream vShaderStream, fShaderStream, gShaderStream;
+	// read file's buffer contents into streams
+	vShaderStream << vShaderFile.rdbuf();
+	fShaderStream << fShaderFile.rdbuf();
+	gShaderStream << gShaderFile.rdbuf();
+	// close file handlers
+	vShaderFile.close();
+	fShaderFile.close();
+	gShaderFile.close();
+	// convert stream into string
+	vertexCode = vShaderStream.str();
+	fragmentCode = fShaderStream.str();
+	geometryCode = gShaderStream.str();
+	const char* vShaderCode = vertexCode.c_str();
+	const char* fShaderCode = fragmentCode.c_str();
+	const char* gShaderCode = geometryCode.c_str();
+	//leer los dos fcheros
+
+	glewInit();
+
+	vertexShader_ = glCreateShader(GL_VERTEX_SHADER);
+
+	GLenum error = glGetError();
+	if (error != GL_NO_ERROR) {
+		std::cout << "Error al crear el shader: " << error << std::endl;
+	}
+	glShaderSource(vertexShader_, 1, &vShaderCode, NULL);
+	glCompileShader(vertexShader_);
+
+	fragmentShader_ = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(fragmentShader_, 1, &fShaderCode, NULL);
+	glCompileShader(fragmentShader_);
+
+	geometryShader_ = glCreateShader(GL_GEOMETRY_SHADER);
+	glShaderSource(geometryShader_, 1, &gShaderCode, NULL);
+	glCompileShader(geometryShader_);
+
+	shaderProgram_ = glCreateProgram();
+
+	glAttachShader(shaderProgram_, vertexShader_);
+	glAttachShader(shaderProgram_, fragmentShader_);
+	glAttachShader(shaderProgram_, geometryShader_);
+	glLinkProgram(shaderProgram_);
+
+	GLint success;
+	GLchar infoLog[512];
+
+	glGetProgramiv(shaderProgram_, GL_LINK_STATUS, &success);
+	if (!success) {
+		glGetProgramInfoLog(shaderProgram_, 512, NULL, infoLog);
+		std::cout << "ERROR: Falló la vinculación del Shader Program:\n" << infoLog << std::endl;
+	}
+
+	glDeleteShader(vertexShader_);
+	glDeleteShader(fragmentShader_);
+	glDeleteShader(geometryShader_);
+
+}
+
 
 void MEW::Shader::Draw(unsigned int vao)
 {
@@ -96,6 +171,7 @@ void MEW::Shader::setInt(const char* name, int value) const
 {
 	glUniform1i(glGetUniformLocation(shaderProgram_, name), value);
 }
+
 
 void MEW::Shader::setFloat(const char* name, float value) const
 {

@@ -40,10 +40,17 @@ namespace MEW {
 
     float shininess;
 
-    bool bling;
+    int bling;
 
+    unsigned int depthMapFBO;
+    unsigned int depthMap;
+    //Shadows
     float* cameraFarPlane;
+    unsigned int shadow_width, shadow_height;
+    float near_plane, far_plane;
     std::vector<float> shadowCascadeLevels;
+    glm::mat4 lightProjection, lightView;
+    glm::mat4 lightSpaceMatrix;
     LightComponent(KTypeLight type);
 
   };

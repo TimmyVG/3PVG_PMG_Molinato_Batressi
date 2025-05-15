@@ -22,4 +22,5 @@ void main() {
     normal = mat3(transpose(inverse(u_model))) * aNormal;
     FragPos = vec3(u_model * vec4(aPos, 1.0));
     FragPosLightSpace = u_lightSpaceMatrix * vec4(FragPos, 1.0);
+
 }

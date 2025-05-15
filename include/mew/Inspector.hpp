@@ -5,6 +5,7 @@
 #include "mew/Window.hpp"
 #include "ECSManager.hpp"
 #include "mew/Input.hpp"
+#include "ImGuizmo.h"
 //#include "imgui_impl_glfw.h"
 //#include "imgui_impl_glfw.h"
 
@@ -25,11 +26,12 @@ namespace MEW {
 
     void NewFrame();
 
-    void WindowEntities();
+    void WindowEntities(MEW::Camera caCamera);
     void HideAll();
     void ShowAll();
     void Render();
-
+    ImGuizmo::OPERATION operation = ImGuizmo::TRANSLATE;
+    ImGuizmo::MODE mCurrentGizmoMode = ImGuizmo::WORLD;
     ~Inspector();
   protected:
     size_t EntityInspector;
