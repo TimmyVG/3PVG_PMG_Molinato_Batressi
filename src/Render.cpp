@@ -361,7 +361,6 @@ namespace MEW {
         shader.setMat4("u_model", transform.model);
         for (const auto& mesh : render.model->value().meshes_)
         {
-          // Draw mesh
           unsigned int diffuseNr = 1;
 
           glBindVertexArray(mesh.GetVAO());
@@ -380,6 +379,104 @@ namespace MEW {
     }
     glCullFace(GL_BACK);
   }
+  PhysicsRenderSystem::PhysicsRenderSystem() {
+    isInitialized = false;
+    m_debugMode = DBG_DrawWireframe;
+    InitializeDebugDrawing();
+  }
+  PhysicsRenderSystem::~PhysicsRenderSystem()
+  {
+    if (isInitialized)
+    {
+      glDeleteVertexArrays(1, &m_debugVAO);
+      glDeleteBuffers(1, &m_debugVBO);
+    }
+  }
+  void PhysicsRenderSystem::InitializeDebugDrawing()
+  {
+    if (isInitialized) return;
+
+    glGenVertexArrays(1, &m_debugVAO);
+    glBindVertexArray(m_debugVAO);
+
+    glGenBuffers(1, &m_debugVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, m_debugVBO);
+
+    glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float) * 2, nullptr, GL_DYNAMIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+    isInitialized = true;
+  }
+
+  void PhysicsRenderSystem::DrawLine(const glm::vec3& from,
+                              const glm::vec3& to, 
+                              Shader& shader, 
+                             CameraComponent& camComp, 
+                              const glm::vec3& color,
+                              float lineWidth
+                              ) {
+ 
+
+    if (m_debugVAO == 0 || m_debugVBO == 0) {
+      printf("ERROR: Debug VAO/VBO not initialized!");
+      return;
+    }
+    glLineWidth(lineWidth);
+    float vertices[] = {
+        from.x, from.y, from.z,
+        to.x, to.y, to.z
+    };
+
+    shader.UseProgram(); 
+    glm::mat4 view = camComp.viewMatrix;
+    glm::mat4 projection = camComp.projectionMatrix;
+    shader.setMat4("view", view);
+    shader.setMat4("projection", projection);
+    shader.setFloat3("color", &color.x);
+
+    // Draw the line
+    glBindVertexArray(m_debugVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, m_debugVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
+    glDrawArrays(GL_LINES, 0, 2);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    glLineWidth(1.0f);
+  }
+  void PhysicsRenderSystem::drawLine(const btVector3& from, const btVector3& to, const btVector3& color) {
+    if (!m_shader || !m_cam) return;
+
+    DrawLine(
+      glm::vec3(from.x(), from.y(), from.z()),
+      glm::vec3(to.x(), to.y(), to.z()),
+      *m_shader,
+      *m_cam,
+      glm::vec3(color.x(), color.y(), color.z())
+    );
+  }
+
+  void PhysicsRenderSystem::reportErrorWarning(const char* warningString) {
+    std::cerr << "[Bullet Debug Warning] " << warningString << std::endl;
+  }
+
+  void PhysicsRenderSystem::setDebugMode(int debugMode) {
+    m_debugMode = debugMode;
+  }
+
+  int PhysicsRenderSystem::getDebugMode() const {
+    return m_debugMode;
+  }
+
+  void PhysicsRenderSystem::SetShaderAndCamera(Shader* shader, CameraComponent* cam) {
+    m_shader = shader;
+    m_cam = cam;
+  }
+
 
   void LightSystem::operator()(
     const std::vector<std::optional<MEW::TransformComponent>>& vecTrans,
