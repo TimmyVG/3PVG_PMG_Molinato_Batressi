@@ -12,57 +12,40 @@ namespace MEW {
 	Model::Model(std::vector<MeshData>& mesh_data) {
 		setUpData(mesh_data);
 	}
+	std::string GetDataHash(unsigned char* data, size_t size) {
+		std::hash<std::string> hasher;
+		return std::to_string(hasher(std::string((char*)data, size)));
+	}
 
 	void Model::setUpData(std::vector<MeshData>& mesh_data) {
 
-		// Get max and min in each axis:
-		float obj_minX, obj_maxX, obj_minY, obj_maxY, obj_minZ, obj_maxZ;
-
-		obj_minX = obj_maxX = obj_minY = obj_maxY = obj_minZ = obj_maxZ = 0;
-
-		for (int i = 0; i < mesh_data.size(); i++) {
-
-			if (mesh_data[i].minX < obj_minX) obj_minX = mesh_data[i].minX;
-			else if (mesh_data[i].maxX > obj_maxX) obj_maxX = mesh_data[i].maxX;
-
-			if (mesh_data[0].minY < obj_minY) obj_minY = mesh_data[i].minY;
-			else if (mesh_data[i].maxY > obj_maxY) obj_maxY = mesh_data[i].maxY;
-
-			if (mesh_data[i].minZ < obj_minZ) obj_minZ = mesh_data[i].minZ;
-			else if (mesh_data[i].maxZ > obj_maxZ) obj_maxZ = mesh_data[i].maxZ;
-		}
-
-		float cx = (obj_minX + obj_maxX) / 2.0f;
-		float cy = (obj_minY + obj_maxY) / 2.0f;
-		float cz = (obj_minZ + obj_maxZ) / 2.0f;
-
-		float total_max = std::max(obj_maxX - obj_minX, obj_maxY - obj_minY);
-		total_max = std::max(total_max, obj_maxZ - obj_minZ);
-
-		for (int i = 0; i < mesh_data.size(); i++) {
-			for (int j = 0; j < mesh_data[i].vertexs_.size(); j++) {
-				mesh_data[i].vertexs_[j].position.x = (mesh_data[i].vertexs_[j].position.x - cx) / (0.5f * total_max);
-				mesh_data[i].vertexs_[j].position.y = (mesh_data[i].vertexs_[j].position.y - cy) / (0.5f * total_max);
-				mesh_data[i].vertexs_[j].position.z = (mesh_data[i].vertexs_[j].position.z - cz) / (0.5f * total_max);
-			}
-		}
-
 		for (int i = 0; i < mesh_data.size(); i++) {
 			Mesh mesh = Mesh(mesh_data[i]);
-
+			TextureData* texturedata;
 			if (mesh_data[i].diffuse_tex_data) {
-				TextureData diffuse_text_data = mesh_data[i].diffuse_tex_data.value();
-				mesh.diffuse_tex_ = Texture(diffuse_text_data);
+				texturedata = &mesh_data[i].diffuse_tex_data.value();
+
+				const std::string& key = texturedata->cadena;
+
+				auto it = loaded_tex_map.find(key);
+				if (it != loaded_tex_map.end()) {
+					mesh.diffuse_tex_ = *(it->second);
+				}
+				else {
+					std::shared_ptr<Texture> texPtr = std::make_shared<Texture>(*texturedata);
+					loaded_tex_map[key] = texPtr;
+					mesh.diffuse_tex_ = *texPtr;
+				}
 			}
 
 			if (mesh_data[i].normal_tex_data) {
-				TextureData normal_text_data = mesh_data[i].normal_tex_data.value();
-				mesh.normal_tex_ = Texture(normal_text_data);
+				texturedata = &mesh_data[i].normal_tex_data.value();
+				mesh.normal_tex_ = Texture(*texturedata);
 			}
 
 			if (mesh_data[i].specular_tex_data) {
-				TextureData specular_text_data = mesh_data[i].specular_tex_data.value();
-				mesh.specular_tex_ = Texture(specular_text_data);
+				texturedata = &mesh_data[i].specular_tex_data.value();
+				mesh.specular_tex_ = Texture(*texturedata);
 			}
 
 			meshes_.emplace_back(std::move(mesh));
@@ -91,12 +74,15 @@ namespace MEW {
 
 		mat->GetTexture(type, 0, &texture_path);
 
+		std::cout << "tex_map size: " << tex_map.size() << std::endl;
 		if (tex_map.find(directory_ + texture_path.C_Str()) == tex_map.end()) {
 			data = TextureFromFile(texture_path.C_Str(), directory_);
+			//tex_map.insert({ directory_ + texture_path.C_Str(),data });
 			tex_map[directory_ + texture_path.C_Str()] = data;
 		}
 		else {
 			data = tex_map[directory_ + texture_path.C_Str()];
+			std::cout << tex_map.size();
 		}
 
 		return data;

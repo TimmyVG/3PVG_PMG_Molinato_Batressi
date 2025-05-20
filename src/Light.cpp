@@ -33,6 +33,7 @@ namespace MEW {
     bling = true;
 
     near_plane = 0.10f;
+    if (type == KTypeLight::Directional) near_plane = -100.0f;
     far_plane = 100.5f;
     shadow_width = 1024;
     shadow_height = 1024;

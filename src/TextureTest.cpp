@@ -10,7 +10,7 @@ namespace MEW {
 		int width, height, nrComponents;
 		unsigned char* data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
 		std::shared_ptr<unsigned char> shared_data{ data, &stbi_image_free };
-		TextureData texture_data = { static_cast<size_t>(width), static_cast<size_t>(height), static_cast<size_t>(nrComponents), shared_data };
+		TextureData texture_data = { static_cast<size_t>(width), static_cast<size_t>(height), static_cast<size_t>(nrComponents), shared_data , path};
 		return texture_data;
 	}
 

@@ -13,19 +13,13 @@
 #include <mew/Identity.hpp>
 
 
-
 int global = 0;
-
-
-
-
 
 
 	int main() {
 		srand(static_cast<unsigned>(time(0)));
 
 		MEW::ECSManager ecs;
-
 
 		//AddComponents to ecs
 
@@ -44,7 +38,7 @@ int global = 0;
 			return -1;
 		}
 		auto ws = maybe_ws.value();
-		std::string title = "Window Example Triangle";
+		std::string title = "Window Deferred";
 		auto maybe_w = MEW::Window::make(1280, 720, title, ws);
 		if (!maybe_w) {
 			return -1;
@@ -52,7 +46,9 @@ int global = 0;
 		MEW::Window w = maybe_w.value();
 		MEW::Shader shader("../data/exampleLight.vs", "../data/exampleLight.fs");
 		MEW::Shader shaderDepth("../data/exampleDepth.vs", "../data/exampleDepth.fs");
-		MEW::Shader shaderDepthCube("../data/exampleDepthCube.vs", "../data/exampleDepthCube.fs", "../data/exampleDepth.gs" );
+		MEW::Shader shaderDepthCube("../data/exampleDepth.vs", "../data/exampleDepthCube.fs", "../data/exampleDepth.gs");
+		MEW::Shader shaderDeferredCamera("../data/deferredCamera.vs", "../data/deferredCamera.fs");
+		MEW::Shader shaderdeferredShading("../data/deferredShading.vs", "../data/deferredShading.fs" );
 
 
 		std::optional<MEW::Model> CorvModel;
@@ -60,7 +56,7 @@ int global = 0;
 		CorvModel = MEW::Model(CorvMeshData);
 		MEW::ModelObject objmiku(ecs);
 		*objmiku.GetRenderComponent()->model = CorvModel;
-		objmiku.GetTransformComponent()->scale_ = glm::vec3(1, 1, 1);
+		objmiku.GetTransformComponent()->scale_ = glm::vec3(15.0f, 15.0f, 15.0f);
 		objmiku.GetTransformComponent()->rotation_ = glm::vec3(0.0f, 0.0f, 0.0f);
 		objmiku.GetTransformComponent()->translation_ = glm::vec3(0.0f, 0.0f, 0.0f);
 
@@ -72,14 +68,26 @@ int global = 0;
 
 
 		//Add lights
-		MEW::Light directional(ecs, MEW::KTypeLight::Point);
-		//MEW::Light directional1(ecs, MEW::KTypeLight::Point);
+		MEW::Light directional(ecs, MEW::KTypeLight::Directional);
+		//MEW::Light directional1(ecs, MEW::KTypeLight::Spot);
 
 		auto light = &ecs.get_component<MEW::TransformComponent>(directional.entity);
-		light->value().translation_ = glm::vec3(0.0f, 5.0f, 0.00f);
-		//auto light1 = &ecs.get_component<MEW::TransformComponent>(directional1.entity);
-		//light1->value().translation_ = glm::vec3(0.0f, 5.0f, 1.00f);
+		light->value().translation_ = glm::vec3(0.0f, 0.0f, 0.00f);
+		light->value().rotation_ = glm::vec3(-80.0f, 0.0f, 0.00f);
 
+		MEW::Light spot(ecs, MEW::KTypeLight::Spot);
+		//MEW::Light directional1(ecs, MEW::KTypeLight::Spot);
+
+		auto light1 = &ecs.get_component<MEW::TransformComponent>(spot.entity);
+		light1->value().translation_ = glm::vec3(0.0f, 0.0f, 0.00f);
+		light1->value().rotation_ = glm::vec3(-80.0f, 0.0f, 0.00f);
+
+		MEW::Light point(ecs, MEW::KTypeLight::Point);
+		//MEW::Light directional1(ecs, MEW::KTypeLight::Spot);
+
+		auto light2 = &ecs.get_component<MEW::TransformComponent>(point.entity);
+		light2->value().translation_ = glm::vec3(0.0f, 0.0f, 0.00f);
+		light2->value().rotation_ = glm::vec3(-80.0f, 0.0f, 0.00f);
 
 		const float color[3] = { 0.25f,0.3f,0.4f };
 		const float color2[3] = { 0.4f,0.3f,0.25f };
@@ -102,7 +110,7 @@ int global = 0;
 		input.assign(MEW::Input::Buttons::MOUSE_2, MEW::CAMERA_ROTATE);
 		input.assign(MEW::Input::Buttons::MOUSE_2, MEW::ActionsInspector::CLICK_OUT);
 		MEW::Camera cameraTest(ecs, 1280 / 720, MEW::CameraType::CAMERA_PERSPECTIVE,
-			50.0f, 0.1f, 5000.0f, 10.0f);
+			50.0f, 0.001f, 5000.0f, 10.0f);
 
 
 		MEW::Inspector inspector(w);
@@ -128,18 +136,27 @@ int global = 0;
 				ecs.get_component<MEW::TransformComponent>(cameraTest.entity_),
 				ecs.get_component<MEW::CameraComponent>(cameraTest.entity_));
 
+			MEW::DepthMaps()(ecs.get_vectorComponent<MEW::TransformComponent>(),
+				ecs.get_vectorComponent<MEW::RenderComponent>(),
+				ecs.get_vectorComponent<MEW::LightComponent>(),
+				shaderDepth, shaderDepthCube,
+				ecs.get_component<MEW::CameraComponent>(cameraTest.entity_),
+				ecs.get_component<MEW::TransformComponent>(cameraTest.entity_));
+				
+			MEW::RenderSystemLit()(ecs.get_vectorComponent<MEW::TransformComponent>(),
+				ecs.get_vectorComponent<MEW::RenderComponent>(),
+				ecs.get_vectorComponent<MEW::LightComponent>(),
+				shaderDeferredCamera,
+				ecs.get_component<MEW::CameraComponent>(cameraTest.entity_),
+				ecs.get_component<MEW::TransformComponent>(cameraTest.entity_));
+
 			MEW::LightSystem()(ecs.get_vectorComponent<MEW::TransformComponent>(),
 										ecs.get_vectorComponent<MEW::RenderComponent>(),
 										ecs.get_vectorComponent<MEW::LightComponent>(),
-				shaderDepthCube,shaderDepthCube,
-										ecs.get_component<MEW::CameraComponent>(cameraTest.entity_));
+				shaderdeferredShading, shaderdeferredShading,
+										ecs.get_component<MEW::CameraComponent>(cameraTest.entity_),ecs.get_component<MEW::TransformComponent>(cameraTest.entity_));
 
-			MEW::RenderSystemLit()(ecs.get_vectorComponent<MEW::TransformComponent>(),
-												ecs.get_vectorComponent<MEW::RenderComponent>(),
-												ecs.get_vectorComponent<MEW::LightComponent>(),
-												shader,
-												ecs.get_component<MEW::CameraComponent>(cameraTest.entity_),
-												ecs.get_component<MEW::TransformComponent>(cameraTest.entity_));
+
 
 
 

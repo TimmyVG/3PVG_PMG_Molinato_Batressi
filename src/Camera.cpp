@@ -1,5 +1,8 @@
+#include <GL/glew.h>
 #include "mew/Camera.hpp"
+#include <gl/GL.h>
 #include <glm/gtc/matrix_transform.hpp>
+#include <iostream>
 
   MEW::Camera::Camera(MEW::ECSManager& ecsMan, float aspectRatio, CameraType type, float fov, float nearPlane, float farPlane, float orthosize, float zoom)
   {
@@ -18,6 +21,52 @@
     cameraComp->zoom = zoom;
     calculateProjection();
     calculateView();
+
+    glGenFramebuffers(1, &cameraComp->gBuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, cameraComp->gBuffer);
+    
+    // - position color buffer
+    glGenTextures(1, &cameraComp->gPosition);
+    glBindTexture(GL_TEXTURE_2D, cameraComp->gPosition);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 1280, 720, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, cameraComp->gPosition, 0);
+
+    // - normal color buffer
+    glGenTextures(1, &cameraComp->gNormal);
+    glBindTexture(GL_TEXTURE_2D, cameraComp->gNormal);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 1280, 720, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, cameraComp->gNormal, 0);
+
+    // - color + specular color buffer
+    glGenTextures(1, &cameraComp->gColorSpec);
+    glBindTexture(GL_TEXTURE_2D, cameraComp->gColorSpec);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1280, 720, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, cameraComp->gColorSpec, 0);
+
+    // - tell OpenGL which color attachments we'll use (of this framebuffer) for rendering 
+    unsigned int attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+    glDrawBuffers(3, attachments);
+
+    //4. Depth renderbuffer
+      unsigned int rboDepth;
+    glGenRenderbuffers(1, &rboDepth);
+    glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 1280, 720);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
+
+
+    // 5. Check
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+      std::cout << "Framebuffer not complete!" << std::endl;
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    cameraComp->quadVAO = 0;
   }
 
   void MEW::Camera::update(float deltaTime, Input& inputManager)

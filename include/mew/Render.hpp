@@ -47,12 +47,40 @@ namespace MEW {
 			std::optional<TransformComponent>& camCompT);
 	};
 
+	class ForwardRenderSystemLit {
+	public:
+		void operator()(
+			const std::vector<std::optional<MEW::TransformComponent>>& vecTrans,
+			const std::vector<std::optional<MEW::RenderComponent>>& vecRender,
+			const std::vector<std::optional<MEW::LightComponent>>& vecLight,
+			Shader& shader,
+			std::optional<CameraComponent>& camComp,
+			std::optional<TransformComponent>& camCompT);
+	};
+
+	class ForwardLightSystem {
+	public:
+		void operator()(const std::vector<std::optional<MEW::TransformComponent>>& vecTrans,
+			const std::vector<std::optional<MEW::RenderComponent>>& vecRender,
+			std::vector<std::optional<MEW::LightComponent>>& vecLight,
+			Shader& shader, Shader& shaderCube,
+			std::optional<CameraComponent>& camComp);
+	};
+
 	class LightSystem {
 	public:
 		void operator()(const std::vector<std::optional<MEW::TransformComponent>>& vecTrans,
 			const std::vector<std::optional<MEW::RenderComponent>>& vecRender,
 			std::vector<std::optional<MEW::LightComponent>>& vecLight,
-			Shader& shader, Shader& shaderCube, std::optional<CameraComponent>& camComp);
+			Shader& shader, Shader& shaderCube, std::optional<CameraComponent>& camComp,std::optional<TransformComponent>& camComptT);
+	};
+
+	class DepthMaps {
+	public:
+		void operator()(const std::vector<std::optional<MEW::TransformComponent>>& vecTrans,
+			const std::vector<std::optional<MEW::RenderComponent>>& vecRender,
+			std::vector<std::optional<MEW::LightComponent>>& vecLight,
+			Shader& shader, Shader& shaderCube, std::optional<CameraComponent>& camComp, std::optional<TransformComponent>& camT);
 	};
 
 

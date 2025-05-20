@@ -23,6 +23,7 @@ namespace MEW {
 
 
   static std::unordered_map<std::string, TextureData> tex_map;
+  static std::unordered_map<std::string, std::shared_ptr<Texture> > loaded_tex_map;
   std::optional<std::vector<MeshData>> loadModel(std::string const& path);
   std::vector<MeshData> processNode(aiNode* node, const aiScene* scene, std::string directory_, std::vector<MeshData>& meshes_data_);
   MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string directory_);
