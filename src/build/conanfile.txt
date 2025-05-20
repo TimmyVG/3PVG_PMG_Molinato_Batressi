@@ -8,6 +8,7 @@ zlib/1.3.1
 minizip/1.2.13
 imgui/1.83
 imguizmo/1.83
+bullet3/3.25
 [generators]
 premake
 [options]
