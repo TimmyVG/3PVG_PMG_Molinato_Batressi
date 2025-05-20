@@ -111,7 +111,7 @@ namespace MEW {
 		MEW::TransformComponent* GetTransformComponent();
 		MEW::RenderComponent* GetRenderComponent();
 
-		ModelObject(MEW::ECSManager& ecs, bool enablePhysics = false);
+		ModelObject(MEW::ECSManager& ecs);
 		size_t GetEntity();
 
 	private:

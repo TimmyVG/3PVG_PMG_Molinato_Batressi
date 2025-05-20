@@ -65,7 +65,7 @@ int main() {
 	std::optional<MEW::Model> TmpModel;
 	std::vector<MEW::MeshData> TmpMeshData = MEW::loadModel("../data/miku/source/miku.fbx").value();
 	TmpModel = MEW::Model(TmpMeshData);
-	MEW::ModelObject objmiku(ecs,true);
+	MEW::ModelObject objmiku(ecs);
 	*objmiku.GetRenderComponent()->model = TmpModel;
 	objmiku.GetTransformComponent()->scale_ = glm::vec3(1, 1, 1);
 	objmiku.GetTransformComponent()->rotation_ = glm::vec3(0.0f, 0.0f, 0.0f);
