@@ -21,6 +21,10 @@ namespace MEW {
     glm::mat4 viewMatrix;       
     glm::mat4 projectionMatrix; 
     float zoom;
+    unsigned int gBuffer;
+    unsigned int gPosition, gNormal, gColorSpec;
+    unsigned int quadVAO;
+    unsigned int quadVBO;
   } CameraComponent;
 
   enum Actions

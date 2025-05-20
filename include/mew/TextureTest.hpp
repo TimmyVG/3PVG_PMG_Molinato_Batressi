@@ -15,6 +15,7 @@ namespace MEW {
   struct TextureData {
     size_t height_, width_, nrComponents_;
     std::shared_ptr<unsigned char> data_;
+    std::string cadena;
   };
 
 

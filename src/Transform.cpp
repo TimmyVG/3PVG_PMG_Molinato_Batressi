@@ -14,17 +14,17 @@ namespace MEW {
 
 			// Aplicar transformacion en orden correcto: Translate  Rotate  Scale
 			transform->model = glm::translate(transform->model, transform->translation_);
-			transform->model = glm::rotate(transform->model, glm::radians(transform->rotation_.x), glm::vec3(1.0f, 0.0f, 0.0f));
-			transform->model = glm::rotate(transform->model, glm::radians(transform->rotation_.y), glm::vec3(0.0f, 1.0f, 0.0f));
 			transform->model = glm::rotate(transform->model, glm::radians(transform->rotation_.z), glm::vec3(0.0f, 0.0f, 1.0f));
+			transform->model = glm::rotate(transform->model, glm::radians(transform->rotation_.y), glm::vec3(0.0f, 1.0f, 0.0f));
+			transform->model = glm::rotate(transform->model, glm::radians(transform->rotation_.x), glm::vec3(1.0f, 0.0f, 0.0f));
 			transform->model = glm::scale(transform->model, transform->scale_);
 
 			// Convertir rotacion a radianes antes de usar en glm::quat()
-			glm::vec3 euler = glm::radians(transform->rotation_);
+			glm::vec3 euler = glm::radians(glm::vec3(transform->rotation_.x,-transform->rotation_.y, transform->rotation_.z));
 			glm::quat rotation = glm::quat(euler);
 
 			// Calcular vectores de direccion
-			glm::vec3 forwardD(0.0f, 0.0f, 1.0f);
+			glm::vec3 forwardD(0.0f, 0.0f, -1.0f);
 			transform->fwd = glm::normalize(rotation * forwardD);
 			transform->right = glm::normalize(rotation * glm::vec3(1.0f, 0.0f, 0.0f));
 			transform->up = glm::normalize(glm::cross(transform->right, transform->fwd));
