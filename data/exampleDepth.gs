@@ -17,7 +17,7 @@ void main()
             FragPos = gl_in[i].gl_Position; // Esto debe ser en espacio de mundo
 
             // Transformamos la posición de mundo a espacio de luz
-            gl_Position = shadowMatrices[face] * vec4(FragPos.xyz, 1.0);
+            gl_Position = shadowMatrices[face] * FragPos;
             EmitVertex();
         }    
         EndPrimitive();

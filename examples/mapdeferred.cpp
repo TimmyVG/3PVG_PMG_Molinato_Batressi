@@ -46,7 +46,7 @@ int global = 0;
 		MEW::Window w = maybe_w.value();
 		MEW::Shader shader("../data/exampleLight.vs", "../data/exampleLight.fs");
 		MEW::Shader shaderDepth("../data/exampleDepth.vs", "../data/exampleDepth.fs");
-		MEW::Shader shaderDepthCube("../data/exampleDepth.vs", "../data/exampleDepthCube.fs", "../data/exampleDepth.gs");
+		MEW::Shader shaderDepthCube("../data/exampleDepthCube.vs", "../data/exampleDepthCube.fs", "../data/exampleDepth.gs");
 		MEW::Shader shaderDeferredCamera("../data/deferredCamera.vs", "../data/deferredCamera.fs");
 		MEW::Shader shaderdeferredShading("../data/deferredShading.vs", "../data/deferredShading.fs" );
 
@@ -56,7 +56,7 @@ int global = 0;
 		CorvModel = MEW::Model(CorvMeshData);
 		MEW::ModelObject objmiku(ecs);
 		*objmiku.GetRenderComponent()->model = CorvModel;
-		objmiku.GetTransformComponent()->scale_ = glm::vec3(15.0f, 15.0f, 15.0f);
+		objmiku.GetTransformComponent()->scale_ = glm::vec3(0.025f, 0.025f, 0.025f);
 		objmiku.GetTransformComponent()->rotation_ = glm::vec3(0.0f, 0.0f, 0.0f);
 		objmiku.GetTransformComponent()->translation_ = glm::vec3(0.0f, 0.0f, 0.0f);
 

@@ -217,13 +217,13 @@ void main() {
         switch(u_type){
           case 1:
             light = DirectionalLight();
-            shadow = ShadowCalculationDefault(max(0.0005 * (1.0 - dot(normalize(normal), normalize(u_light_dir))), 0.0005));
+            shadow = ShadowCalculationDefault(max(0.005 * (1.0 - dot(normalize(normal), normalize(u_light_dir))), 0.005));
             //light = light * (1.0 - shadow);
         break;
 
         case 2:
             light = PointLight();
-            shadow = ShadowCalculationPoint(0.0015);
+            shadow = ShadowCalculationPoint(0.015);
         break;
 
         case 3:

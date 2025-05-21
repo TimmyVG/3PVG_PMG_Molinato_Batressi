@@ -256,7 +256,7 @@ namespace MEW {
           if (mesh.diffuse_tex_.has_value()) {
             glActiveTexture(GL_TEXTURE0 + textureUnit);
             shader.setInt("texture_diffuse0", textureUnit);
-            glBindTexture(GL_TEXTURE_2D,  mesh.diffuse_tex_.value().getID());
+            glBindTexture(GL_TEXTURE_2D, mesh.diffuse_tex_.value().getID());
           }
 
           glActiveTexture(GL_TEXTURE0);
@@ -272,6 +272,7 @@ namespace MEW {
 
           }
           glBindVertexArray(mesh.GetVAO());
+
           glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(mesh.indices_.size()), GL_UNSIGNED_INT, 0);
           glBindVertexArray(0);
         }
@@ -307,16 +308,26 @@ namespace MEW {
         glm::vec3 center = trLight.translation_;
         glm::vec3 lightPos = center - trLight.fwd * 1.0f;
         liLight.lightView = glm::lookAt(lightPos, center, glm::vec3(0, 1, 0));
-        float size = 20.0f;
+        float size = 40.0f;
         liLight.lightProjection = glm::ortho(-size, size, -size, size, liLight.near_plane, liLight.far_plane);
 
         //liLight.lightProjection = glm::perspective(glm::radians(90.0f), 1.0f, liLight.near_plane, liLight.far_plane);
-
+        liLight.lightView = glm::lookAt(trLight.translation_, trLight.translation_ + trLight.fwd, glm::vec3(0.0, 1.0, 0.0));
+        liLight.lightSpaceMatrix = liLight.lightProjection * liLight.lightView;
+        shader.setMat4("u_lightSpaceMatrix", liLight.lightSpaceMatrix);
+        shader.setFloat("u_far", liLight.far_plane);
+        shader.setInt("u_type", liLight.type);
+        shader.setFloat3("u_lightPos", &trLight.translation_.x);
       }
       if (KTypeLight::Spot == liLight.type) {
         shader.UseProgram();
         liLight.lightProjection = glm::perspective(glm::radians(90.0f), 1.0f, liLight.near_plane, liLight.far_plane);
-
+        liLight.lightView = glm::lookAt(trLight.translation_, trLight.translation_ + trLight.fwd, glm::vec3(0.0, 1.0, 0.0));
+        liLight.lightSpaceMatrix = liLight.lightProjection * liLight.lightView;
+        shader.setMat4("u_lightSpaceMatrix", liLight.lightSpaceMatrix);
+        shader.setFloat("u_far", liLight.far_plane);
+        shader.setInt("u_type", liLight.type);
+        shader.setFloat3("u_lightPos", &trLight.translation_.x);
       }
       if (KTypeLight::Point == liLight.type) {
         shaderCube.UseProgram();
@@ -337,17 +348,18 @@ namespace MEW {
         for (unsigned int i = 0; i < 6; ++i) {
 
           std::string uniformName = "shadowMatrices[" + std::to_string(i) + "]";
-          shader.setMat4(uniformName.c_str(), shadowTransforms[i]);
+          shaderCube.setMat4(uniformName.c_str(), shadowTransforms[i]);
         }
+        liLight.lightView = glm::lookAt(trLight.translation_, trLight.translation_ + trLight.fwd, glm::vec3(0.0, 1.0, 0.0));
+        liLight.lightSpaceMatrix = liLight.lightProjection * liLight.lightView;
+        shaderCube.setMat4("u_lightSpaceMatrix", liLight.lightSpaceMatrix);
+        shaderCube.setFloat("u_far", liLight.far_plane);
+        shaderCube.setInt("u_type", liLight.type);
+        shaderCube.setFloat3("u_lightPos", &trLight.translation_.x);
       }
 
-      liLight.lightView = glm::lookAt(trLight.translation_, trLight.translation_ + trLight.fwd, glm::vec3(0.0, 1.0, 0.0));
-      liLight.lightSpaceMatrix = liLight.lightProjection * liLight.lightView;
 
-      shader.setMat4("u_lightSpaceMatrix", liLight.lightSpaceMatrix);
-      shader.setFloat("u_far", liLight.far_plane);
-      shader.setInt("u_type", liLight.type);
-      shader.setFloat3("u_lightPos", &trLight.translation_.x);
+
       glViewport(0, 0, liLight.shadow_width, liLight.shadow_height);
       glBindFramebuffer(GL_FRAMEBUFFER, liLight.depthMapFBO);
       glClear(GL_DEPTH_BUFFER_BIT);
@@ -358,7 +370,13 @@ namespace MEW {
         if (!itRender->has_value() || !itTransform->has_value()) continue;
         auto& render = itRender->value();
         auto& transform = itTransform->value();
-        shader.setMat4("u_model", transform.model);
+        if (KTypeLight::Point == liLight.type) {
+          shaderCube.setMat4("u_model", transform.model);
+        }
+        else {
+
+          shader.setMat4("u_model", transform.model);
+        }
         for (const auto& mesh : render.model->value().meshes_)
         {
           unsigned int diffuseNr = 1;
@@ -413,13 +431,13 @@ namespace MEW {
   }
 
   void PhysicsRenderSystem::DrawLine(const glm::vec3& from,
-                              const glm::vec3& to, 
-                              Shader& shader, 
-                             CameraComponent& camComp, 
-                              const glm::vec3& color,
-                              float lineWidth
-                              ) {
- 
+    const glm::vec3& to,
+    Shader& shader,
+    CameraComponent& camComp,
+    const glm::vec3& color,
+    float lineWidth
+  ) {
+
 
     if (m_debugVAO == 0 || m_debugVBO == 0) {
       printf("ERROR: Debug VAO/VBO not initialized!");
@@ -431,7 +449,7 @@ namespace MEW {
         to.x, to.y, to.z
     };
 
-    shader.UseProgram(); 
+    shader.UseProgram();
     glm::mat4 view = camComp.viewMatrix;
     glm::mat4 projection = camComp.projectionMatrix;
     shader.setMat4("view", view);
@@ -514,9 +532,9 @@ namespace MEW {
 
 
       if (KTypeLight::Point == liLight.type) {
-        shaderCube.UseProgram();
+       // shaderCube.UseProgram();
       }
-      
+
       shader.setFloat3("u_diffuse_color", &liLight.diffuse.x);
       shader.setFloat("u_diffuse_strength", liLight.fDiffuse);
 
@@ -629,16 +647,30 @@ namespace MEW {
 
       if (KTypeLight::Directional == liLight.type) {
         shader.UseProgram();
-        glm::vec3 center = trLight.translation_; 
-        glm::vec3 lightPos = center - trLight.fwd * 1.0f; 
-        liLight.lightView = glm::lookAt(lightPos, center, glm::vec3(0, 1, 0));
-        float size = 10.0f;
+        glm::vec3 center = trLight.translation_;
+        glm::vec3 lightPos = center - trLight.fwd * 1.0f;
+        liLight.lightView = glm::lookAt(trLight.translation_, trLight.translation_ + trLight.fwd, glm::vec3(0.0, 1.0, 0.0));
+        float size = 40.0f;
         liLight.lightProjection = glm::ortho(-size, size, -size, size, liLight.near_plane, liLight.far_plane);
+        liLight.lightSpaceMatrix = liLight.lightProjection * liLight.lightView;
+        shader.setMat4("u_lightSpaceMatrix", liLight.lightSpaceMatrix);
+        shader.setFloat("u_far", liLight.far_plane);
+        shader.setInt("u_type", liLight.type);
+        shader.setFloat3("u_lightPos", &trLight.translation_.x);
+  
+
       }
       if (KTypeLight::Spot == liLight.type) {
         shader.UseProgram();
         liLight.lightProjection = glm::perspective(glm::radians(90.0f), 1.0f, liLight.near_plane, liLight.far_plane);
         liLight.lightView = glm::lookAt(trLight.translation_, trLight.translation_ + trLight.fwd, glm::vec3(0.0, 1.0, 0.0));
+        liLight.lightSpaceMatrix = liLight.lightProjection * liLight.lightView;
+        shader.setMat4("u_lightSpaceMatrix", liLight.lightSpaceMatrix);
+        shader.setFloat("u_far", liLight.far_plane);
+        shader.setInt("u_type", liLight.type);
+        shader.setFloat3("u_lightPos", &trLight.translation_.x);
+
+
       }
       if (KTypeLight::Point == liLight.type) {
         shaderCube.UseProgram();
@@ -662,20 +694,14 @@ namespace MEW {
           shaderCube.setMat4(uniformName.c_str(), shadowTransforms[i]);
         }
         liLight.lightView = glm::lookAt(trLight.translation_, trLight.translation_ + trLight.fwd, glm::vec3(0.0, 1.0, 0.0));
-
+        liLight.lightSpaceMatrix = liLight.lightProjection * liLight.lightView;
         shaderCube.setMat4("u_lightSpaceMatrix", liLight.lightSpaceMatrix);
         shaderCube.setFloat("u_far", liLight.far_plane);
+        shaderCube.setInt("u_type", liLight.type);
+        shaderCube.setFloat3("u_lightPos", &trLight.translation_.x);
+
+
       }
-
-
-      liLight.lightSpaceMatrix = liLight.lightProjection * liLight.lightView;
-
-      shader.setMat4("u_lightSpaceMatrix", liLight.lightSpaceMatrix);
-      shader.setFloat("u_far", liLight.far_plane);
-      shader.setInt("u_type", liLight.type);
-      shader.setFloat3("u_lightPos", &trLight.translation_.x);
-      shaderCube.setInt("u_type", liLight.type);
-
 
       glViewport(0, 0, liLight.shadow_width, liLight.shadow_height);
       glBindFramebuffer(GL_FRAMEBUFFER, liLight.depthMapFBO);
@@ -688,8 +714,14 @@ namespace MEW {
         if (!itRender->has_value() || !itTransform->has_value()) continue;
         auto& render = itRender->value();
         auto& transform = itTransform->value();
+        if (liLight.type == KTypeLight::Point) {
+          shaderCube.setMat4("u_model", transform.model);
+
+        }
+        else {
+
         shader.setMat4("u_model", transform.model);
-        shaderCube.setMat4("u_model", transform.model);
+        }
         for (const auto& mesh : render.model->value().meshes_)
         {
           // Draw mesh
