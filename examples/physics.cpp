@@ -20,28 +20,32 @@ int main() {
 	srand(static_cast<unsigned>(time(0)));
 
 	MEW::ECSManager ecs;
+	ecs.add_component_type<MEW::TransformComponent>();
+	ecs.add_component_type<MEW::RenderComponent>();
+	ecs.add_component_type<MEW::CameraComponent>();
+	ecs.add_component_type<MEW::RigidBodyComponent>();
+
 #pragma region PhysicsFunctions
-	MEW::PhysicsWorld physicsWorld;
-	// Create a static ground plane
+	MEW::PhysicsWorld physicsWorld(&ecs);
+	size_t ground = ecs.create_entity();
 	MEW::TransformComponent groundTransform;
 	groundTransform.translation_ = glm::vec3(0, -1, 0);
 	groundTransform.scale_ = glm::vec3(50, 1, 50);
-	btRigidBody* groundBody = physicsWorld.AddBox(0.0f, groundTransform, glm::vec3(1, 1, 1));
+	auto& groundTransComp = ecs.add_component<MEW::TransformComponent>(ground);
+	groundTransComp.value() = groundTransform;
+	glm::vec3 halfExtents(0.5f, 0.5f, 0.5f);
+	btRigidBody* groundBody = physicsWorld.AddBox(0, groundTransform, halfExtents);
+	auto& rigidbodycomponent = ecs.add_component<MEW::RigidBodyComponent>(ground);
+	rigidbodycomponent.value().body = groundBody;
 
-	// Create a dynamic box
-	MEW::TransformComponent boxTransform;
-	boxTransform.translation_ = glm::vec3(0, 10, -10);
-	btRigidBody* boxBody = physicsWorld.AddBox(1.0f, boxTransform, glm::vec3(1, 1, 1));
+	
 #pragma endregion
-	//AddComponents to ecs
 	bool done = false;
 	double deltaTime;
 
 	const float backgroundcolor[4] = { 0.2f, 0.3f, 0.3f, 1.0f };
 	
-	ecs.add_component_type<MEW::TransformComponent>();
-	ecs.add_component_type<MEW::RenderComponent>();
-	ecs.add_component_type<MEW::CameraComponent>();
+	
 #pragma region WindowCreation
 
 	auto maybe_ws = MEW::WindowSystem::make();
@@ -69,7 +73,13 @@ int main() {
 	*objmiku.GetRenderComponent()->model = TmpModel;
 	objmiku.GetTransformComponent()->scale_ = glm::vec3(1, 1, 1);
 	objmiku.GetTransformComponent()->rotation_ = glm::vec3(0.0f, 0.0f, 0.0f);
-	objmiku.GetTransformComponent()->translation_ = glm::vec3(0.0f, 0.0f, 0.0f);
+
+	MEW::TransformComponent boxTransform;
+	boxTransform.translation_ = glm::vec3(0, 10, -10);
+	btRigidBody* boxBody = physicsWorld.AddBox(1.0f, boxTransform, glm::vec3(1, 1, 1));
+	auto& mikuRb = ecs.add_component<MEW::RigidBodyComponent>(objmiku.GetEntity());
+	mikuRb.value().body = boxBody;
+
 #pragma endregion
 	MEW::Shader debugShader("../data/debug.vs", "../data/debug.fs");
 #pragma region Camera
@@ -84,7 +94,7 @@ int main() {
 	input.assign(MEW::Input::Buttons::MOUSE_2, MEW::CAMERA_ROTATE);
 	MEW::Camera cameraTest(ecs, 640 / 460);
 #pragma endregion
-
+	
 	MEW::PhysicsRenderSystem renderSystem;
 	renderSystem.SetShaderAndCamera(&debugShader, cameraTest.GetCameraComponent());
 	physicsWorld.GetDynamicsWorld()->setDebugDrawer(&renderSystem);
@@ -95,7 +105,6 @@ int main() {
 		cameraTest.update(deltaTime, input);
 		physicsWorld.StepSimulation(deltaTime);
 		physicsWorld.UpdateTransform(boxBody, boxTransform);
-		*objmiku.GetTransformComponent() = boxTransform;
 		MEW::TransformSystemMat()(ecs.get_vectorComponent<MEW::TransformComponent>());
 		const auto& vecT = ecs.get_vectorComponent<MEW::TransformComponent>();
 		const auto& vecR = ecs.get_vectorComponent<MEW::RenderComponent>();

@@ -24,7 +24,6 @@ int main() {
 	ecs.add_component_type<MEW::RenderComponent>();
 	ecs.add_component_type<MEW::CameraComponent>();
 
-	MEW::RenderSystem RS;
 
 
 	auto maybe_ws = MEW::WindowSystem::make();
@@ -44,12 +43,10 @@ int main() {
 	MEW::Shader shader("../data/example.vs","../data/example.fs");
 	
 	MEW::Object objmiku(&shader);
-	objmiku.model->loadModel("../data/miku/source/Miku.fbx");
-	objmiku.model->loadMeshes();
+
 
 	MEW::Object objsilla(&shader);
-	objsilla.model->loadModel("../data/miku/source/Miku.fbx");
-	objsilla.model->loadMeshes();
+
 
 	std::vector<size_t> entities;
 	
@@ -59,14 +56,12 @@ int main() {
 		ecs.add_component<MEW::RenderComponent>(entity);
 		ecs.add_component<MEW::TransformComponent>(entity);
 	
-		*ecs.get_component<MEW::RenderComponent>(entity).value().object = objsilla;
 		ecs.get_component<MEW::TransformComponent>(entity).value().scale_ = glm::vec3(1);
 		ecs.get_component<MEW::TransformComponent>(entity).value().translation_ = glm::vec3((rand() % 50) - 25.0f, (rand() % 30) - 15.0f, -40.0f);
 	}
 	size_t miku = ecs.create_entity();
 	ecs.add_component<MEW::RenderComponent>(miku);
 	ecs.add_component<MEW::TransformComponent>(miku);
-	*ecs.get_component<MEW::RenderComponent>(miku).value().object = objmiku;
 
 
 
@@ -98,7 +93,6 @@ int main() {
 		const auto& vecT = ecs.get_vectorComponent<MEW::TransformComponent>();
 		const auto& vecR = ecs.get_vectorComponent<MEW::RenderComponent>();
 		const auto& vecL = ecs.get_vectorComponent<MEW::LightComponent>();
-		MEW::RenderSystemUnlit()(vecT, vecR, RS, shader, &ecs.get_component<MEW::CameraComponent>(cameraTest.entity_).value());
 		bool closePressed = w.closedPressed();
 		bool escPressed = w.isKeyPressed(GLFW_KEY_ESCAPE);
 		if (closePressed || escPressed) done = true;
