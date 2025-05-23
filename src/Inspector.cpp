@@ -104,17 +104,49 @@ namespace MEW {
 
         if (light->has_value()) {
           ImGui::Text("Light");
-
+          if (light->value().type == KTypeLight::Directional) {
+            ImGui::Text("Directional");
+            if (ImGui::ColorPicker3("Color Diffuse", &light->value().diffuse.x)) {}
+            if (ImGui::InputFloat("Diffuse Strenght", &light->value().fDiffuse)) {}
+            if (ImGui::ColorPicker3("Color Spec", &light->value().specular.x)) {}
+            if (ImGui::InputFloat("Spec Strenght", &light->value().fSpecular)) {}
+            if (ImGui::InputFloat("Near", &light->value().near_plane)) {}
+            if (ImGui::InputFloat("Far", &light->value().far_plane)) {}
+            if (ImGui::InputFloat("Shininess", &light->value().shininess)) {}
+          }
+          else if (light->value().type == KTypeLight::Spot) {
+            ImGui::Text("Spot");
+            if (ImGui::ColorPicker3("Color Diffuse", &light->value().diffuse.x)) {}
+            if (ImGui::InputFloat("Diffuse Strenght", &light->value().fDiffuse)) {}
+            if (ImGui::ColorPicker3("Color Spec", &light->value().specular.x)) {}
+            if (ImGui::InputFloat("Spec Strenght", &light->value().fSpecular)) {}
+            if (ImGui::InputFloat("Near", &light->value().near_plane)) {}
+            if (ImGui::InputFloat("Far", &light->value().far_plane)) {}
+            if (ImGui::InputFloat("Shininess", &light->value().shininess)) {}
+          }
+          else if (light->value().type == KTypeLight::Point) {
+            ImGui::Text("Point");
+            if (ImGui::ColorPicker3("Color Diffuse", &light->value().diffuse.x)) {}
+            if (ImGui::InputFloat("Diffuse Strenght", &light->value().fDiffuse)) {}
+            if (ImGui::ColorPicker3("Color Spec", &light->value().specular.x)) {}
+            if (ImGui::InputFloat("Spec Strenght", &light->value().fSpecular)) {}
+            if (ImGui::InputFloat("Near", &light->value().near_plane)) {}
+            if (ImGui::InputFloat("Far", &light->value().far_plane)) {}
+            if (ImGui::InputFloat("Shininess", &light->value().shininess)) {}
+          }
+          else if (light->value().type == KTypeLight::Ambient) {
+            ImGui::Text("Ambient");
+            if (ImGui::ColorPicker3("Color Diffuse", &light->value().diffuse.x)) {}
+            if (ImGui::InputFloat("Diffuse Strenght", &light->value().fDiffuse)) {}
+          }
           // Luego pasas el arreglo a ImGui::ColorPicker3
-          if (ImGui::ColorPicker3("Color Diffuse", &light->value().diffuse.x)) {}
-          if (ImGui::InputFloat("Diffuse Strenght", &light->value().fDiffuse)) {}
+          if (caCamera.GetCameraComponent()->ssao == 1) {
 
-          if (ImGui::ColorPicker3("Color Spec", &light->value().specular.x)) {}
+          }
 
-          if (ImGui::InputFloat("Spec Strenght", &light->value().fSpecular)) {}
-          if (ImGui::InputFloat("Shininess", &light->value().shininess)) {}
-          if (ImGui::InputFloat("Near", &light->value().near_plane)) {}
-          if (ImGui::InputFloat("Far", &light->value().far_plane)) {}
+
+
+
           bool blingValue = light->value().bling;  // Copia el valor
           if (ImGui::Checkbox("Blin", &blingValue)) {
             light->value().bling = blingValue;  // Actualiza el valor original
@@ -122,7 +154,15 @@ namespace MEW {
         }  
       }
 
+      auto cameraEntity = &ecs->get_component<MEW::CameraComponent>(EntityInspector);
+      if (EntityInspector != -1 && cameraEntity->has_value()) {
+        ImGui::InputInt("Blur", &cameraEntity->value().blur);
+        ImGui::InputInt("SSAO", &cameraEntity->value().ssao);
+        ImGui::InputInt("kernel", &cameraEntity->value().kernelSize);
+        ImGui::InputFloat("radius", &cameraEntity->value().radius);
+        ImGui::InputFloat("bias", &cameraEntity->value().bias);
 
+      }
 
       auto trEntity = &ecs->get_component<MEW::TransformComponent>(EntityInspector);
       if (EntityInspector != -1  && trEntity->has_value()) {
@@ -147,9 +187,9 @@ namespace MEW {
         if (ImGuizmo::IsUsing()) {
           float matrixTranslation[3], matrixRotation[3], matrixScale[3];
           ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(trEntity->value().model), matrixTranslation, matrixRotation, matrixScale);
-          ImGui::InputFloat3("Tr", matrixTranslation);
-          ImGui::InputFloat3("Rt", matrixRotation);
-          ImGui::InputFloat3("Sc", matrixScale);
+          //ImGui::InputFloat3("Tr", matrixTranslation);
+          //ImGui::InputFloat3("Rt", matrixRotation);
+          //ImGui::InputFloat3("Sc", matrixScale);
           ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, glm::value_ptr(trEntity->value().model));
           trEntity->value().translation_ = glm::vec3(matrixTranslation[0], matrixTranslation[1], matrixTranslation[2]);
           trEntity->value().rotation_ = glm::vec3(matrixRotation[0], matrixRotation[1], matrixRotation[2]);

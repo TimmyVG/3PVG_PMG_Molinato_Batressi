@@ -69,6 +69,16 @@ namespace MEW {
 			std::optional<TransformComponent>& camCompT);
 	};
 
+	class RenderSystemLitSSAO {
+	public:
+		void operator()(const std::vector<std::optional<MEW::TransformComponent>>& vecTrans,
+			const std::vector<std::optional<MEW::RenderComponent>>& vecRender,
+			const std::vector<std::optional<MEW::LightComponent>>& vecLight,
+			Shader& shader,
+			std::optional<CameraComponent>& camComp,
+			std::optional<TransformComponent>& camCompT);
+	};
+
 	class ForwardRenderSystemLit {
 	public:
 		void operator()(
@@ -89,6 +99,8 @@ namespace MEW {
 			std::optional<CameraComponent>& camComp);
 	};
 
+
+
 	class LightSystem {
 	public:
 		void operator()(const std::vector<std::optional<MEW::TransformComponent>>& vecTrans,
@@ -97,7 +109,32 @@ namespace MEW {
 			Shader& shader, Shader& shaderCube, std::optional<CameraComponent>& camComp,std::optional<TransformComponent>& camComptT);
 	};
 
+	class LightSystemSSAO {
+	public:
+		void operator()(const std::vector<std::optional<MEW::TransformComponent>>& vecTrans,
+			const std::vector<std::optional<MEW::RenderComponent>>& vecRender,
+			std::vector<std::optional<MEW::LightComponent>>& vecLight,
+			Shader& shader, Shader& shaderCube, std::optional<CameraComponent>& camComp, std::optional<TransformComponent>& camComptT);
+	};
+
+	class RenderSSAOTexture {
+	public:
+		void operator()(Shader& shader,
+										Shader& shaderBlur,
+										std::optional<CameraComponent>& cameraCamera,
+										std::optional<TransformComponent>& cameraTransform);
+	};
+
+
 	class DepthMaps {
+	public:
+		void operator()(const std::vector<std::optional<MEW::TransformComponent>>& vecTrans,
+			const std::vector<std::optional<MEW::RenderComponent>>& vecRender,
+			std::vector<std::optional<MEW::LightComponent>>& vecLight,
+			Shader& shader, Shader& shaderCube, std::optional<CameraComponent>& camComp, std::optional<TransformComponent>& camT);
+	};
+
+	class DepthMapsSSAO {
 	public:
 		void operator()(const std::vector<std::optional<MEW::TransformComponent>>& vecTrans,
 			const std::vector<std::optional<MEW::RenderComponent>>& vecRender,

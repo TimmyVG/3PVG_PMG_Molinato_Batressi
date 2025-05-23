@@ -82,16 +82,24 @@ int main() {
 
 
 	//Add lights
-	MEW::Light directional(ecs, MEW::KTypeLight::Directional);
-	//MEW::Light directional1(ecs, MEW::KTypeLight::Point);
-
-	auto light = &ecs.get_component<MEW::TransformComponent>(directional.entity);
-	light->value().translation_ = glm::vec3(0.0f, 5.0f, 0.00f);
-	light->value().rotation_ = glm::vec3(-80.0f, 0.0f, 0.00f);
-	//auto light1 = &ecs.get_component<MEW::TransformComponent>(directional1.entity);
-	//light1->value().translation_ = glm::vec3(0.0f, 5.0f, 1.00f);
-
-
+	{
+		MEW::Light directional(ecs, MEW::KTypeLight::Point);
+		auto light = &ecs.get_component<MEW::TransformComponent>(directional.entity);
+		light->value().translation_ = glm::vec3(0.0f, 5.0f, 0.00f);
+		light->value().rotation_ = glm::vec3(-80.0f, 0.0f, 0.00f);
+	}
+	{
+		MEW::Light directional(ecs, MEW::KTypeLight::Spot);
+		auto light = &ecs.get_component<MEW::TransformComponent>(directional.entity);
+		light->value().translation_ = glm::vec3(2.0f, 5.0f, 0.00f);
+		light->value().rotation_ = glm::vec3(-80.0f, 0.0f, 0.00f);
+	}
+	{
+		MEW::Light directional(ecs, MEW::KTypeLight::Directional);
+		auto light = &ecs.get_component<MEW::TransformComponent>(directional.entity);
+		light->value().translation_ = glm::vec3(4.0f, 5.0f, 0.00f);
+		light->value().rotation_ = glm::vec3(-80.0f, 0.0f, 0.00f);
+	}
 	const float color[3] = { 0.25f,0.3f,0.4f };
 	const float color2[3] = { 0.4f,0.3f,0.25f };
 
