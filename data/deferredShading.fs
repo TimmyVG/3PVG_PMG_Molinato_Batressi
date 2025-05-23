@@ -219,7 +219,7 @@ void main() {
         switch(u_type){
           case 1:
             light = DirectionalLight(FragPos,normal,Diffuse,Specular);
-            shadow = ShadowCalculationDefault(0.01,FragPos,normal,Diffuse,Specular);
+            shadow = ShadowCalculationDefault(max(0.05 * (1.0 - dot(normalize(normal), normalize(u_light_dir))), 0.001),FragPos,normal,Diffuse,Specular);
             //light = light * (1.0 - shadow);
         break;
 

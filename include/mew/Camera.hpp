@@ -25,6 +25,15 @@ namespace MEW {
     unsigned int gPosition, gNormal, gColorSpec;
     unsigned int quadVAO;
     unsigned int quadVBO;
+    unsigned int ssaoFBO, ssaoBlurFBO;
+    std::vector<glm::vec3> ssaoKernel;
+    unsigned int noiseTexture;
+    unsigned int ssaoColorBuffer, ssaoColorBufferBlur;
+    int blur, ssao;
+
+    int kernelSize;
+    float radius;
+    float bias;
   } CameraComponent;
 
   enum Actions
@@ -54,6 +63,7 @@ namespace MEW {
     CameraComponent* GetCameraComponent();
     TransformComponent* GetTransformComp();
     size_t entity_;
+    
   private:
     ECSManager* ecs;
 

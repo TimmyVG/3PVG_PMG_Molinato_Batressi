@@ -168,6 +168,63 @@ namespace MEW {
     glDisable(GL_BLEND);
   }
 
+  void RenderSystemLitSSAO::operator()(
+    const std::vector<std::optional<MEW::TransformComponent>>& vecTrans,
+    const std::vector<std::optional<MEW::RenderComponent>>& vecRender,
+    const std::vector<std::optional<MEW::LightComponent>>& vecLight,
+    Shader& shader,
+    std::optional<CameraComponent>& camComp,
+    std::optional<TransformComponent>& camCompT) {
+
+    if (!camComp.has_value() || !camCompT.has_value()) return;
+    auto caCamera = camComp.value();
+    auto trCamera = camCompT.value();
+
+    //General settings    
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glBindFramebuffer(GL_FRAMEBUFFER, camComp->gBuffer);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    shader.UseProgram();
+
+    glViewport(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
+
+    //General Uniform
+    shader.setMat4("u_view", caCamera.viewMatrix);
+    shader.setMat4("u_view_projection", caCamera.projectionMatrix * caCamera.viewMatrix);
+
+    auto itTransformO = vecTrans.begin();
+    auto itRenderO = vecRender.begin();
+    for (; itTransformO != vecTrans.end() && itRenderO != vecRender.end(); itTransformO++, itRenderO++) {
+      if (!itTransformO->has_value() || !itRenderO->has_value()) continue;
+      auto trObject = itTransformO->value();
+      auto reObject = itRenderO->value();
+
+      shader.setMat4("u_model", trObject.model);
+      glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(trObject.model)));
+      shader.setMat4("u_normalMatrix", normalMatrix);
+
+      for (const auto& mesh : reObject.model->value().meshes_)
+      {
+        unsigned int diffuseNr = 0;
+        unsigned int textureUnit = 0;
+        if (mesh.diffuse_tex_.has_value()) {
+          glActiveTexture(GL_TEXTURE0 + textureUnit);
+          shader.setInt("texture_diffuse0", textureUnit);
+          glBindTexture(GL_TEXTURE_2D, mesh.diffuse_tex_.value().getID());
+        }
+
+        glBindVertexArray(mesh.GetVAO());
+        glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(mesh.indices_.size()), GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
+        glBlendFunc(GL_ONE, GL_ONE);
+        glActiveTexture(GL_TEXTURE0);
+      }
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glDisable(GL_BLEND);
+  }
+
+
   void ForwardRenderSystemLit::operator()(
     const std::vector<std::optional<MEW::TransformComponent>>& vecTrans,
     const std::vector<std::optional<MEW::RenderComponent>>& vecRender,
@@ -626,6 +683,237 @@ namespace MEW {
     glDepthMask(GL_TRUE);
   }
 
+  void LightSystemSSAO::operator()(
+    const std::vector<std::optional<MEW::TransformComponent>>& vecTrans,
+    const std::vector<std::optional<MEW::RenderComponent>>& vecRender,
+    std::vector<std::optional<MEW::LightComponent>>& vecLight,
+    Shader& shader, Shader& shaderCube,
+    std::optional<CameraComponent>& camComp, std::optional<TransformComponent>& camCompT) {
+    if (!camComp.has_value()) return;
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    shader.UseProgram();
+    glEnable(GL_BLEND);
+    glCullFace(GL_BACK);
+    glDepthFunc(GL_LEQUAL);
+    glBlendFunc(GL_ONE, GL_ZERO);
+    glEnable(GL_DEPTH_TEST);
+
+    shader.setInt("gPosition", 0);
+    shader.setInt("gNormal", 1);
+    shader.setInt("gColorSpec", 2);
+    shader.setInt("ssao", 3);
+    shader.setInt("u_ssao", camComp.value().ssao);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, camComp->gPosition);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, camComp->gNormal);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, camComp->gColorSpec);
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, camComp->ssaoColorBufferBlur);
+    auto itLight = vecLight.begin();
+    auto itLightT = vecTrans.begin();
+    for (; itLight != vecLight.end() && itLightT != vecTrans.end(); itLight++, itLightT++) {
+      if (!itLight->has_value()) continue;
+      if (!itLightT->has_value()) continue;
+      auto& liLight = itLight->value();
+      auto& trLight = itLightT->value();
+
+
+      if (KTypeLight::Point == liLight.type) {
+        // shaderCube.UseProgram();
+      }
+
+      shader.setFloat3("u_diffuse_color", &liLight.diffuse.x);
+      shader.setFloat("u_diffuse_strength", liLight.fDiffuse);
+
+      shader.setFloat("u_constant", liLight.constant);
+      shader.setFloat("u_linear", liLight.linear);
+      shader.setFloat("u_quadratic", liLight.quadratic);
+
+
+      shader.setFloat3("u_spec_color", &liLight.specular.x);
+      shader.setFloat("u_spec_strength", liLight.fSpecular);
+
+      shader.setFloat("u_cutoff", glm::cos(glm::radians(liLight.cutOff)));
+      shader.setFloat("u_outercutoff", glm::cos(glm::radians(liLight.outerCutOff)));
+
+      shader.setInt("u_blin", liLight.bling);
+      //glm::vec3 lightDir_view = glm::mat3(camComp.value().viewMatrix) * trLight.fwd;
+      shader.setFloat3("u_light_dir", &trLight.fwd.x);
+      //glm::vec3 lightPos_view = glm::vec3(camComp.value().viewMatrix * glm::vec4(trLight.translation_, 1.0f));
+      shader.setFloat3("u_lightPos", &trLight.translation_.x);
+      shader.setMat4("u_viewInv", glm::inverse(camComp.value().viewMatrix));
+      shader.setMat4("u_view", camComp.value().viewMatrix);
+      shader.setMat4("u_lightSpaceMatrix", liLight.lightSpaceMatrix);
+      shader.setFloat("u_near", liLight.near_plane);
+      shader.setFloat("u_far", liLight.far_plane);
+      shader.setInt("u_shadowMap", 10);
+      shader.setInt("u_cubeMap", 11);
+
+      shader.setInt("u_type", liLight.type);
+      shader.setFloat3("u_camera_pos", &camCompT->translation_.x);
+      shader.setFloat3("u_camera_dir", &camCompT->fwd.x);
+      shader.setFloat("u_shininess", liLight.shininess);
+
+      if (KTypeLight::Point == liLight.type) {
+        glActiveTexture(GL_TEXTURE0 + 11);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, liLight.depthMap);
+
+      }
+      else {
+        glActiveTexture(GL_TEXTURE0 + 10);
+        glBindTexture(GL_TEXTURE_2D, liLight.depthMap);
+
+      }
+      if (camComp->quadVAO == 0)
+      {
+        float quadVertices[] = {
+          // positions        // texture Coords
+          -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+          -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+           1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+           1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+        };
+        // setup plane VAO
+        glGenVertexArrays(1, &camComp->quadVAO);
+        glGenBuffers(1, &camComp->quadVBO);
+        glBindVertexArray(camComp->quadVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, camComp->quadVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+      }
+
+      glViewport(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
+
+      glBindVertexArray(camComp->quadVAO);
+      glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+      glBindVertexArray(0);
+      glBlendFunc(GL_ONE, GL_ONE);
+    }
+
+    glDisable(GL_BLEND);
+
+
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, camComp->gBuffer);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
+
+    glBlitFramebuffer(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT, 0, 0, CAMERA_WIDTH, CAMERA_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
+  }
+
+  void RenderSSAOTexture::operator()(Shader& shader,
+                                     Shader& shaderBlur,
+                                     std::optional<CameraComponent>& cameraCamera,
+                                     std::optional<TransformComponent>& cameraTransform) {
+
+    if (!cameraCamera.has_value()) return;
+    if (!cameraTransform.has_value()) return;
+
+
+    glBindFramebuffer(GL_FRAMEBUFFER, cameraCamera->ssaoFBO);
+    glClear(GL_COLOR_BUFFER_BIT);
+    shader.UseProgram();
+    shader.setInt("gPosition", 0);
+    shader.setInt("gNormal", 1);
+    shader.setInt("texNoise", 2);
+    for (unsigned int i = 0; i < 64; ++i) {
+      std::string uniformName = "u_samples[" + std::to_string(i) + "]";
+      shader.setFloat3(uniformName.c_str(), &cameraCamera.value().ssaoKernel[i].x);
+    }
+    shader.setMat4("u_projection", cameraCamera.value().projectionMatrix);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, cameraCamera.value().gPosition);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, cameraCamera.value().gNormal);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, cameraCamera.value().noiseTexture);
+    
+
+    shader.setInt("kernelSize", cameraCamera.value().kernelSize);
+    shader.setFloat("radius", cameraCamera.value().radius);
+    shader.setFloat("bias", cameraCamera.value().bias);
+    //RenderQuad
+
+    if (cameraCamera.value().quadVAO == 0)
+    {
+      float quadVertices[] = {
+        // positions        // texture Coords
+        -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+         1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+         1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+      };
+      // setup plane VAO
+      glGenVertexArrays(1, &cameraCamera.value().quadVAO);
+      glGenBuffers(1, &cameraCamera.value().quadVBO);
+      glBindVertexArray(cameraCamera.value().quadVAO);
+      glBindBuffer(GL_ARRAY_BUFFER, cameraCamera.value().quadVBO);
+      glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+      glEnableVertexAttribArray(0);
+      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+      glEnableVertexAttribArray(1);
+      glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    }
+    glBindVertexArray(cameraCamera.value().quadVAO);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glBindVertexArray(0);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    ///////////////////////BLUR///////////////////////////////////////////
+    if (cameraCamera.value().blur) {
+      glBindFramebuffer(GL_FRAMEBUFFER, cameraCamera.value().ssaoBlurFBO);
+      glClear(GL_COLOR_BUFFER_BIT);
+      shaderBlur.UseProgram();
+      shaderBlur.setInt("ssaoInput", 0);
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D, cameraCamera.value().ssaoColorBuffer);
+
+      //RenderQUAD
+      if (cameraCamera.value().quadVAO == 0)
+      {
+        float quadVertices[] = {
+          // positions        // texture Coords
+          -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+          -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+           1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+           1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+        };
+        // setup plane VAO
+        glGenVertexArrays(1, &cameraCamera.value().quadVAO);
+        glGenBuffers(1, &cameraCamera.value().quadVBO);
+        glBindVertexArray(cameraCamera.value().quadVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, cameraCamera.value().quadVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+      }
+      glBindVertexArray(cameraCamera.value().quadVAO);
+      glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+      glBindVertexArray(0);
+
+      glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    }
+  }
+  
 
   void DepthMaps::operator()(
     const std::vector<std::optional<MEW::TransformComponent>>& vecTrans,
@@ -721,6 +1009,122 @@ namespace MEW {
         else {
 
         shader.setMat4("u_model", transform.model);
+        }
+        for (const auto& mesh : render.model->value().meshes_)
+        {
+          // Draw mesh
+          unsigned int diffuseNr = 1;
+
+          glBindVertexArray(mesh.GetVAO());
+          glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(mesh.indices_.size()), GL_UNSIGNED_INT, 0);
+          glBindVertexArray(0);
+        }
+      }
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    GLenum err;
+    while ((err = glGetError()) != GL_NO_ERROR) {
+      std::cout << "OpenGL Error: " << err << std::endl;
+    }
+    glCullFace(GL_BACK);
+  }
+
+  void DepthMapsSSAO::operator()(
+    const std::vector<std::optional<MEW::TransformComponent>>& vecTrans,
+    const std::vector<std::optional<MEW::RenderComponent>>& vecRender,
+    std::vector<std::optional<MEW::LightComponent>>& vecLight,
+    Shader& shader, Shader& shaderCube,
+    std::optional<CameraComponent>& camComp,
+    std::optional<TransformComponent>& camT) {
+    if (!camComp.has_value()) return;
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    auto itLight = vecLight.begin();
+    auto itLightT = vecTrans.begin();
+    for (; itLight != vecLight.end() && itLightT != vecTrans.end(); itLight++, itLightT++) {
+      if (!itLight->has_value()) continue;
+      if (!itLightT->has_value()) continue;
+      auto& liLight = itLight->value();
+      auto& trLight = itLightT->value();
+
+      if (KTypeLight::Directional == liLight.type) {
+        shader.UseProgram();
+        glm::vec3 center = trLight.translation_;
+        glm::vec3 lightPos = center - trLight.fwd * 1.0f;
+        liLight.lightView = glm::lookAt(trLight.translation_, trLight.translation_ + trLight.fwd, glm::vec3(0.0, 1.0, 0.0));
+        float size = 40.0f;
+        liLight.lightProjection = glm::ortho(-size, size, -size, size, liLight.near_plane, liLight.far_plane);
+        liLight.lightSpaceMatrix = liLight.lightProjection * liLight.lightView;
+        shader.setMat4("u_lightSpaceMatrix", liLight.lightSpaceMatrix);
+        shader.setFloat("u_far", liLight.far_plane);
+        shader.setInt("u_type", liLight.type);
+        shader.setFloat3("u_lightPos", &trLight.translation_.x);
+
+
+      }
+      if (KTypeLight::Spot == liLight.type) {
+        shader.UseProgram();
+        liLight.lightProjection = glm::perspective(glm::radians(90.0f), 1.0f, liLight.near_plane, liLight.far_plane);
+        liLight.lightView = glm::lookAt(trLight.translation_, trLight.translation_ + trLight.fwd, glm::vec3(0.0, 1.0, 0.0));
+        liLight.lightSpaceMatrix = liLight.lightProjection * liLight.lightView;
+        shader.setMat4("u_lightSpaceMatrix", liLight.lightSpaceMatrix);
+        shader.setFloat("u_far", liLight.far_plane);
+        shader.setInt("u_type", liLight.type);
+        shader.setFloat3("u_lightPos", &trLight.translation_.x);
+
+
+      }
+      if (KTypeLight::Point == liLight.type) {
+        shaderCube.UseProgram();
+        liLight.lightProjection = glm::perspective(glm::radians(90.0f), (float)liLight.shadow_width / (float)liLight.shadow_height, liLight.near_plane, liLight.far_plane);
+        std::vector<glm::mat4> shadowTransforms;
+        shadowTransforms.push_back(liLight.lightProjection *
+          glm::lookAt(trLight.translation_, trLight.translation_ + glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
+        shadowTransforms.push_back(liLight.lightProjection *
+          glm::lookAt(trLight.translation_, trLight.translation_ + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
+        shadowTransforms.push_back(liLight.lightProjection *
+          glm::lookAt(trLight.translation_, trLight.translation_ + glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0)));
+        shadowTransforms.push_back(liLight.lightProjection *
+          glm::lookAt(trLight.translation_, trLight.translation_ + glm::vec3(0.0, -1.0, 0.0), glm::vec3(0.0, 0.0, -1.0)));
+        shadowTransforms.push_back(liLight.lightProjection *
+          glm::lookAt(trLight.translation_, trLight.translation_ + glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0, -1.0, 0.0)));
+        shadowTransforms.push_back(liLight.lightProjection *
+          glm::lookAt(trLight.translation_, trLight.translation_ + glm::vec3(0.0, 0.0, -1.0), glm::vec3(0.0, -1.0, 0.0)));
+
+        for (unsigned int i = 0; i < 6; ++i) {
+          std::string uniformName = "shadowMatrices[" + std::to_string(i) + "]";
+          shaderCube.setMat4(uniformName.c_str(), shadowTransforms[i]);
+        }
+        liLight.lightView = glm::lookAt(trLight.translation_, trLight.translation_ + trLight.fwd, glm::vec3(0.0, 1.0, 0.0));
+        liLight.lightSpaceMatrix = liLight.lightProjection * liLight.lightView;
+        shaderCube.setMat4("u_lightSpaceMatrix", liLight.lightSpaceMatrix);
+        shaderCube.setFloat("u_far", liLight.far_plane);
+        shaderCube.setInt("u_type", liLight.type);
+        shaderCube.setFloat3("u_lightPos", &trLight.translation_.x);
+
+
+      }
+
+      glViewport(0, 0, liLight.shadow_width, liLight.shadow_height);
+      glBindFramebuffer(GL_FRAMEBUFFER, liLight.depthMapFBO);
+      glClear(GL_DEPTH_BUFFER_BIT);
+
+      //Recorrer meshes
+      auto itRender = vecRender.begin();
+      auto itTransform = vecTrans.begin();
+      for (; itTransform != vecTrans.end() && itRender != vecRender.end(); itTransform++, itRender++) {
+        if (!itRender->has_value() || !itTransform->has_value()) continue;
+        auto& render = itRender->value();
+        auto& transform = itTransform->value();
+        if (liLight.type == KTypeLight::Point) {
+          shaderCube.setMat4("u_model", transform.model);
+
+        }
+        else {
+
+          shader.setMat4("u_model", transform.model);
         }
         for (const auto& mesh : render.model->value().meshes_)
         {

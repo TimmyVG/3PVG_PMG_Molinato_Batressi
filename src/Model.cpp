@@ -74,7 +74,7 @@ namespace MEW {
 
 		mat->GetTexture(type, 0, &texture_path);
 
-		std::cout << "tex_map size: " << tex_map.size() << std::endl;
+		//std::cout << "tex_map size: " << tex_map.size() << std::endl;
 		if (tex_map.find(directory_ + texture_path.C_Str()) == tex_map.end()) {
 			data = TextureFromFile(texture_path.C_Str(), directory_);
 			//tex_map.insert({ directory_ + texture_path.C_Str(),data });
@@ -82,7 +82,7 @@ namespace MEW {
 		}
 		else {
 			data = tex_map[directory_ + texture_path.C_Str()];
-			std::cout << tex_map.size();
+			//std::cout << tex_map.size();
 		}
 
 		return data;
