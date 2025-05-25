@@ -161,6 +161,10 @@ namespace MEW {
         ImGui::InputInt("kernel", &cameraEntity->value().kernelSize);
         ImGui::InputFloat("radius", &cameraEntity->value().radius);
         ImGui::InputFloat("bias", &cameraEntity->value().bias);
+        ImGui::InputInt("hdr", &cameraEntity->value().hdr);
+        ImGui::InputFloat("exposure", &cameraEntity->value().exposure);
+        ImGui::InputFloat("near", &cameraEntity->value().nearPlane);
+        ImGui::InputFloat("far", &cameraEntity->value().farPlane);
 
       }
 

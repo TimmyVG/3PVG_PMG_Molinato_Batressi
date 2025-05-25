@@ -51,6 +51,7 @@ int global = 0;
 		MEW::Shader shaderdeferredShading("../data/deferredShading.vs", "../data/ssao_lighting.fs" );
 		MEW::Shader shaderSSAO("../data/ssao.vs","../data/ssao.fs");
 		MEW::Shader shaderBlur("../data/ssao.vs","../data/ssao_blur.fs");
+		MEW::Shader shaderHDR("../data/hdr.vs","../data/hdr.fs");
 
 
 		std::optional<MEW::Model> CorvModel;
@@ -85,12 +86,17 @@ int global = 0;
 		light1->value().rotation_ = glm::vec3(-80.0f, 0.0f, 0.00f);
 
 		MEW::Light point(ecs, MEW::KTypeLight::Point);
-		MEW::Light ambient(ecs, MEW::KTypeLight::Ambient);
+	
 		//MEW::Light directional1(ecs, MEW::KTypeLight::Spot);
 
 		auto light2 = &ecs.get_component<MEW::TransformComponent>(point.entity);
 		light2->value().translation_ = glm::vec3(0.0f, 0.0f, 0.00f);
 		light2->value().rotation_ = glm::vec3(-80.0f, 0.0f, 0.00f);
+
+		MEW::Light ambient(ecs, MEW::KTypeLight::Ambient);
+		auto lightAmbient = &ecs.get_component<MEW::LightComponent>(ambient.entity);
+		lightAmbient->value().specular = glm::vec3(0.3f, 0.3f, 0.3f);
+		lightAmbient->value().fSpecular = 0.3f;
 
 		const float color[3] = { 0.25f,0.3f,0.4f };
 		const float color2[3] = { 0.4f,0.3f,0.25f };
@@ -113,7 +119,7 @@ int global = 0;
 		input.assign(MEW::Input::Buttons::MOUSE_2, MEW::CAMERA_ROTATE);
 		input.assign(MEW::Input::Buttons::MOUSE_2, MEW::ActionsInspector::CLICK_OUT);
 		MEW::Camera cameraTest(ecs, 1280 / 720, MEW::CameraType::CAMERA_PERSPECTIVE,
-			50.0f, 0.001f, 5000.0f, 10.0f);
+			50.0f, 0.05f, 100.0f, 10.0f);
 
 
 		MEW::Inspector inspector(w);
@@ -163,7 +169,7 @@ int global = 0;
 			MEW::LightSystemSSAO()(ecs.get_vectorComponent<MEW::TransformComponent>(),
 										ecs.get_vectorComponent<MEW::RenderComponent>(),
 										ecs.get_vectorComponent<MEW::LightComponent>(),
-				shaderdeferredShading, shaderdeferredShading,
+				shaderdeferredShading, shaderdeferredShading,shaderHDR,
 										ecs.get_component<MEW::CameraComponent>(cameraTest.entity_),ecs.get_component<MEW::TransformComponent>(cameraTest.entity_));
 
 

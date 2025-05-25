@@ -34,6 +34,11 @@ namespace MEW {
     int kernelSize;
     float radius;
     float bias;
+    unsigned int hdrFBO;
+    int hdr;
+    float exposure;
+    unsigned int hdrColorBuffer;
+
   } CameraComponent;
 
   enum Actions

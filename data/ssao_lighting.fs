@@ -238,8 +238,8 @@ vec3 normal_view = normalize(mat3(u_viewInv) * normal_world);
             break;
         case 4:
             light = Diffuse * u_diffuse_strength; ;
-            if(u_ssao == 1)light = vec3(u_diffuse_strength * Diffuse * AmbientOcclusion);
-            if(u_ssao == 0)light = vec3(u_diffuse_strength * Diffuse );
+            if(u_ssao == 1)light = vec3(u_diffuse_strength * Diffuse * AmbientOcclusion * u_diffuse_color);
+            if(u_ssao == 0)light = vec3(u_diffuse_strength * Diffuse *u_diffuse_color);
             break;
         }
       

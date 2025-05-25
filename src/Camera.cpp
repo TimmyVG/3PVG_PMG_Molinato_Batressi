@@ -34,7 +34,7 @@ float ourLerp(float a, float b, float f)
     // - position color buffer
     glGenTextures(1, &cameraComp->gPosition);
     glBindTexture(GL_TEXTURE_2D, cameraComp->gPosition);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, 1280, 720, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, 1280, 720, 0, GL_RGB, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -44,7 +44,7 @@ float ourLerp(float a, float b, float f)
     // - normal color buffer
     glGenTextures(1, &cameraComp->gNormal);
     glBindTexture(GL_TEXTURE_2D, cameraComp->gNormal);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, 1280, 720, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, 1280, 720, 0, GL_RGB, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, cameraComp->gNormal, 0);
@@ -52,7 +52,7 @@ float ourLerp(float a, float b, float f)
     // - color + specular color buffer
     glGenTextures(1, &cameraComp->gColorSpec);
     glBindTexture(GL_TEXTURE_2D, cameraComp->gColorSpec);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, 1280, 720, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, 1280, 720, 0, GL_RGB, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, cameraComp->gColorSpec, 0);
@@ -94,6 +94,20 @@ float ourLerp(float a, float b, float f)
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
       std::cout << "SSAO Blur Framebuffer not complete!" << std::endl;
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    glGenTextures(1, &cameraComp->hdrColorBuffer);
+    glBindTexture(GL_TEXTURE_2D, cameraComp->hdrColorBuffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 1280, 720, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    
+    //FBO
+    glGenFramebuffers(1, &cameraComp->hdrFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, cameraComp->hdrFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, cameraComp->hdrColorBuffer, 0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+      std::cout << "Framebuffer not complete!" << std::endl;
 
     // generate sample kernel
     // ----------------------
@@ -137,6 +151,11 @@ float ourLerp(float a, float b, float f)
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     cameraComp->quadVAO = 0;
+
+    cameraComp->hdr = 1;
+    cameraComp->exposure = 0.5f;
+    cameraComp->ssao = 1;
+    cameraComp->blur = 1;
   }
 
   void MEW::Camera::update(float deltaTime, Input& inputManager)
