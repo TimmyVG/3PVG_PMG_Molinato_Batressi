@@ -43,6 +43,7 @@ namespace MEW {
 		bool closedPressed();
 		double time();
 		double deltaTime();
+		double lastFrame_;
 		int getWindowHeight();
 		int getWindowWidth();
 		Window(Window&& other) noexcept; //CONSTRUCTOR DE MOVIMIENTO
@@ -54,7 +55,6 @@ namespace MEW {
 	private:
 		double currentFrame_;
 		double deltaTime_;
-		double lastFrame_;
 		int window_width;
 		int window_height;
 		Window(GLFWwindow* w) : window_{ w } ,isDeletable_(false), window_width(0),window_height(0) {  }

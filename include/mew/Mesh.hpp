@@ -39,12 +39,13 @@ namespace MEW {
 		Mesh(Mesh& other);
 		void setUpMesh(const MeshData& mesh_data);
 		const unsigned int GetVAO() const;
-
+		
 	private:
 		unsigned int VAO, VBO, EBO;
 		bool isMeshLoaded;
 	};
 
+	MeshData generateGridMesh(int width, int height , int resolutionX , int resolutionY);
 }
 
 #endif

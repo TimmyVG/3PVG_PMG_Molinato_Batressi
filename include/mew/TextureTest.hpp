@@ -27,7 +27,7 @@ namespace MEW {
     const unsigned int getID() const;
     Texture& operator=(const Texture& other);
     Texture(Texture& other);
-
+    void bind(unsigned int unit = 0) const;
   private:
     unsigned int id_;
     bool terminate_;
