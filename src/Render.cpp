@@ -1172,7 +1172,7 @@ namespace MEW {
       glBindTexture(GL_TEXTURE_2D, mesh.normal_tex_.value().getID());
 
       glActiveTexture(GL_TEXTURE2);
-      glBindTexture(GL_TEXTURE_2D, mesh.normal_tex_.value().getID());
+      glBindTexture(GL_TEXTURE_2D, mesh.displacement_tex.value().getID());
 
       shader.setInt("waterDiffuse", 0);
       shader.setInt("waterNormal", 1);

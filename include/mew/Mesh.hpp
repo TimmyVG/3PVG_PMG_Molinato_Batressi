@@ -31,6 +31,7 @@ namespace MEW {
 		std::optional<Texture> diffuse_tex_;
 		std::optional<Texture> normal_tex_;
 		std::optional<Texture> specular_tex_;
+		std::optional<Texture> displacement_tex;
 
 		Mesh(const MeshData& other_mesh_data);
 		~Mesh();

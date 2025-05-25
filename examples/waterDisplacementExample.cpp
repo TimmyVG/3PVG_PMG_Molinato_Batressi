@@ -55,21 +55,28 @@ int main() {
 	MEW::Shader shader("../data/example.vs", "../data/example.fs");
 	MEW::Shader watershader("../data/displacementMap.vs", "../data/displacementMap.fs");
 	MEW::TextureData waterdiffuseTextureData = MEW::TextureFromFile("WaterColor.jpg", "../data/water");
-	MEW::TextureData waternormalTextureData = MEW::TextureFromFile("WaterDisp.png", "../data/Water");
+	MEW::TextureData waternormalTextureData = MEW::TextureFromFile("WaterNormal.jpg", "../data/Water");
+	MEW::TextureData waterDisplacementTextureData = MEW::TextureFromFile("WaterDisp.png", "../data/Water");
 	MEW::Texture waterdiffuseTexture(waterdiffuseTextureData);
 	MEW::Texture waternormalTexture(waternormalTextureData);
 
-	MEW::MeshData meshData = MEW::generateGridMesh(10,10,10,10);
+	MEW::MeshData meshData = MEW::generateGridMesh(100,100,100,100);
 	std::optional<MEW::Mesh> watermesh = std::make_optional<MEW::Mesh>(meshData);
 
-	auto entityWater = ecs.create_entity();
-	auto& transformwater = ecs.add_component<MEW::TransformComponent>(entityWater);
-	transformwater.value().translation_ = glm::vec3(0); 
+	for (int x = 0; x < 4; ++x) {
+		for (int z = 0; z < 4; ++z) {
+			auto entityWater = ecs.create_entity();
 
-	auto& watercomponent = ecs.add_component<MEW::WaterComponent>(entityWater);
-	*watercomponent.value().mesh = watermesh.value();
-	watercomponent.value().mesh->value().diffuse_tex_ = waterdiffuseTexture;
-	watercomponent.value().mesh->value().normal_tex_ = waternormalTexture;
+			auto& transformwater = ecs.add_component<MEW::TransformComponent>(entityWater);
+			transformwater.value().translation_ = glm::vec3(100 * x, 0, 100 * z);  
+
+			auto& watercomponent = ecs.add_component<MEW::WaterComponent>(entityWater);
+			*watercomponent.value().mesh = watermesh.value();
+			watercomponent.value().mesh->value().diffuse_tex_ = waterdiffuseTexture;
+			watercomponent.value().mesh->value().normal_tex_ = waterDisplacementTextureData;
+		}
+	}
+	
 
 #pragma endregion
 #pragma region Camera
