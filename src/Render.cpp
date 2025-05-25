@@ -687,9 +687,10 @@ namespace MEW {
     const std::vector<std::optional<MEW::TransformComponent>>& vecTrans,
     const std::vector<std::optional<MEW::RenderComponent>>& vecRender,
     std::vector<std::optional<MEW::LightComponent>>& vecLight,
-    Shader& shader, Shader& shaderCube,
+    Shader& shader, Shader& shaderCube,Shader& shaderHDR,
     std::optional<CameraComponent>& camComp, std::optional<TransformComponent>& camCompT) {
     if (!camComp.has_value()) return;
+    glBindFramebuffer(GL_FRAMEBUFFER, camComp->hdrFBO);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     shader.UseProgram();
     glEnable(GL_BLEND);
@@ -797,6 +798,39 @@ namespace MEW {
 
     glDisable(GL_BLEND);
 
+    //hdr
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    shaderHDR.UseProgram();
+    shaderHDR.setInt("hdrBuffer", 0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, camComp->hdrColorBuffer);
+    shaderHDR.setInt("hdr",camComp->hdr);
+    shaderHDR.setFloat("exposure", camComp->exposure);
+
+    if (camComp->quadVAO == 0)
+    {
+      float quadVertices[] = {
+        // positions        // texture Coords
+        -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+         1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+         1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+      };
+      // setup plane VAO
+      glGenVertexArrays(1, &camComp->quadVAO);
+      glGenBuffers(1, &camComp->quadVBO);
+      glBindVertexArray(camComp->quadVAO);
+      glBindBuffer(GL_ARRAY_BUFFER, camComp->quadVBO);
+      glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+      glEnableVertexAttribArray(0);
+      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+      glEnableVertexAttribArray(1);
+      glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    }
+    glBindVertexArray(camComp->quadVAO);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glBindVertexArray(0);
 
     glBindFramebuffer(GL_READ_FRAMEBUFFER, camComp->gBuffer);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
