@@ -23,6 +23,11 @@ namespace MEW {
 		RenderComponent() : model(std::make_shared<std::optional<Model>>()), cast_shadows(false) {};
 	};
 
+	struct WaterComponent {
+		std::shared_ptr<std::optional<Mesh>> mesh;
+		WaterComponent() : mesh(std::make_shared<std::optional<Mesh>>()) {};
+	};
+
 
 	class PhysicsRenderSystem : public btIDebugDraw {
 	private:
@@ -140,6 +145,14 @@ namespace MEW {
 			const std::vector<std::optional<MEW::RenderComponent>>& vecRender,
 			std::vector<std::optional<MEW::LightComponent>>& vecLight,
 			Shader& shader, Shader& shaderCube, std::optional<CameraComponent>& camComp, std::optional<TransformComponent>& camT);
+	};
+
+	class WaterRenderSystem {
+	public:
+		void operator()(const std::vector<std::optional<MEW::TransformComponent>>& vecTransform,
+			const std::vector<std::optional<MEW::WaterComponent>>& vecWater,
+			Shader& shader,
+			std::optional<CameraComponent>& camComp,float deltatime);
 	};
 
 

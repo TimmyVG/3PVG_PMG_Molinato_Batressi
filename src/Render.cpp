@@ -1180,4 +1180,42 @@ namespace MEW {
     }
     glCullFace(GL_BACK);
   }
+
+  void WaterRenderSystem::operator()(
+    const std::vector<std::optional<MEW::TransformComponent>>& vecTransform,
+    const std::vector<std::optional<MEW::WaterComponent>>& vecWater,
+    Shader& shader,
+    std::optional<CameraComponent>& camComp,float currentTime){
+    for (size_t i = 0; i < vecWater.size(); ++i) {
+      if (!vecTransform[i] || !vecWater[i]) continue;
+
+      auto& water = *vecWater[i];
+      auto& transform = *vecTransform[i];
+
+      shader.UseProgram();
+
+      shader.setMat4("model", transform.model);
+      shader.setMat4("view", camComp->viewMatrix);
+      shader.setMat4("projection", camComp->projectionMatrix);
+
+      auto& mesh = water.mesh->value();
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D, mesh.diffuse_tex_.value().getID());
+
+      glActiveTexture(GL_TEXTURE1);
+      glBindTexture(GL_TEXTURE_2D, mesh.normal_tex_.value().getID());
+
+      glActiveTexture(GL_TEXTURE2);
+      glBindTexture(GL_TEXTURE_2D, mesh.normal_tex_.value().getID());
+
+      shader.setInt("waterDiffuse", 0);
+      shader.setInt("waterNormal", 1);
+      shader.setInt("displacementMap", 2);
+      shader.setFloat("time", currentTime);
+
+      glBindVertexArray(water.mesh->value().GetVAO());
+      glDrawElements(GL_TRIANGLES, water.mesh->value().indices_.size(), GL_UNSIGNED_INT, 0);
+      glBindVertexArray(0);
+    }
+  }
 }

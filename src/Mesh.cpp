@@ -96,3 +96,43 @@ const unsigned int MEW::Mesh::GetVAO() const
 {
   return VAO;
 }
+namespace MEW {
+  MeshData generateGridMesh(int width, int height, int resolutionX, int resolutionY)
+  {
+    MEW::MeshData meshData;
+
+    float dx = static_cast<float>(width) / (resolutionX - 1);
+    float dz = static_cast<float>(height) / (resolutionY - 1);
+
+    for (int y = 0; y < resolutionY; ++y) {
+      for (int x = 0; x < resolutionX; ++x) {
+        float u = static_cast<float>(x) / (resolutionX - 1);
+        float v = static_cast<float>(y) / (resolutionY - 1);
+
+        MEW::Vertex_Data vertex;
+        vertex.position = glm::vec3(x * dx, 0.0f, y * dz);
+        vertex.normal = glm::vec3(0.0f, 1.0f, 0.0f);
+        vertex.uv = glm::vec2(u, v);
+
+        meshData.vertexs_.push_back(vertex);
+      }
+    }
+
+    for (int y = 0; y < resolutionY - 1; ++y) {
+      for (int x = 0; x < resolutionX - 1; ++x) {
+        int i = y * resolutionX + x;
+
+        meshData.ids_.push_back(i);
+        meshData.ids_.push_back(i + resolutionX);
+        meshData.ids_.push_back(i + 1);
+
+        meshData.ids_.push_back(i + 1);
+        meshData.ids_.push_back(i + resolutionX);
+        meshData.ids_.push_back(i + resolutionX + 1);
+      }
+    }
+
+    return meshData;
+  }
+}
+
