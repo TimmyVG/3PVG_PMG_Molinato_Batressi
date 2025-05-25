@@ -90,7 +90,7 @@ int main() {
 	input.assign(MEW::Input::Buttons::KEY_DOWN, MEW::CAMERA_BACK);
 	input.assign(MEW::Input::Buttons::MOUSE_2, MEW::CAMERA_ROTATE);
 	MEW::Camera cameraTest(ecs, 640 / 460);
-	w.lastFrame_ = w.time();
+	w.lastFrame_ = 0;
 #pragma endregion
 	float globalTime = 0.0f; // Initialize global time
 	while (!done) {
