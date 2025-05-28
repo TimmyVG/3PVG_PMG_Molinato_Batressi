@@ -97,7 +97,7 @@ float ourLerp(float a, float b, float f)
 
     glGenTextures(1, &cameraComp->hdrColorBuffer);
     glBindTexture(GL_TEXTURE_2D, cameraComp->hdrColorBuffer);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 1280, 720, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, 1280, 720, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     
@@ -156,6 +156,8 @@ float ourLerp(float a, float b, float f)
     cameraComp->exposure = 0.5f;
     cameraComp->ssao = 1;
     cameraComp->blur = 1;
+    cameraComp->tone = 0;
+    cameraComp->gamma = 2.2f;
   }
 
   void MEW::Camera::update(float deltaTime, Input& inputManager)

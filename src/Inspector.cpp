@@ -165,6 +165,13 @@ namespace MEW {
         ImGui::InputFloat("exposure", &cameraEntity->value().exposure);
         ImGui::InputFloat("near", &cameraEntity->value().nearPlane);
         ImGui::InputFloat("far", &cameraEntity->value().farPlane);
+        ImGui::InputFloat("gamma", &cameraEntity->value().gamma);
+        ImGui::Text("Tone Mapping:");
+        ImGui::RadioButton("None", &cameraEntity->value().tone, 0);
+        ImGui::RadioButton("Reinhard", &cameraEntity->value().tone, 1);
+        ImGui::RadioButton("Exposure", &cameraEntity->value().tone, 2);
+        ImGui::RadioButton("ACES", &cameraEntity->value().tone, 3);
+        ImGui::RadioButton("Uncharted2", &cameraEntity->value().tone, 4);
 
       }
 

@@ -11,6 +11,8 @@ namespace MEW {
     CAMERA_PERSPECTIVE
   } CameraType;
 
+
+
   typedef struct {
     CameraType type;
     float fov;
@@ -38,7 +40,8 @@ namespace MEW {
     int hdr;
     float exposure;
     unsigned int hdrColorBuffer;
-
+    int tone;
+    float gamma;
   } CameraComponent;
 
   enum Actions
@@ -49,6 +52,7 @@ namespace MEW {
     CAMERA_BACK,
     CAMERA_ROTATE
   };
+
 
   class Camera
   {

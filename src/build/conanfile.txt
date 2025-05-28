@@ -9,6 +9,7 @@ minizip/1.2.13
 imgui/1.83
 imguizmo/1.83
 bullet3/3.25
+nlohmann_json/3.11.2
 [generators]
 premake
 [options]

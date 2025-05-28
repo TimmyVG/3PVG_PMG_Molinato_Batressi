@@ -124,6 +124,8 @@ int global = 0;
 
 		MEW::Inspector inspector(w);
 		inspector.LinkECS(ecs);
+
+
 		while (!done) {
 			input.newframe();
 			w.newframe(backgroundcolor);
