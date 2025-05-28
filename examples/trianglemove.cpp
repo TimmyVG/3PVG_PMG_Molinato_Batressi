@@ -1,4 +1,3 @@
-#include "GLFW/glfw3.h"
 #include "mew/Window.hpp"
 #include "mew/Shader.hpp"
 #include "mew/Input.hpp"

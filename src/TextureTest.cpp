@@ -1,5 +1,7 @@
 #include <GL/glew.h>
 #include "MEW/TextureTest.hpp"
+#include "MEW/Model.hpp"
+
 #include <iostream>
 
 namespace MEW {
@@ -40,7 +42,11 @@ namespace MEW {
 	}
 
 	Texture::~Texture() {
-		if (terminate_ && id_ != 0) glDeleteTextures(1, &id_);
+		if (terminate_ && id_ != 0) {
+			id_ = 0;
+			glDeleteTextures(1, &id_);
+			MEW::loaded_tex_map.clear();
+		}
 	}
 
 	const unsigned int Texture::getID() const {

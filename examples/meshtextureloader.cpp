@@ -36,17 +36,19 @@ int main() {
 		return -1;
 	}
 	MEW::Window w = maybe_w.value();
-
 	MEW::Input input(w.window_);
+
 	MEW::Shader shader("../data/example.vs", "../data/example.fs");
-	std::optional<MEW::Model> CorvModel;
-	std::vector<MEW::MeshData> CorvMeshData = MEW::loadModel("../data/silla.fbx").value();
-	CorvModel = MEW::Model(CorvMeshData);
-	MEW::ModelObject objmiku(ecs);
-	*objmiku.GetRenderComponent()->model = CorvModel;
-	objmiku.GetTransformComponent()->scale_ = glm::vec3(1, 1, 1);
-	objmiku.GetTransformComponent()->rotation_ = glm::vec3(270.0f, 0.0f, 0.0f);
-	objmiku.GetTransformComponent()->translation_ = glm::vec3(0.0f, 0.0f, -10.0f);
+	std::optional<MEW::Model> TmpModel;
+	std::vector<MEW::MeshData> TmpMeshData = MEW::loadModel("../data/vivi/scene.gltf").value();
+	TmpModel = MEW::Model(TmpMeshData);
+	MEW::ModelObject obj(ecs);
+	*obj.GetRenderComponent()->model = TmpModel;
+	obj.GetTransformComponent()->scale_ = glm::vec3(1, 1, 1);
+	obj.GetTransformComponent()->rotation_ = glm::vec3(270.0f, 0.0f, 0.0f);
+	obj.GetTransformComponent()->translation_ = glm::vec3(0.0f, -1.0f, -5.0f);
+
+
 
 	
 	const float color[3] = { 0.25f,0.3f,0.4f };
