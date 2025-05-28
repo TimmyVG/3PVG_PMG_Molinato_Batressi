@@ -192,3 +192,16 @@ project "Motor"
         conan_config_exec("RelWithDebInfo")
         debugargs { _MAIN_SCRIPT_DIR .. "/examples/data" }
         files "examples/waterDisplacementExample.cpp"
+
+     project"Map"
+        kind "ConsoleApp"
+        language "C++"
+        targetdir "build/%{prj.name}/%{cfg.buildcfg}"
+        includedirs "include"
+        libdirs { "build/%{cfg.buildcfg}" }
+        links {"mew"}
+        conan_config_exec("Debug")
+        conan_config_exec("Release")
+        conan_config_exec("RelWithDebInfo")
+        debugargs { _MAIN_SCRIPT_DIR .. "/examples/data" }
+        files "examples/map.cpp"
