@@ -45,25 +45,12 @@ int main() {
 
 	MEW::Input input(w.window_);
 	MEW::Shader shader("../data/example.vs", "../data/example.fs");
-	MEW::RenderSystem RS;
-	MEW::Object objmiku(&shader);
-	objmiku.model->loadModel("../data/miku/source/Miku.fbx");
-	objmiku.model->loadMeshes();
-
-	//size_t miku = ecs.create_entity();
-	//entities.push_back(miku);
-	//ecs.add_component<MEW::RenderComponent>(miku);
-	//ecs.add_component<MEW::TransformComponent>(miku);
-	//*ecs.get_component<MEW::RenderComponent>(miku).value().object = objmiku;
 
 	for (int i = 0; i < nEntity; i++) {
 		size_t entity = ecs.create_entity();
 		entities.push_back(entity);
-		//MEW::ScriptingComponent tempComponent;
-		//tempComponent.scripts.push_back(script2);
 		ecs.add_component<MEW::ScriptingComponent>(entity);
 		ecs.add_component<MEW::TransformComponent>(entity);
-		//ecs.get_component<MEW::ScriptingComponent>(entity).value() = std::move(tempComponent);
 		ecs.get_component<MEW::ScriptingComponent>(entity).value().scripts.push_back(script);
 	}
 	ecs.get_component<MEW::TransformComponent>(entities.at(0)).value().translation_.x = 0;
@@ -87,11 +74,6 @@ int main() {
 		w.newframe(backgroundcolor);
 		deltaTime = w.deltaTime();
 		cameraTest.update(deltaTime, input);
-		MEW::TransformSystemMat()(ecs.get_vectorComponent<MEW::TransformComponent>());
-		const auto& vecT = ecs.get_vectorComponent<MEW::TransformComponent>();
-		const auto& vecR = ecs.get_vectorComponent<MEW::RenderComponent>();
-		const auto& vecL = ecs.get_vectorComponent<MEW::LightComponent>();
-		MEW::RenderSystemUnlit()(vecT, vecR, RS, shader, &ecs.get_component<MEW::CameraComponent>(cameraTest.entity_).value());
 
 		bool closePressed = w.closedPressed();
 		bool escPressed = false;

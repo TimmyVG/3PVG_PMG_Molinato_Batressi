@@ -68,7 +68,7 @@ int main() {
 			auto entityWater = ecs.create_entity();
 
 			auto& transformwater = ecs.add_component<MEW::TransformComponent>(entityWater);
-			transformwater.value().translation_ = glm::vec3(100 * x, 0, 100 * z);  
+			transformwater.value().translation_ = glm::vec3(-50 + 100 * x, -10, -10 - 100 * z);  
 
 			auto& watercomponent = ecs.add_component<MEW::WaterComponent>(entityWater);
 			*watercomponent.value().mesh = watermesh.value();
@@ -90,9 +90,9 @@ int main() {
 	input.assign(MEW::Input::Buttons::KEY_DOWN, MEW::CAMERA_BACK);
 	input.assign(MEW::Input::Buttons::MOUSE_2, MEW::CAMERA_ROTATE);
 	MEW::Camera cameraTest(ecs, 640 / 460);
-	w.lastFrame_ = 0;
 #pragma endregion
-	float globalTime = 0.0f; // Initialize global time
+	w.lastFrame_ = 0;
+	float globalTime = 0.0f; 
 	while (!done) {
 		w.newframe(backgroundcolor);
 		deltaTime = w.deltaTime();

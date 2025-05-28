@@ -32,7 +32,6 @@ namespace MEW {
 
     btRigidBody* AddBox(float mass, const TransformComponent& transform, const glm::vec3& halfExtents);
 
-    void UpdateTransform(btRigidBody* body, TransformComponent& transform);
 
     btDiscreteDynamicsWorld* GetDynamicsWorld() { return m_dynamicsWorld.get(); }
   private:

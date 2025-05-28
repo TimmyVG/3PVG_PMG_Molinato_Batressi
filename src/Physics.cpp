@@ -102,9 +102,11 @@ namespace MEW {
     const btVector3& position = btTrans.getOrigin();
     const btQuaternion& rotation = btTrans.getRotation();
 
-    
+    glm::quat glmQuat(rotation.getX(), rotation.getY(), rotation.getZ(), rotation.getW());
+
+
     transform.translation_ = glm::vec3(position.x(), position.y(), position.z());
-    transform.rotation_ = glm::vec3(rotation.getX(), rotation.getY(), rotation.getZ()); 
+    transform.rotation_ = glm::eulerAngles(glmQuat);
   }
 
   btRigidBody* PhysicsWorld::AddBox(float mass, const TransformComponent& transform, const glm::vec3& halfExtents) {
@@ -116,22 +118,6 @@ namespace MEW {
     return AddRigidBody(mass, transform, std::move(shape));
   }
 
-  void PhysicsWorld::UpdateTransform(btRigidBody* body, TransformComponent& transform) {
-    if (body && body->getMotionState()) {
-      btTransform btTrans;
-      body->getMotionState()->getWorldTransform(btTrans);
-
-      transform.translation_ = glm::vec3(
-        btTrans.getOrigin().getX(),
-        btTrans.getOrigin().getY(),
-        btTrans.getOrigin().getZ()
-      );
-
-      btQuaternion rotation = btTrans.getRotation();
-      glm::quat glmQuat(rotation.getW(), rotation.getX(), rotation.getY(), rotation.getZ());
-      transform.rotation_ = glm::eulerAngles(glmQuat);
-
-    }
-  }
+  
 
 } 

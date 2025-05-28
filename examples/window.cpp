@@ -22,11 +22,7 @@ int main() {
 	MEW::Inspector inspector(w);
 	while (!done) {
 		w.newframe(backgroundcolor);
-		inspector.NewFrame();
-		bool show_demo_window = true;
-		if (show_demo_window)
-			ImGui::ShowDemoWindow(&show_demo_window);
-		inspector.Render();
+	
 		
 
 

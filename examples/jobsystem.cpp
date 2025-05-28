@@ -47,11 +47,7 @@ int main() {
 
 	MEW::Shader shader("../data/example.vs", "../data/example.fs");
 
-	size_t entity = ecs.create_entity();
-	ecs.add_component<MEW::TransformComponent>(entity);
-	ecs.add_component<MEW::RenderComponent>(entity);
-	MEW::RenderComponent* rc = &ecs.get_component<MEW::RenderComponent>(entity).value();
-	MEW::TransformComponent* tc = &ecs.get_component<MEW::TransformComponent>(entity).value();
+	
 
 	const float color[3] = { 0.4f,0.3f,0.25f };
 	MEW::Input input(w.window_);
@@ -64,14 +60,16 @@ int main() {
 	std::optional<MEW::Model> currentModel_;
 
 	std::vector<std::string> obj_paths;
-	obj_paths.push_back("../data/cube/cube.obj");
-	obj_paths.push_back("../data/Silla.fbx");
+	obj_paths.push_back("../data/vivi/scene.gltf");
+	obj_paths.push_back("../data/robot/scene.gltf");
 
 	int objIndex = 0;
 	std::future<std::optional<std::vector<MEW::MeshData>>> current_meshdata_future = js.add([objIndex, obj_paths]() { return MEW::loadModel(obj_paths[objIndex]); });
 	objIndex++;
 
 	MEW::ModelObject currentObject(ecs);
+	currentObject.GetTransformComponent()->translation_ = glm::vec3(0,-1,-5);
+	currentObject.GetTransformComponent()->rotation_ = glm::vec3(-90, 0, 0);
 
 	input.assign(MEW::Input::Buttons::KEY_A, MEW::CAMERA_LEFT);
 	input.assign(MEW::Input::Buttons::KEY_LEFT, MEW::CAMERA_LEFT);
@@ -97,6 +95,7 @@ int main() {
 			currentModel_ = MEW::Model(current_meshData);
 			*currentObject.GetRenderComponent()->model = currentModel_;
 			current_meshData.clear();
+			
 		}
 
 		if (currentModel_) {

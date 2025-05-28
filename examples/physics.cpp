@@ -27,6 +27,7 @@ int main() {
 
 #pragma region PhysicsFunctions
 	MEW::PhysicsWorld physicsWorld(&ecs);
+	physicsWorld.GetDynamicsWorld()->setGravity(btVector3(0, -0.81f, 0));
 	size_t ground = ecs.create_entity();
 	MEW::TransformComponent groundTransform;
 	groundTransform.translation_ = glm::vec3(0, -1, 0);
@@ -72,10 +73,11 @@ int main() {
 	MEW::ModelObject objmiku(ecs);
 	*objmiku.GetRenderComponent()->model = TmpModel;
 	objmiku.GetTransformComponent()->scale_ = glm::vec3(1, 1, 1);
-	objmiku.GetTransformComponent()->rotation_ = glm::vec3(0.0f, 0.0f, 0.0f);
+	objmiku.GetTransformComponent()->rotation_ = glm::vec3(180.0f, 180.0f, 180.0f);
 
 	MEW::TransformComponent boxTransform;
-	boxTransform.translation_ = glm::vec3(0, 10, -10);
+	boxTransform.translation_ = glm::vec3(0, 5, -10);
+	boxTransform.rotation_ = glm::vec3(14, 14, 14);
 	btRigidBody* boxBody = physicsWorld.AddBox(1.0f, boxTransform, glm::vec3(1, 1, 1));
 	auto& mikuRb = ecs.add_component<MEW::RigidBodyComponent>(objmiku.GetEntity());
 	mikuRb.value().body = boxBody;
@@ -92,6 +94,9 @@ int main() {
 	input.assign(MEW::Input::Buttons::KEY_S, MEW::CAMERA_BACK);
 	input.assign(MEW::Input::Buttons::KEY_DOWN, MEW::CAMERA_BACK);
 	input.assign(MEW::Input::Buttons::MOUSE_2, MEW::CAMERA_ROTATE);
+	input.assign(MEW::Input::Buttons::KEY_Q, 0);
+	input.assign(MEW::Input::Buttons::KEY_E, 1);
+	input.assign(MEW::Input::Buttons::KEY_R, 2);
 	MEW::Camera cameraTest(ecs, 640 / 460);
 #pragma endregion
 	
@@ -104,7 +109,6 @@ int main() {
 		deltaTime = w.deltaTime();
 		cameraTest.update(deltaTime, input);
 		physicsWorld.StepSimulation(deltaTime);
-		physicsWorld.UpdateTransform(boxBody, boxTransform);
 		MEW::TransformSystemMat()(ecs.get_vectorComponent<MEW::TransformComponent>());
 		const auto& vecT = ecs.get_vectorComponent<MEW::TransformComponent>();
 		const auto& vecR = ecs.get_vectorComponent<MEW::RenderComponent>();
